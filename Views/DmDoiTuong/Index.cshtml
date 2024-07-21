@@ -1,0 +1,455 @@
+﻿@{
+    ViewBag.Title = "Danh mục đối tượng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Danh mục đối tượng</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <a href="@Url.Action("Create","DmDoiTuong")" class="btn btn-primary float-right"> <i class="fas fa-plus"></i> Tạo mới</a>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-3">
+                    <label>Tìm theo mã, tên đối tượng</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="searchName" name="searchName" class="form-control" placeholder="Mã hoặc tên đối tượng">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Tìm theo nhóm đối tượng</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group">
+                                <select id="TimLoaiDT_ID" name="TimLoaiDT_ID" class="form-control select" style="width: 100%;">
+                                    <option>Chọn nhóm đối tượng</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <table class="table table-sm table-bordered nowrap" id="TableObject">
+                <thead>
+                    <tr>
+                        <th>
+                            Mã ĐT
+                        </th>
+                        <th>
+                            Tên đối tượng
+                        </th>
+                        <th>
+                            Điện thoại
+                        </th>
+                        <th>
+                            Số tài khoản
+                        </th>
+                        <th>
+                            Trạng thái
+                        </th>
+                        <th>
+                            Chức năng
+                        </th>
+                    </tr>
+                </thead>
+           
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //Show list table
+            $(function () {
+                GetAllList();
+            });
+            function GetAllList() {
+                $('#TableObject').DataTable({
+                    //"destroy": true,
+                    //"scrollY": "200px",
+                    "scrollX": true,
+                    "sScrollXInner": "100%",
+                    "scrollCollapse": true,
+                    "scroller": true,
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": true,
+                    "ordering": true,
+                    "info": true,
+                    "autoWidth": true,
+                    "autoHeight": false,
+                    "responsive": false,
+                    "ajax": {
+                        "url": "/DmDoiTuong/GetListObject",
+                        "type": "GET",
+                        "datatype": "json",
+                    },
+                    "columns": [
+                        { "data": "MaDT", className: "text-center", width: "5%" },
+                        {
+                            "data": null, render: function (data, type, row) {
+                                var details = row.TenDT + "<br>" + "Đc: " + row.DiaChi;
+                                return details;
+                            }, className: "text-wrap", width: "35%",
+                        },
+                        {
+                            "data": null, render: function (data, type, row) {
+                                var details = "Điện thoại: " + row.Phone + "<br>" + "Email: " + row.Email;
+                                return details;
+                            }, className: "text-wrap", width: "20%",
+                        },
+                        {
+                            "data": null, render: function (data, type, row) {
+                                var details = "Tài khoản: " + row.SoTK + "<br>" + "Mã số thuế: " + row.MaST;
+                                return details;
+                            }, className: "text-wrap", width: "20%",
+                        },
+                        {
+                            "data": "Status",
+                            render: function (data, type, row) {
+                                return data == 0 ? 'Đang sử dụng' : 'Tạm khóa'
+                            }, className: "text-center", width: "20%"
+                        },
+                        {
+                            "data": "DT_ID", "render": function (data) {
+                                return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + " class='btn btn-success' style='margin-left:5px'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a><a href='javascript:void(0);' id='btn_eye' data-id=" + data + " class='btn btn-secondary' style='margin-left:5px'><i class='fas fa-eye'></i> Mở/khóa</a>";
+                            }, className: "text-center", width: "20%",
+                        },
+                    ],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+
+                });
+            }
+            loadListGroupObject();
+            function loadListGroupObject() {
+                $.ajax({
+                    url: "/DmDoiTuong/GetListNhomDT",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#TimLoaiDT_ID').empty();
+                        $('#TimLoaiDT_ID').append("<option value=''>Tất cả nhóm</option>");
+                        $.each(data, function (key, value) {
+                            $("#TimLoaiDT_ID").append($("<option></option>").val(value.LoaiDT_ID).html(value.TenLoaiDT));
+                        });
+                    },
+                });
+            }
+            //Search Show list by CategoryObject in table
+            $('#TimLoaiDT_ID').change(function () {
+                var loaidtid = $('#TimLoaiDT_ID option:selected').val();
+                if (loaidtid == "")
+                {
+                    $('#TableObject').DataTable().clear().destroy();
+                    $('#TableObject').DataTable({
+                        //"destroy": true,
+                        //"scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": true,
+                        "autoHeight": false,
+                        "responsive": false,
+                        "ajax": {
+                            "url": "/DmDoiTuong/GetListObject",
+                            "type": "GET",
+                            "datatype": "json",
+                        },
+                        "columns": [
+                            { "data": "MaDT", className: "text-center", width: "5%" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = row.TenDT + "<br>" + "Đc: " + row.DiaChi;
+                                    return details;
+                                }, className: "text-wrap", width: "35%",
+                            },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = "Điện thoại: " + row.Phone + "<br>" + "Email: " + row.Email;
+                                    return details;
+                                }, className: "text-wrap", width: "20%",
+                            },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = "Tài khoản: " + row.SoTK + "<br>" + "Mã số thuế: " + row.MaST;
+                                    return details;
+                                }, className: "text-wrap", width: "20%",
+                            },
+                            {
+                                "data": "Status",
+                                render: function (data, type, row) {
+                                    return data == 0 ? 'Đang sử dụng' : 'Tạm khóa'
+                                }, className: "text-center", width: "20%"
+                            },
+                            {
+                                "data": "DT_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + " class='btn btn-success' style='margin-left:5px'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a><a href='javascript:void(0);' id='btn_eye' data-id=" + data + " class='btn btn-secondary' style='margin-left:5px'><i class='fas fa-eye'></i> Mở/khóa</a>";
+                                }, className: "text-center", width: "20%",
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+                else
+                {
+                    $('#TableObject').DataTable().clear().destroy();
+                    $('#TableObject').DataTable({
+                        //"destroy": true,
+                        //"scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": true,
+                        "autoHeight": false,
+                        "responsive": false,
+                        "ajax": {
+                            "url": "/DmDoiTuong/GetListObjectByNhomID",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { id: loaidtid },
+                        },
+                        "columns": [
+                            { "data": "MaDT", className: "text-center", width: "5%" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = row.TenDT + "<br>" + "Đc: " + row.DiaChi;
+                                    return details;
+                                }, className: "text-wrap", width: "35%",
+                            },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = "Điện thoại: " + row.Phone + "<br>" + "Email: " + row.Email;
+                                    return details;
+                                }, className: "text-wrap", width: "20%",
+                            },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = "Tài khoản: " + row.SoTK + "<br>" + "Mã số thuế: " + row.MaST;
+                                    return details;
+                                }, className: "text-wrap", width: "20%",
+                            },
+                            {
+                                "data": "Status",
+                                render: function (data, type, row) {
+                                    return data == 0 ? 'Đang sử dụng' : 'Tạm khóa'
+                                }, className: "text-center", width: "20%"
+                            },
+                            {
+                                "data": "DT_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + " class='btn btn-success' style='margin-left:5px'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a><a href='javascript:void(0);' id='btn_eye' data-id=" + data + " class='btn btn-secondary' style='margin-left:5px'><i class='fas fa-eye'></i> Mở/khóa</a>";
+                                }, className: "text-center", width: "20%",
+                            },
+                        ],
+                        "language": {
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+            });
+            //Search by name
+            $('#searchName').on('keyup change', function () {
+                var name = $('#searchName').val();
+                $('#TableObject').DataTable().clear().destroy();
+                $('#TableObject').DataTable({
+                    //"destroy": true,
+                    //"scrollY": "200px",
+                    "scrollX": true,
+                    "sScrollXInner": "100%",
+                    "scrollCollapse": true,
+                    "scroller": true,
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": true,
+                    "ordering": true,
+                    "info": true,
+                    "autoWidth": true,
+                    "autoHeight": false,
+                    "responsive": false,
+                    "ajax": {
+                        "url": "/DmDoiTuong/GetListObjectByCodeName",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": { CodeName: name },
+                    },
+                    "columns": [
+                        { "data": "MaDT", className: "text-center", width: "5%" },
+                        {
+                            "data": null, render: function (data, type, row) {
+                                var details = row.TenDT + "<br>" + "Đc: " + row.DiaChi;
+                                return details;
+                            }, className: "text-wrap", width: "35%",
+                        },
+                        {
+                            "data": null, render: function (data, type, row) {
+                                var details = "Điện thoại: " + row.Phone + "<br>" + "Email: " + row.Email;
+                                return details;
+                            }, className: "text-wrap", width: "20%",
+                        },
+                        {
+                            "data": null, render: function (data, type, row) {
+                                var details = "Tài khoản: " + row.SoTK + "<br>" + "Mã số thuế: " + row.MaST;
+                                return details;
+                            }, className: "text-wrap", width: "20%",
+                        },
+                        {
+                            "data": "Status",
+                            render: function (data, type, row) {
+                                return data == 0 ? 'Đang sử dụng' : 'Tạm khóa'
+                            }, className: "text-center", width: "20%"
+                        },
+                        {
+                            "data": "DT_ID", "render": function (data) {
+                                return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + " class='btn btn-success' style='margin-left:5px'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a><a href='javascript:void(0);' id='btn_eye' data-id=" + data + " class='btn btn-secondary' style='margin-left:5px'><i class='fas fa-eye'></i> Mở/khóa</a>";
+                            }, className: "text-center", width: "20%",
+                        },
+                    ],
+                    "language": {
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+                });
+            });
+            // Delete Object
+            $('body').on('click', '#btn_delete', function () {
+                var delete_id = $(this).data("id");
+                 //Check quyen xoa
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenDelete", "DmDoiTuong")',
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                            {
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("DeleteObject", "DmDoiTuong")',
+                                    data: { id: delete_id },
+                                    success: function (data) {
+                                        if (data == true) {
+                                            //Delete object
+                                            $('#TableObject').DataTable().ajax.reload();
+                                            toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công', { timeOut: 5000 });
+                                        }
+                                        else {
+                                            toastr.error('Bạn không thể xóa, tên này đã sử dụng!', 'Thất bại', { timeOut: 5000 });
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            toastr.error('Bạn không thể xóa, chưa phân quyền xóa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //Edit object
+            $('body').on('click', '#btn_edit', function () {
+                var edit_id = $(this).data("id");
+                localStorage.setItem("myValue", edit_id);
+                window.location.href = "/DmDoiTuong/Edit";
+            });
+            //set hien thi Hien/An
+            $('body').on('click', '#btn_eye', function () {
+                var eye_id = $(this).data("id");
+                //Check quyen sua
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenEdit", "DmDoiTuong")',
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                           $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("UpdateStatus", "DmDoiTuong")/' + eye_id,
+                                success: function (data) {
+                                    toastr.success('Bạn đã thay đổi đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                                    $('#TableObject').DataTable().ajax.reload();
+
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+
+                           });
+                        }
+                        else {
+                            toastr.error('Bạn không thể sửa trạng thái, chưa phân quyền sửa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+
+            });
+        });
+    </script>
+
+
+}
+
+
+
+
+

@@ -1,0 +1,896 @@
+﻿
+@{
+    ViewBag.Title = "Sửa hàng hóa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/home">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Sửa hàng hóa <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div>
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <button type="button" id="btn_edit_product" name="btn_edit_product" class="btn btn-primary "><i class="fas fa-check"></i> Lưu</button>
+                    <a href="@Url.Action("Index","DmHangHoa")" class="btn btn-warning"> <i class="fas fa-backward"></i> Quay lại</a>
+                </div>
+            </div>
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-primary">
+            <div class="card-body">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col-md-8">
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Mã hàng hóa<span style="color:red;">(*)</span>:</label>
+                                        <input type="hidden" id="txtHH_ID" name="txtHH_ID">
+                                        <input type="text" id="txtMaHH" name="txtMaHH" class="form-control" maxlength="15" value="" placeholder="Nhập mã hàng">
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label>Tên hàng hóa<span style="color:red;">(*)</span>:</label>
+                                            <input type="text" id="txtTenHH" name="txtTenHH" class="form-control" maxlength="15" value="" placeholder="Nhập tên hàng">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <!-- text input -->
+                                    <div class="form-group">
+                                        <label>Chọn ĐVT</label>
+                                        <div class="input-group">
+                                            <select id="DVT_ID" name="DVT_ID" class="form-control selectdvt">
+                                            </select>
+                                            <span class="input-group-append">
+                                                <button type="button" id="btn_unit" name="btn_unit" class="btn btn-info btn-flat"><i class="fas fa-plus"></i></button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label>Chọn Nhóm hàng hóa</label>
+                                        <div class="input-group">
+                                            <select id="LoaiHH_ID" name="LoaiHH_ID" class="form-control selectdvt">
+                                            </select>
+                                            <span class="input-group-append">
+                                                <button type="button" id="btn_nhomhh" name="btn_nhomhh" class="btn btn-info btn-flat"><i class="fas fa-plus"></i></button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <!-- text input -->
+                                    <div class="form-group">
+                                        <label>Giá mua</label>
+                                        <input type="text" id="txtGiaMua" name="txtGiaMua" class="form-control" maxlength="15" value="0" style="text-align:right;">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Giá bán 1</label>
+                                        <input type="text" id="txtGiaBan1" name="txtGiaBan1" class="form-control" maxlength="15" value="0" style="text-align:right;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <!-- text input -->
+                                    <div class="form-group">
+                                        <label>Giá bán 2</label>
+                                        <input type="text" id="txtGiaBan2" name="txtGiaBan2" class="form-control" maxlength="15" value="0" style="text-align:right;">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Giá bán 3</label>
+                                        <input type="text" id="txtGiaBan3" name="txtGiaBan3" class="form-control" maxlength="15" value="0" style="text-align:right;">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModalDVT" role="dialog" data-url='@Url.Action("_PartialDVT","DmHangHoa")'></div>
+    <div class="modal fade" id="myModalNhomHang" role="dialog" data-url='@Url.Action("_PartialNhomHang","DmHangHoa")'></div>
+</section>
+
+@section scripts{
+
+    <script src="~/Scripts/thienphong/formatnumber.js"></script>
+    <style type="text/css">
+        .green {
+            color: Green;
+        }
+
+        .red {
+            color: Red;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //check no space ma hang
+            $('#txtMaHH').keypress(function (event) {
+                if ($('#txtMaHH').val().indexOf(' ') !== -1) {
+                    toastr.error('Không được có khoản trắng !', 'Bị lỗi', { timeOut: 3000 });
+                    event.preventDefault();
+                }
+            });
+            //Load danh sach DmDVT
+            loadListUnit();
+            function loadListUnit() {
+                //load  unit list
+                $.ajax({
+                    url: "/DmHangHoa/LoadLaiDVT",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#DVT_ID').empty();
+                        // $('#TenDVT').append("<option value=''>Chọn nhóm hàng</option>");
+                        $.each(data, function (key, value) {
+                            $("#DVT_ID").append($("<option></option>").val(value.DVT_ID).html(value.TenDVT));
+                        });
+                    },
+                });
+            }
+            //Load list nhom hang
+            loadListGroupProduct();
+            function loadListGroupProduct() {
+                $.ajax({
+                    url: "/DmHangHoa/NhomHangList",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#LoaiHH_ID').empty();
+                        //$('#LoaiHH_ID').append("<option value=''>Chọn nhóm hàng</option>");
+                        $.each(data, function (key, value) {
+                            $("#LoaiHH_ID").append($("<option></option>").val(value.LoaiHH_ID).html(value.TenLoaiHH));
+                        });
+                        loadFormEditProductById();
+                    },
+                });
+            }
+            //Load list group product in form modal
+            loadListGroupProductModal();
+            function loadListGroupProductModal() {
+                //load  GroupProduct list Modal
+                $.ajax({
+                    url: "/DmHangHoa/NhomHangList",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#LoaiHH_ID_Modal').empty();
+                        $('#LoaiHH_ID_Modal').append("<option value=''>Cấp cha</option>");
+                        $.each(data, function (key, value) {
+                            $("#LoaiHH_ID_Modal").append($("<option></option>").val(value.LoaiHH_ID).html(value.TenLoaiHH));
+                        });
+                    },
+                });
+            }
+            //loadFormEditProductById();
+            function loadFormEditProductById() {
+                var code = localStorage.getItem("myValue");
+                $.ajax({
+                    url: "/DmHangHoa/GetEditByCode",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { Ma: code },
+                    success: function (data) {
+                        $('#txtHH_ID').val(data.HH_ID);
+                        $('#txtMaHH').val(data.MaHH);
+                        $('#txtTenHH').val(data.TenHH);
+                        $('#DVT_ID').select2().val(data.DVT_ID).trigger('change');
+                        $('#LoaiHH_ID').select2().val(data.LoaiHH_ID).trigger('change');
+                        $('#txtGiaMua').val(CurrencyFormatted(data.GiaMua));
+                        $('#txtGiaBan1').val(CurrencyFormatted(data.GiaBan1));
+                        $('#txtGiaBan2').val(CurrencyFormatted(data.GiaBan2));
+                        $('#txtGiaBan3').val(CurrencyFormatted(data.GiaBan3));
+
+                    },
+                });
+            }
+            //refresh form
+            ClearFormProduct();
+            function ClearFormProduct() {
+                $('#txtMaHH').val('');
+                $('#txtTenHH').val('');
+                $('#txtGiaMua').val('0');
+                $('#txtGiaBan1').val('0');
+                $('#txtGiaBan2').val('0');
+                $('#txtGiaBan3').val('0');
+            }
+            //btn link_refresh
+            $('#link_refresh').click(function () {
+                //toastr.error('Chưa chọn nhóm hàng nào!', 'Alert', { timeOut: 5000 });
+                $('#txtMaHH').val('');
+                $('#txtTenHH').val('');
+                $('#txtGiaMua').val('0');
+                $('#txtGiaBan1').val('0');
+                $('#txtGiaBan2').val('0');
+                $('#txtGiaBan3').val('0');
+            })
+            //Load Popup Modal DmDVT
+            $('#btn_unit').click(function () {
+                var url = $('#myModalDVT').data('url');
+                $.get(url, function (data) {
+
+                    //load table unite
+                    $('#myModalDVT').html(data);
+                    $('#myModalDVT').modal('show');
+                    $("#TableUnit").DataTable({
+                        "ajax": {
+                            "url": "/DmHangHoa/GetListDmDVT",
+                            "type": "GET",
+                            "datatype": "json",
+                        },
+                        "columns": [
+                            { "data": "DVT_ID", "visible": false },
+                            { "data": "TenDVT" },
+                            {
+                                "data": "DVT_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit_unit' data-id=" + data + " class='btn btn-sm btn-info' style='margin-left:5px'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_delete_unit' data-id=" + data + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                },
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                });
+            });
+            //Save Create DmDVT
+            $(document).on('click', '#btn_unit_save', function () {
+                var tendvt = $('#unitName_add').val();
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                var statusLoi = $("#divStatus");
+                statusLoi.html("Checking....").removeClass();
+
+                if (tendvt === "") {
+                    toastr.error('Chưa nhập tên !', 'Bị lỗi', { timeOut: 3000 });
+
+                }
+                else {
+                    //check name already
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("CheckDVT", "DmHangHoa")',
+                        data: { unitname: tendvt },
+                        success: function (data) {
+                            if (data == true) {
+                                statusLoi.html(name + " Tên này nhập được!").addClass("green");
+                                //Create name unit
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("CreateDVT", "DmHangHoa")',
+                                    data: {
+                                        TenDVT: tendvt,
+                                        TenCongTy_ID: congty_id,
+                                        Status: status
+                                    },
+                                    success: function (data) {
+                                        toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                                        $('#myModalDVT').modal('hide');
+                                        loadListUnit();
+
+                                    },
+                                    error: function (data) {
+                                        console.log('Error:', data);
+                                    }
+
+                                });
+                            } else {
+                                statusLoi.html(name + " Tên này đã có!").addClass("red");
+                            }
+                        }
+                    });
+
+                }
+            });
+            //Save DmDVT and continue
+            $(document).on('click', '#btn_unit_continue', function () {
+                var tendvt = $('#unitName_add').val();
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                var statusLoi = $("#divStatus");
+                statusLoi.html("Checking....").removeClass();
+
+                if (tendvt === "") {
+                    toastr.error('Chưa nhập tên !', 'Bị lỗi', { timeOut: 3000 });
+                    statusLoi.html("Bạn chưa nhập tên!").removeClass();
+                }
+                else {
+                    //check name already
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("CheckDVT", "DmHangHoa")',
+                        data: { unitname: tendvt },
+                        success: function (data) {
+                            if (data == true) {
+                                statusLoi.html(name + " Tên này nhập được!").addClass("green");
+                                //Create name unit
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("CreateDVT", "DmHangHoa")',
+                                    data: {
+                                        TenDVT: tendvt,
+                                        TenCongTy_ID: congty_id,
+                                        Status: status
+                                    },
+                                    success: function (data) {
+                                        toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                                        $('#unit_id_add').val("");
+                                        $('#unitName_add').val("");
+                                        $('#TableUnit').DataTable().ajax.reload();
+                                        statusLoi.html(name + " Đã nhập thành công!").addClass("green");
+                                        $('#DVT_ID').empty();
+                                        loadListUnit();
+                                        //$('#myModalUnit').modal('hide');
+                                    },
+                                    error: function (data) {
+                                        console.log('Error:', data);
+                                    }
+
+                                });
+                            } else {
+                                statusLoi.html(name + " Tên này đã có!").addClass("red");
+                            }
+                        }
+                    });
+
+                }
+            });
+            //btn Edit DmDVT
+            $(document).on('click', '#btn_edit_unit', function () {
+                var edit_id = $(this).data("id");
+                $.ajax({
+                    url: "/DmHangHoa/EditDmDVTByID",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { id: edit_id },
+                    success: function (data) {
+                        $('#unit_id_add').val(data.DVT_ID);
+                        $('#unitName_add').val(data.TenDVT);
+                        //click link to show tabs
+                        $('#link_unitTab').find('a').trigger('click');
+                        $('#btn_unit_continue').hide();
+                        $('#btn_unit_save').hide();
+                        $('#btn_unit_edit_save').show();
+                        $('#btn_unit_cancel').show();
+                    },
+                });
+            });
+            //btn save Edit DmDVT
+            $(document).on('click', '#btn_unit_edit_save', function () {
+                var id = $('#unit_id_add').val();
+                var name = $('#unitName_add').val();
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                if (name === "") {
+                    toastr.error('Chưa nhập tên !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdateEditDmDVT", "DmHangHoa")',
+                    data: { DVT_ID: id, TenDVT: name, TenCongTy_ID: congty_id, Status: status },
+                    success: function (data) {
+                        if (data == true) {
+                            toastr.success('Bạn đã sửa đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                            $('#unit_id_add').val('');
+                            $('#unitName_add').val('');
+                            $('#TableUnit').DataTable().ajax.reload();
+                            //click link to show tabs
+                            $('#link_list_unitTab').find('a').trigger('click');
+                            $('#btn_unit_continue').show();
+                            $('#btn_unit_save').show();
+                            $('#btn_unit_edit_save').hide();
+                            $('#btn_unit_cancel').hide();
+                        }
+                        else {
+                            toastr.error('Tên này đã có. Bạn phải nhập tên khác !', 'Không thành công Alert', { timeOut: 5000 });
+                            $('#unitName_add').focus();
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            });
+            //btn cancel DmDVT
+            $(document).on('click', '#btn_unit_cancel', function () {
+                $('#unit_id_add').val('');
+                $('#unitName_add').val('');
+                //click link to show tabs
+                $('#link_list_unitTab').find('a').trigger('click');
+                $('#btn_unit_continue').show();
+                $('#btn_unit_save').show();
+                $('#btn_unit_edit_save').hide();
+                $('#btn_unit_cancel').hide();
+
+            });
+            //Delete DmDVT
+            $(document).on('click', '#btn_delete_unit', function () {
+                var delete_id = $(this).data("id");
+                if (confirm('Bạn có muốn xóa tên đơn vị tính này ?')) {
+                    //Check ID in product
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("CheckDVTinDmHangHoa", "DmHangHoa")',
+                        data: { Id: delete_id },
+                        success: function (data) {
+                            if (data == true) {
+                                //Delete name unit
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("DeleteDmDVT", "DmHangHoa")/' + delete_id,
+                                    success: function (data) {
+                                        $('#TableUnit').DataTable().ajax.reload();
+                                        $('#DVT_ID').empty();
+                                        loadListUnit();
+                                        toastr.success('Bạn đã xóa được đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                                    },
+                                    error: function (data) {
+                                        console.log('Error:', data);
+                                    }
+                                });
+                            } else {
+                                toastr.error('Bạn không thể xóa, tên này đã sử dụng trong hàng hóa!', 'Không thành công Alert', { timeOut: 5000 });
+                            }
+                        }
+                    });
+
+                }
+
+            });
+            //Load Popup Modal nhom hang hoa
+            $('#btn_nhomhh').click(function () {
+                var url = $('#myModalNhomHang').data('url');
+                $.get(url, function (data) {
+                    $('#myModalNhomHang').html(data);
+                    $('#myModalNhomHang').modal('show');
+                    loadListGroupProductModal();
+                    $("#TableGroupProduct").DataTable({
+                        "ajax": {
+                            "url": "/DmHangHoa/GetListNhomHang",
+                            "type": "GET",
+                            "datatype": "json",
+                        },
+                        "columns": [
+                            { "data": "LoaiHH_ID" },
+                            { "data": "TenLoaiHH" },
+                            {
+                                "data": "LoaiHH_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit_groupproduct' data-id=" + data + " class='btn btn-sm btn-info' style='margin-left:5px'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_delete_groupproduct' data-id=" + data + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                },
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+                    });
+                });
+            })
+            //Save nhom hang
+            $(document).on('click', '#btn_groupproduct_save', function () {
+                var tennhomhang = $('#GroupProductName_add').val();
+                var congty_id = "@Session["congty_id"]";
+                var nguyenlieu = $('#cboxNguyenLieu').is(":checked");
+                var status = 0;
+
+                var statusLoi = $("#divStatus");
+                statusLoi.html("Checking....").removeClass();
+
+                if (tennhomhang === "") {
+                    toastr.error('Chưa nhập tên !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                //check name already
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckNhomHang", "DmHangHoa")',
+                    data: { name: tennhomhang },
+                    success: function (data) {
+                        if (data == true) {
+                            statusLoi.html(name + " Tên này nhập được!").addClass("green");
+                            //Create group product
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("CreateNhomHang", "DmHangHoa")',
+                                data: {
+                                    TenLoaiHH: tennhomhang,
+                                    TenCongTy_ID: congty_id,
+                                    NhomNguyenLieu: nguyenlieu,
+                                    Status: status
+                                },
+                                success: function (data) {
+                                    toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                                    $('#myModalNhomHang').modal('hide');
+                                    $('#LoaiHH_id_add').empty();
+                                    loadListGroupProduct();
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+
+                            });
+                        } else {
+                            statusLoi.html(name + " Tên này đã có!").addClass("red");
+                        }
+                    }
+                });
+
+
+            });
+            //Save and continue nhom hang
+            $(document).on('click', '#btn_groupproduct_continue', function () {
+                var tennhomhang = $('#GroupProductName_add').val();
+                var congty_id = "@Session["congty_id"]";
+                var nguyenlieu = $('#cboxNguyenLieu').is(":checked");
+                var status = 0;
+
+                var statusLoi = $("#divStatus");
+                statusLoi.html("Checking....").removeClass();
+
+                if (tennhomhang === "") {
+                    toastr.error('Chưa nhập tên !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                //check name already
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckNhomHangByName", "DmHangHoa")',
+                    data: { name: tennhomhang },
+                    success: function (data) {
+                        if (data == true) {
+                            statusLoi.html(name + " Tên này nhập được!").addClass("green");
+                            //Create group product
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("CreateNhomHang", "DmHangHoa")',
+                                data: {
+                                    TenLoaiHH: tennhomhang,
+                                    TenCongTy_ID: congty_id,
+                                    NhomNguyenLieu: nguyenlieu,
+                                    Status: status
+                                },
+                                success: function (data) {
+                                    toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                                    //$('#LoaiHH_id_add').val("");
+                                    $('#GroupProductName_add').val("");
+                                    $('#TableGroupProduct').DataTable().ajax.reload();
+                                    statusLoi.html(name + " Đã nhập thành công!").addClass("green");
+                                    loadListGroupProduct();
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+
+                            });
+                        } else {
+                            statusLoi.html(name + " Tên này đã có!").addClass("red");
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+
+
+            });
+            //btn Edit nhom hang
+            $(document).on('click', '#btn_edit_groupproduct', function () {
+                var edit_id = $(this).data("id");
+                $.ajax({
+                    url: "/DmHangHoa/EditNhomHangById",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { id: edit_id },
+                    success: function (data) {
+                        $('#LoaiHH_id_add').val(data.LoaiHH_ID);
+                        $('#GroupProductName_add').val(data.TenLoaiHH);
+                        $('#cboxNguyenLieu').prop('checked', data.NhomNguyenLieu);
+                        //click link to show tabs
+                        $('#linkGroupTab').find('a').trigger('click');
+                        $('#btn_groupproduct_continue').hide();
+                        $('#btn_groupproduct_save').hide();
+                        $('#btn_groupproduct_edit_save').show();
+                        $('#btn_groupproduct_cancel').show();
+
+                    },
+                });
+            });
+            //btn save Edit nhom hang
+            $(document).on('click', '#btn_groupproduct_edit_save', function () {
+                var id = $('#LoaiHH_id_add').val();
+                var name = $('#GroupProductName_add').val();
+                var congty_id = "@Session["congty_id"]";
+                var nguyenlieu = $('#cboxNguyenLieu').is(":checked");
+                var status = 1;
+                if (name === "") {
+                    toastr.error('Chưa nhập tên !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                 $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckIdAndTenNhom", "DmHangHoa")',
+                    data: { id: id, name: name },
+                    success: function (data) {
+                        if (data == true) {
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("UpdateEditNhomHang", "DmHangHoa")',
+                                data: { LoaiHH_ID: id, TenLoaiHH: name, TenCongTy_ID: congty_id, NhomNguyenLieu: nguyenlieu, Status: status },
+                                success: function (data) {
+                                    toastr.success('Bạn đã sửa đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                                    $('#LoaiHH_id_add').val('');
+                                    $('#GroupProductName_add').val('');
+                                    $('#TableGroupProduct').DataTable().ajax.reload();
+                                    //click link to show tabs
+                                    $('#linkListGroupTab').find('a').trigger('click');
+                                    $('#btn_groupproduct_continue').show();
+                                    $('#btn_groupproduct_save').show();
+                                    $('#btn_groupproduct_edit_save').hide();
+                                    $('#btn_groupproduct_cancel').hide();
+
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+                            });
+                        }
+                        else {
+                            //Check ten
+                             $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("CheckTenNhomHang", "DmHangHoa")',
+                                data: { name: name },
+                                success: function (data) {
+                                    if (data == false) {
+                                         $.ajax({
+                                                type: "POST",
+                                                url: '@Url.Action("UpdateEditNhomHang", "DmHangHoa")',
+                                                data: { LoaiHH_ID: id, TenLoaiHH: name, TenCongTy_ID: congty_id, NhomNguyenLieu: nguyenlieu, Status: status },
+                                                success: function (data) {
+                                                    toastr.success('Bạn đã sửa đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                                                    $('#LoaiHH_id_add').val('');
+                                                    $('#GroupProductName_add').val('');
+                                                    $('#TableGroupProduct').DataTable().ajax.reload();
+                                                    //click link to show tabs
+                                                    $('#linkListGroupTab').find('a').trigger('click');
+                                                    $('#btn_groupproduct_continue').show();
+                                                    $('#btn_groupproduct_save').show();
+                                                    $('#btn_groupproduct_edit_save').hide();
+                                                    $('#btn_groupproduct_cancel').hide();
+
+                                                },
+                                                error: function (data) {
+                                                    console.log('Error:', data);
+                                                }
+                                         });
+                                    }
+                                    else {
+                                        toastr.error('Mã đối tượng này đã có !', 'Bị lỗi', { timeOut: 3000 });
+                                    }
+                                },
+                                error: function () {
+                                    alert("Error!");
+                                }
+
+                             });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+
+            });
+            //btn cancel nhom hang
+            $(document).on('click', '#btn_groupproduct_cancel', function () {
+                $('#LoaiHH_id_add').val('');
+                $('#GroupProductName_add').val('');
+                //click link to show tabs
+                $('#linkListGroupTab').find('a').trigger('click');
+                $('#btn_groupproduct_continue').show();
+                $('#btn_groupproduct_save').show();
+                $('#btn_groupproduct_edit_save').hide();
+                $('#btn_groupproduct_cancel').hide();
+                $('#LoaiHH_ID_Modal').attr('disabled', false);
+
+            });
+            //Delete nhom hang
+            $(document).on('click', '#btn_delete_groupproduct', function () {
+                var delete_id = $(this).data("id");
+                if (confirm('Bạn có muốn xóa tên nhóm hàng này ?')) {
+                    //Check ID in product
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("CheckNhomHanginDmHangHoa", "DmHangHoa")',
+                        data: { Id: delete_id },
+                        success: function (data) {
+                            if (data == true) {
+                                //Delete name group product
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("DeleteNhomHang", "DmHangHoa")/' + delete_id,
+                                    success: function (data) {
+                                        $('#TableGroupProduct').DataTable().ajax.reload();
+                                        //$('#DVT_ID').empty();
+                                        loadListGroupProduct();
+                                        toastr.success('Bạn đã xóa được đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                                    },
+                                    error: function (data) {
+                                        console.log('Error:', data);
+                                    }
+                                });
+                            } else {
+                                toastr.error('Bạn không thể xóa, tên này đã sử dụng trong hàng hóa!', 'Không thành công Alert', { timeOut: 5000 });
+                            }
+                        }
+                    });
+
+                }
+
+            });
+            //Create DmHangHoa
+            $('#btn_edit_product').click(function () {
+                var hh_id = $('#txtHH_ID').val();
+                var codeproduct = $('#txtMaHH').val();
+                var nameproduct = $('#txtTenHH').val();
+                var dvt_id = $('#DVT_ID option:selected').val();
+                var loaihh_id = $('#LoaiHH_ID option:selected').val();
+                var giamua = $('#txtGiaMua').val().replace(/,/g, "");
+                var giaban1 = $('#txtGiaBan1').val().replace(/,/g, "");
+                var giaban2 = $('#txtGiaBan2').val().replace(/,/g, "");
+                var giaban3 = $('#txtGiaBan3').val().replace(/,/g, "");
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                if (codeproduct === "") {
+                    toastr.error('Chưa nhập mã hàng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (codeproduct.indexOf(' ') !== -1) {
+                    toastr.error('Không được có khoản trắng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (nameproduct === "") {
+                    toastr.error('Chưa nhập tên hàng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                //Check id and code product
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckIdAndCodeProduct", "DmHangHoa")',
+                    data: { id: hh_id, code: codeproduct },
+                    success: function (data) {
+                        if (data == true) {
+                            //Create update product
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("UpdateDmHangHoa", "DmHangHoa")',
+                                data: {
+                                    HH_ID: hh_id,
+                                    MaHH: codeproduct,
+                                    TenHH: nameproduct,
+                                    DVT_ID: dvt_id,
+                                    LoaiHH_ID: loaihh_id,
+                                    GiaMua: giamua,
+                                    GiaBan1: giaban1,
+                                    GiaBan2: giaban2,
+                                    GiaBan3: giaban3,
+                                    TenCongTy_ID: congty_id,
+                                    Status: status
+                                },
+                                success: function (data) {
+                                    toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                                    window.location.href = "/DmHangHoa/Index";
+                                    ClearFormProduct();
+
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+                            });
+                        }
+                        else {
+                            //Check same code product
+                             $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("CheckCodeProduct", "DmHangHoa")',
+                                data: { code: codeproduct },
+                                success: function (data) {
+                                    if (data == false) {
+                                         $.ajax({
+                                                type: "POST",
+                                                url: '@Url.Action("UpdateDmHangHoa", "DmHangHoa")',
+                                                data: {
+                                                    HH_ID: hh_id,
+                                                    MaHH: codeproduct,
+                                                    TenHH: nameproduct,
+                                                    DVT_ID: dvt_id,
+                                                    LoaiHH_ID: loaihh_id,
+                                                    GiaMua: giamua,
+                                                    GiaBan1: giaban1,
+                                                    GiaBan2: giaban2,
+                                                    GiaBan3: giaban3,
+                                                    TenCongTy_ID: congty_id,
+                                                    Status: status
+                                                },
+                                                success: function (data) {
+                                                    toastr.success('Bạn đã sửa đối tượng thành công!', 'Thành công Alert', { timeOut: 5000 });
+                                                    window.location.href = "/DmHangHoa/Index";
+                                                    ClearFormProduct();
+                                                },
+                                                error: function (data) {
+                                                    console.log('Error:', data);
+                                                }
+                                         });
+                                    }
+                                    else {
+                                        toastr.error('Mã đối tượng này đã có !', 'Bị lỗi', { timeOut: 3000 });
+                                    }
+                                },
+                                error: function () {
+                                    alert("Error!");
+                                }
+
+                            });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+
+            })
+            //functon format number 100,000
+            function CurrencyFormatted(nStr) {
+                nStr += '';
+                x = nStr.split(',');
+                x1 = x[0];
+                x2 = x.length > 1 ? ',' + x[1] : '';
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                }
+                return x1 + x2;
+            }
+        });
+
+
+    </script>
+}
+
+
+
+
+

@@ -1,0 +1,968 @@
+﻿
+@{
+    ViewBag.Title = "Sửa phiếu thu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/home">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Sửa phiếu thu <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div>
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <button type="button" id="btn_edit" name="btn_edit" class="btn btn-app bg-primary"><i class="fas fa-check"></i> Lưu</button>
+                    <button type="button" id="btn_edit_in" name="btn_edit_in" class="btn btn-app bg-success"><i class="fas fa-print"></i> Lưu và in</button>
+                    <a href="@Url.Action("Index","PhieuThu")" class="btn btn-app bg-warning"> <i class="fas fa-backward"></i> Quay lại</a>
+                </div>
+            </div>
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-primary">
+            <div class="card-body">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="row">
+                        <!-- text input so phieu -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Số phiếu</label>
+                                <input type="hidden" id="txtPhieu_ID" name="txtPhieu_ID">
+                                <input type="text" class="form-control" id="txtSoPhieu" name="txtSoPhieu" readonly="readonly">
+                            </div>
+                        </div>
+                        <!-- text input tinh chat thu chi -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tính chất thu</label>
+                                <select id="LoaiThuChi_ID" name="LoaiThuChi_ID" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                        <!-- text input ngay phieu -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Ngày phiếu</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control float-right" id="inputNgay">
+                                    <p style="display:none;">Ngày phiếu: <b id="txtNgayPhieu"></b></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- text input ma doi tuong -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tìm đối tượng</label>
+                                <div class="input-group">
+                                    <input type="text" id="txtTimDoiTuong" name="txtTimDoiTuong" class="form-control" placeholder="Nhập mã hoặc tên">
+                                    <span class="input-group-append">
+                                        <button type="button" id="btn_createObject" name="btn_createObject" class="btn btn-warning btn-flat"><i class="fas fa-plus"></i></button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- text input ma doi tuong -->
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Mã đối tượng</label>
+                                <input type="hidden" id="txtDT_ID" name="txtDT_ID">
+                                <input type="text" id="txtMaDT" name="txtMaDT" class="form-control" readonly="readonly" placeholder="Mã đối tượng">
+                            </div>
+                        </div>
+                        <!-- text input ten doi tuong -->
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Tên đối tượng</label>
+                                <input type="text" id="txtTenDT" name="txtTenDT" readonly="readonly" class="form-control" placeholder="Tên đối tượng">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- text input dia chi -->
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Địa chỉ</label>
+                                <input type="text" id="txtDiaChi" name="txtDiaChi" class="form-control" placeholder="Nhập địa chỉ">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- text input tien no -->
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Tổng tiền nợ</label>
+                                <input type="text" id="txtSoTienNo" name="txtSoTienNo" value="0" class="form-control text-right" readonly="readonly" style="font-weight:800;color:red;">
+                            </div>
+                        </div>
+                        <!-- text input so tien -->
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Số tiền</label>
+                                <input type="text" id="txtSoTien" name="txtSoTien" value="0" class="form-control text-right">
+                            </div>
+                        </div>
+                        <!-- text input nguoi nhan -->
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Người nhận</label>
+                                <input type="text" id="txtNguoiNhan" name="txtNguoiNhan" class="form-control" placeholder="Nhập người nhận">
+                            </div>
+                        </div>
+                        <!-- text input ghi chu -->
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Ghi chú</label>
+                                <input type="text" id="txtLyDo" name="txtLyDo" class="form-control" placeholder="Nhập ghi chú">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- text input tien mat -->
+                        <div class="col-md-3">
+                            <div class="custom-control custom-radio">
+                                <input class="custom-control-input" type="radio" id="customRadioTienMat" name="customThanhToan" checked>
+                                <label for="customRadioTienMat" class="custom-control-label">Tiền mặt</label>
+                            </div>
+                        </div>
+                        <!-- text input chuyen khoan -->
+                        <div class="col-md-3">
+                            <div class="custom-control custom-radio">
+                                <input class="custom-control-input" type="radio" id="customRadioChuyenKhoan" name="customThanhToan">
+                                <label for="customRadioChuyenKhoan" class="custom-control-label">Chuyển khoản:</label>
+                            </div>
+                        </div>
+                        <!-- text input ten ngan hang -->
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <select id="NganHang_ID" name="NganHang_ID" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card-footer">
+                <div class="col-sm-12">
+                    <div class="float-right">
+                        <button type="button" id="btn_editFooter" name="btn_editFooter" class="btn btn-app bg-primary "><i class="fas fa-check"></i> Lưu</button>
+                        <button type="button" id="btn_editFooter_in" name="btn_editFooter_in" class="btn btn-app bg-success"><i class="fas fa-print"></i> Lưu và in</button>
+                        <a href="@Url.Action("Index", "PhieuThu")" class="btn btn-app bg-warning"> <i class="fas fa-backward"></i> Quay lại</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-footer">
+                <div class="row">
+                    
+                    <div class="col-sm-6">
+                        <h6>Khổ giấy in: <span id="spPageSize" class="text-danger"></span> <button type="button" id="btn_ConfigSize" class="btn btn-outline-secondary btn-sm"><i class="fas fa-tools" title="Chọn loại khổ giấy"></i></button></h6>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModalObject" role="dialog" data-url='@Url.Action("_PartialObject","Objects")'></div>
+    <div class="modal fade" id="myModalPageSizeIn" role="dialog" data-url='@Url.Action("_PartialPageSize","PhieuThu")'></div>
+    <div class="modal fade" id="myModalListPageSize" role="dialog" data-url='@Url.Action("_PartialListPageSize","PhieuThu")'></div>
+</section>
+
+@section scripts{
+
+    <style type="text/css">
+        .green {
+            color: Green;
+        }
+
+        .red {
+            color: Red;
+        }
+
+        .custom {
+            height: 75px;
+        }
+    </style>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //Load PageSize default
+            var ckpagesizex = $.cookie("ckPageSizeT");
+            var ckpagesizetext = $.cookie("ckPageSizeText");
+            if (ckpagesizex != null) {
+                $('#spPageSize').val(ckpagesizex);
+                $('#spPageSize').text(ckpagesizetext);
+            }
+            else {
+                $('#spPageSize').text("Khổ giấy - 8.0 cm");
+                $('#spPageSize').val("KhoGiay80");
+            }
+            $('#txtTimDoiTuong').focus();
+            //show date for edit
+            $('#inputNgay').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                locale: {
+                    format: 'DD/MM/YYYY'
+                }
+            });
+            $('#inputNgay').on('apply.daterangepicker', function (ev, picker) {
+                $('#inputNgay').val(picker.startDate.format('DD/MM/YYYY'));
+                $('#txtNgayPhieu').text(picker.startDate.format('YYYY/MM/DD'));
+
+            });
+            //load tinh chat thu chi
+            function LoadTinhChatThuChi () {
+                $.ajax({
+                    url: "/PhieuThu/ListLoaiThuChi",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#LoaiThuChi_ID').empty();
+                        // $('#TenDVT').append("<option value=''>Chọn nhóm hàng</option>");
+                        $.each(data, function (key, value) {
+                            $("#LoaiThuChi_ID").append($("<option></option>").val(value.LoaiThuChi_ID).html(value.TenLoaiThuChi));
+                        });
+                        $("#LoaiThuChi_ID").prop('selectedIndex', 0);
+                        //LoadSoPhieuMoi();
+                        //$('.overlay').hide();
+                    },
+                });
+            }
+
+            //Radio chuyen khoan
+            $(document).on('click', '#customRadioChuyenKhoan', function () {
+                LoadDropDownNganHang();
+            });
+            //radio Tien mat
+            $(document).on('click', '#customRadioTienMat', function () {
+                $('#NganHang_ID').empty();
+            });
+            //load danh muc ngan hang
+            function LoadDropDownNganHang() {
+                $.ajax({
+                    url: "/PhieuThu/GetListDmNganHang",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#NganHang_ID').empty();
+                        // $('#TenDVT').append("<option value=''>Chọn nhóm hàng</option>");
+                        $.each(data, function (key, value) {
+                            $('#NganHang_ID').append($("<option></option>").val(value.NganHang_ID).html(value.TenNganHang));
+                        });
+                        //$('#NganHang_IDEdit').prop('selectedIndex', 0);
+                        //$('#NganHang_ID').select2({
+                        //    containerCss: "form-control form-control-sm"
+                        //});
+                    },
+                });
+            }
+            //search object by autocomplete
+            $(function () {
+                $("#txtTimDoiTuong").autocomplete({
+                    minLength: 0,
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '/Objects/GetObjectAutoComplete/',
+                            data: "{ 'Prefix': '" + request.term + "'}",
+                            dataType: "json",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return item;
+                                }))
+                            },
+                            error: function (response) {
+                                alert(response.responseText);
+                            },
+                            failure: function (response) {
+                                alert(response.responseText);
+                            }
+                        });
+                    },
+                    focus: function (event, ui) {
+                        $("#txtMaDT").val(ui.item.madt);
+                        $("#txtTenDT").val(ui.item.tendt);
+                        return false;
+                    },
+                    select: function (event, ui) {
+                        $("#txtDT_ID").val(ui.item.dt_id);
+                        $("#txtDiaChi").val(ui.item.diachi);
+                        var myMa = ui.item.madt;
+                        myMa = jQuery.trim(myMa);
+                        $("#txtMaDT").val(myMa);
+                        $("#txtTenDT").val(ui.item.tendt);
+                        $("#txtSoTien").focus();
+                        GetCongNo();
+                        return false;
+                    }
+                }).keyup(function (e) { //dung cho ma vach
+                    if (e.which === 13) {
+                        autocomplete_enter_object();
+                        $(".ui-menu").hide();
+                    }
+                }).autocomplete("instance")._renderItem = function (ul, item) {
+                    return $("<li style='border-bottom: 1px solid #CBD3DD';>")
+                            .append("<div>" + item.madt + "<br>" + item.tendt + "</div>")
+                            .appendTo(ul);
+                };
+            });
+            //enter cho ma vach cho doi tuong khach hang
+            function autocomplete_enter_object() {
+                var code = $("#txtTimDoiTuong").val();
+                $.ajax({
+                    url: "/Objects/GetObjectByBarcode",
+                    method: "GET",
+                    dataType: "json",
+                    data: { Barcode: code },
+                    success: function (data) {
+                        $("#txtDT_ID").val(data.DT_ID);
+                        $('#txtDiaChi').val(data.DiaChi);
+                        var myMa = data.MaDT;
+                        myMa = jQuery.trim(myMa);
+                        $("#txtMaDT").val(myMa);
+                        $("#txtTenDT").val(data.TenDT);
+                        $("#txtSoTien").focus();
+                        GetCongNo();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                        toastr.error('Mã đối1 tượng này không có !', 'Bị lỗi', { timeOut: 3000 });
+                    }
+                });
+
+            }
+            //load edit form input by id
+            loadFormEditById();
+            function loadFormEditById() {
+                var edit_id = localStorage.getItem("myValue");
+                LoadDropDownNganHang();
+                $.ajax({
+                    url: "/PhieuThu/GetPhieuThuByID",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { id: edit_id },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                        LoadTinhChatThuChi();
+
+                    },
+                    success: function (data) {
+                        $('#txtPhieu_ID').val(data.ThuChi_ID);
+                        $('#txtSoPhieu').val(data.SoPhieu_ID);
+                        $('#txtDT_ID').val(data.DT_ID);
+                        var myMa = data.MaDT;
+                        myMa = jQuery.trim(myMa);
+                        $("#txtMaDT").val(myMa);
+                        $('#txtTenDT').val(data.TenDT);
+                        $('#txtDiaChi').val(data.DiaChi);
+                        $('#LoaiThuChi_ID').val(data.LoaiThuChi_ID).trigger('change');
+                        $('#inputNgay').val(parseJsonDateShow(data.NgayPhieu));
+                        $('#txtNgayPhieu').text(parseJsonDateSQL(data.NgayPhieu));
+                        $('#txtSoTien').val(CurrencyFormatted(data.SoTien));
+                        $('#txtLyDo').val(data.LyDo);
+                        $('#txtNguoiNhan').val(data.NguoiNhanNop);
+                        $('#customRadioTienMat').prop('checked', data.HinhThucThanhToan);
+
+                        var tienmat = $('#customRadioTienMat').is(":checked");
+                        if (tienmat === false) {
+                            $('#customRadioChuyenKhoan').prop('checked', true);
+                            $('#NganHang_ID').val(data.NganHang_ID).trigger('change');
+                        }
+                        else {
+                            $('#NganHang_ID').empty();
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+            }
+            //event keydown txtSoTien
+            $(document).on('keydown', '#txtSoTien', function (e) {
+                // Allow: backspace, delete, tab, escape, enter and .
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                    // Allow: Ctrl+A, Command+A
+                    (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                    // Allow: home, end, left, right, down, up
+                    (e.keyCode >= 35 && e.keyCode <= 40)) {
+                    // let it happen, don't do anything
+                    return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+            //event keyup txtSoTien
+            $(document).on('keyup', '#txtSoTien', function () {
+                if ($(this).val() == '')
+                    $(this).val(0);
+                else {
+                    var value = tp_decode_currency_format($(this).val());
+                    $(this).val(tp_encode_currency_format(value));
+                }
+            });
+            function tp_encode_currency_format(obs) {
+                return obs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            function tp_decode_currency_format(obs) {
+                if (obs == '')
+                    return 0;
+                else
+                    return parseInt(obs.replace(/,/g, ''));
+            }
+            //format Json Date for show
+            function parseJsonDateShow(jsonDateString) {
+                return moment(jsonDateString).format("DD/MM/YYYY").toUpperCase();
+            }
+            //format Json Date for insert to sql
+            function parseJsonDateSQL(jsonDateString) {
+                return moment(jsonDateString).format("YYYY-MM-DD").toUpperCase();
+            }
+            //format number for display
+            function CurrencyFormatted(nStr) {
+                nStr += '';
+                x = nStr.split(',');
+                x1 = x[0];
+                x2 = x.length > 1 ? ',' + x[1] : '';
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                }
+                return x1 + x2;
+            }
+            //Edit phieu and in
+            $('#btn_edit_in, #btn_editFooter_in').click(function () {
+                var loai = $('#LoaiThuChi_ID option:selected').val();
+                $.ajax({
+                    url: "/PhieuThu/GetLoaiCongNo",
+                    type: "GET",
+                    data: { id: loai },
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data.CongNo == 1) {
+                            inserPhieuThuCongNoIn();
+                        }
+                        else {
+                            inserPhieuThuIn();
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            });
+            //edit phieu
+            $('#btn_edit, #btn_editFooter').click(function () {
+
+                var loai = $('#LoaiThuChi_ID option:selected').val();
+                $.ajax({
+                    url: "/PhieuThu/GetLoaiCongNo",
+                    type: "GET",
+                    data: { id: loai },
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data.CongNo == 1) {
+                           inserPhieuThuCongNo();
+                        }
+                        else {
+                            inserPhieuThu();
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            });
+            //Insert phieu thu
+            function inserPhieuThu() {
+                var thuchi_id = $('#txtPhieu_ID').val();
+                var objectid = $('#txtDT_ID').val();
+                var address = $('#txtDiaChi').val();
+                var loaithuchi_id = $('#LoaiThuChi_ID option:selected').val();
+                var sophieu_id = $('#txtSoPhieu').val();
+                var sophieu = "PT"
+                var ngayphieu = $('#txtNgayPhieu').text();
+                var sotien = $('#txtSoTien').val().replace(/,/g, "");
+                var lydo = $('#txtLyDo').val();
+                var nguoinhannop = $('#txtNguoiNhan').val();
+                var congty_id = "@Session["congty_id"]";
+                var hinhthucthanhtoan = $('#customRadioTienMat').is(":checked");
+                var status = 0;
+                if (hinhthucthanhtoan == true) {
+                    var nganhang_id = 0;
+                }
+                else {
+                    var nganhang_id = $('#NganHang_ID option:selected').val();
+                }
+                //check Object
+                if (objectid === "") {
+                    toastr.error('Chưa nhập tên đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (sotien === "0") {
+                    toastr.error('Số tiền không thể bằng 0!', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdatePhieuThu", "PhieuThu")',
+                    data: {
+                        ThuChi_ID: thuchi_id,
+                        TinhCuoc_ID: 0,
+                        LoaiThuChi_ID: loaithuchi_id,
+                        DT_ID: objectid,
+                        DiaChi: address,
+                        SoPhieu_ID: sophieu_id,
+                        SoPhieu: sophieu,
+                        NgayPhieu: ngayphieu,
+                        SoTien: sotien,
+                        LyDo: lydo,
+                        NguoiNhanNop: nguoinhannop,
+                        HinhThucThanhToan: hinhthucthanhtoan,
+                        NganHang_ID: nganhang_id,
+                        TenCongTy_ID: congty_id,
+                        Status: status
+                    },
+                    dataType: "json",
+                    success: function (output) {
+                        toastr.success('Bạn đã sửa phiếu thành công!', 'Thành công', { timeOut: 3000 });
+                        window.location.href = "/PhieuThu/Index";
+
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+            //insert cong no va phieu thu
+            function inserPhieuThuCongNo() {
+
+                var thuchi_id = $('#txtPhieu_ID').val();
+                var objectid = $('#txtDT_ID').val();
+                var address = $('#txtDiaChi').val();
+                var loaithuchi_id = $('#LoaiThuChi_ID option:selected').val();
+                var sophieu_id = $('#txtSoPhieu').val();
+                var sophieu = "PT"
+                var ngayphieu = $('#txtNgayPhieu').text();
+                var sotien = $('#txtSoTien').val().replace(/,/g, "");
+                var lydo = $('#txtLyDo').val();
+                var nguoinhannop = $('#txtNguoiNhan').val();
+                var congty_id = "@Session["congty_id"]";
+                var hinhthucthanhtoan = $('#customRadioTienMat').is(":checked");
+                var status = 0;
+
+                if (hinhthucthanhtoan == true) {
+                    var nganhang_id = 0;
+                }
+                else {
+                    var nganhang_id = $('#NganHang_ID option:selected').val();
+                }
+
+                //check Object
+                if (objectid === "") {
+                    toastr.error('Chưa nhập tên đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (sotien === "0") {
+                    toastr.error('Số tiền không thể bằng 0!', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdatePhieuThuCongNo", "PhieuThu")',
+                    data: {
+                        ThuChi_ID: thuchi_id,
+                        PhNhapXuat_ID: 0,
+                        LoaiThuChi_ID: loaithuchi_id,
+                        DT_ID: objectid,
+                        DiaChi: address,
+                        SoPhieu_ID: sophieu_id,
+                        SoPhieu: sophieu,
+                        NgayPhieu: ngayphieu,
+                        SoTien: sotien,
+                        LyDo: lydo,
+                        NguoiNhanNop: nguoinhannop,
+                        HinhThucThanhToan: hinhthucthanhtoan,
+                        NganHang_ID: nganhang_id,
+                        TenCongTy_ID: congty_id,
+                        Status: status
+                    },
+                    dataType: "json",
+                    success: function (output) {
+                        toastr.success('Bạn đã sửa phiếu thành công!', 'Thành công', { timeOut: 3000 });
+                        window.location.href = "/PhieuThu/Index";
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+            //insert cong no va phieu thu in
+            function inserPhieuThuCongNoIn() {
+                var thuchi_id = $('#txtPhieu_ID').val();
+                var objectid = $('#txtDT_ID').val();
+                var address = $('#txtDiaChi').val();
+                var loaithuchi_id = $('#LoaiThuChi_ID option:selected').val();
+                var sophieu_id = $('#txtSoPhieu').val();
+                var sophieu = "PT"
+                var ngayphieu = $('#txtNgayPhieu').text();
+                var sotien = $('#txtSoTien').val().replace(/,/g, "");
+                var lydo = $('#txtLyDo').val();
+                var nguoinhannop = $('#txtNguoiNhan').val();
+                var congty_id = "@Session["congty_id"]";
+                var hinhthucthanhtoan = $('#customRadioTienMat').is(":checked");
+                var status = 0;
+                if (hinhthucthanhtoan == true) {
+                    var nganhang_id = 0;
+                }
+                else {
+                    var nganhang_id = $('#NganHang_ID option:selected').val();
+                }
+                //check Object
+                if (objectid === "") {
+                    toastr.error('Chưa nhập tên đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (sotien === "0") {
+                    toastr.error('Số tiền không thể bằng 0!', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdatePhieuThuCongNo", "PhieuThu")',
+                    data: {
+                        ThuChi_ID: thuchi_id,
+                        PhNhapXuat_ID: 0,
+                        LoaiThuChi_ID: loaithuchi_id,
+                        DT_ID: objectid,
+                        DiaChi: address,
+                        SoPhieu_ID: sophieu_id,
+                        SoPhieu: sophieu,
+                        NgayPhieu: ngayphieu,
+                        SoTien: sotien,
+                        LyDo: lydo,
+                        NguoiNhanNop: nguoinhannop,
+                        HinhThucThanhToan: hinhthucthanhtoan,
+                        NganHang_ID: nganhang_id,
+                        TenCongTy_ID: congty_id,
+                        Status: status
+                    },
+                    dataType: "json",
+                    success: function (output) {
+                        InPhieu();
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    }
+                });
+            }
+            //get cong no cho tim khach hang
+            function GetCongNo() {
+                var dt_id = $('#txtDT_ID').val();
+                var ngayphieu = $('#txtNgayPhieu').text();
+                $.ajax({
+                    url: "/PhieuThu/GetNoCuKH",
+                    method: "GET",
+                    dataType: "json",
+                    data: { ngayPhieu: ngayphieu, Id: dt_id },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        //var congnocuoi = data.TienCongNoKH;
+                        //toastr.error(congnocuoi + 'Mã hàng này không có !', 'Bị lỗi', { timeOut: 3000 });
+                        $('#txtSoTienNo').val(tp_encode_currency_format(data.TienCongNoKH));
+                        $('#txtSoTien').val(tp_encode_currency_format(data.TienCongNoKH));
+                        $("#txtSoTien").focus();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                        $('#txtSoTienNo').val(0);
+                        $('#txtSoTien').val(0);
+                        $("#txtSoTien").focus();
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+           //Load Popup Modal Object to create new object
+            $('#btn_createObject').click(function () {
+                var url = $('#myModalObject').data('url');
+                $.get(url, function (data) {
+                    //load Groupobject in dropdown
+                    $.ajax({
+                        url: "/Objects/GetListNhomDT",
+                        type: "GET",
+                        dataType: "JSON",
+                        beforeSend: function () {
+                            $('.overlay').show();
+                        },
+                        success: function (data) {
+                            $('#CategoryObject_ID').empty();
+                            $.each(data, function (key, value) {
+                                $("#CategoryObject_ID").append($("<option></option>").val(value.LoaiDT_ID).html(value.TenLoaiDT));
+                            });
+                            $("#CategoryObject_ID").prop('selectedIndex', 0);
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        },
+                        complete: function () {
+                            $('.overlay').hide();
+                        }
+                    });
+                    $('#myModalObject').html(data);
+                    $('#myModalObject').modal('show');
+
+                });
+            });
+            //save object from popup modal
+            $(document).on('click', '#btn_saveObject', function () {
+
+                var codeobject = $('#CodeObject').val();
+                var nameobject = $('#NameObject').val();
+                var loaidt_id = $('#CategoryObject_ID option:selected').val();
+                var address = $('#txtAddress').val();
+                var phone = $('#txtPhone').val();
+                var email = $('#txtEmail').val();
+                var taxcode = $('#txtTaxCode').val();
+                var bankaccount = $('#txtBankAccount').val();
+                var nguoigiaodich = $('#txtNguoiGiaoDich').val();
+                var congty_id = "@Session["congty_id"].ToString()";
+                var status = 0;
+                if (codeobject === "") {
+                    toastr.error('Chưa nhập mã đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (codeobject.indexOf(' ') !== -1) {
+                    toastr.error('Không được có khoản trắng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (nameobject === "") {
+                    toastr.error('Chưa nhập tên đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                var testEmail = /^[A-Z0-9._%+-]+ ([A-Z0-9-]+\.)+[A-Z]{2,4}$/i;
+                if (testEmail.test(email))
+                {
+                    toastr.error('Chưa nhập mail chưa đúng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateObject", "Objects")',
+                    data: {
+                        MaDT: codeobject,
+                        TenDT: nameobject,
+                        LoaiDT_ID: loaidt_id,
+                        DiaChi: address,
+                        phone: phone,
+                        Email: email,
+                        SoTK: bankaccount,
+                        MaST: taxcode,
+                        NgGiaoDich: nguoigiaodich,
+                        TenCongTy_ID: congty_id,
+                        Status: status
+                    },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                            $('#myModalObject').modal('hide');
+                        }
+                        else {
+                            toastr.error('Mã đối tượng này đã có !', 'Bị lỗi', { timeOut: 3000 });
+                            $('#txtMaDT').focus();
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //refesh form
+            $('#link_refresh').click(function () {
+
+                $('#txtDT_ID').val('');
+                $('#txtTimDoiTuong').val('');
+                $('#txtMaDT').val('');
+                $('#txtTenDT').val('');
+                $('#txtDiaChi').val('');
+                $('#txtSoTien').val('0');
+                $('#txtSoTienNo').val('0');
+                $('#txtLyDo').val('');
+                $('#txtNguoiNhan').val('');
+            })
+            //Load modal Config PageSize
+            $('#btn_ConfigSize').click(function () {
+                var url = $('#myModalPageSizeIn').data('url');
+                $.get(url, function (data) {
+                    //load list kho giay
+                    LoadSelectPageSize();
+                    $('#myModalPageSizeIn').html(data);
+                    $('#myModalPageSizeIn').modal('show');
+                });
+            });
+            //Load select page size
+            function LoadSelectPageSize() {
+                $.ajax({
+                    url: "/PhieuThu/GetPageSizeHien",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        //$("#PrinterName").html(data); // HTML DOM replace
+                        $('#pageSize_id').empty();
+                        $.each(data, function (key, value) {
+                            $("#pageSize_id").append($("<option></option>").val(value.TenFile).html(value.TenKhoGiay));
+                        });
+                    },
+                });
+            }
+            //Load modal list Page Size all
+            $(document).on('click', '#btn_ShowPageSize', function () {
+
+                var url = $('#myModalListPageSize').data('url');
+                $.get(url, function (data) {
+                    //load list page size
+                    $('#myModalListPageSize').html(data);
+                    $('#myModalListPageSize').modal('show');
+                    $("#TablePageSize").DataTable({
+                        'paging': true,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": false,
+                        "responsive": true,
+                        "ajax": {
+                            "url": "/PhieuThu/GetListPageSize",
+                            "type": "GET",
+                            "datatype": "json",
+                        },
+                        "columns": [
+                            { "data": "KhoGiay_ID", visible: false },
+                            { "data": "TenKhoGiay" },
+                            {
+                                "data": "AnHien",
+                                render: function (data, type, row) {
+                                    return data == 1 ? 'Hiện' : 'Ẩn'
+                                }
+                            },
+                            {
+                                "data": "KhoGiay_ID",
+                                "render": function (data) {
+                                    return "<a href='javascript: void (0); ' id='btn_showHide' data-id=" + data + " class='btn btn-sm btn-warning' style='margin - left: 5px'><i class='fas fa-check'></i> Ẩn/Hiện</a>";
+                                },
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+
+                });
+            });
+            //save cau hinh danh sach kho giay
+            $(document).on('click', '#btn_showHide', function () {
+                var showhide_id = $(this).data("id");
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ShowHideKhoGiay", "PhieuThu")/' + showhide_id,
+                    success: function (data) {
+                        $('#TablePageSize').DataTable().ajax.reload();
+                        LoadSelectPageSize();
+                        //toastr.success('Bạn đã thực hiện thành công !', 'Thành công Alert', { timeOut: 5000 });
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+
+                });
+
+            });
+            //Save PageSize
+            $(document).on('click', '#btn_savePageSize', function () {
+                var tentile = $('#pageSize_id option:selected').val();
+                var sizeText = $('#pageSize_id option:selected').text();
+                $('#spPageSize').val(tentile)
+                $.cookie("ckPageSizeT", $('#spPageSize').val(), { expires: 360 });
+                $('#spPageSize').text(sizeText)
+                $.cookie("ckPageSizeText", $('#spPageSize').text(), { expires: 360 });
+                $('#myModalPageSizeIn').modal('hide');
+            });
+            //In phieu
+            function InPhieu() {
+                var phieu_id = $('#txtPhieu_ID').val();
+                var pagesize = $('#spPageSize').val();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("InPhieuThu", "PhieuThu")',
+                    data: { id: phieu_id, pagesize: pagesize },
+                    success: function (data) {
+                        window.location.href = "/PhieuThu/FormInPhieuThu";
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+            }
+
+
+        });
+    </script>
+}
+
+
+
+
+

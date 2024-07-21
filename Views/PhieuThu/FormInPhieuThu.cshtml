@@ -1,0 +1,98 @@
+﻿
+@{
+    ViewBag.Title = "In phiếu thu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">In phiếu <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div>
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <button type="button" id="btn_print" name="btn_print" class="btn btn-success btn-sm"><i class="fa fa-print"></i> In phiếu</button>
+                    <button style="display:none;" type="button" id="btn_printNgay" name="btn_printNgay" class="btn btn-success btn-sm"><i class="fa fa-print"></i> In ngay</button>
+                    <a href="@Url.Action("Index","PhieuThu")" class="btn btn-warning btn-sm"> <i class="fas fa-backward"></i> Quay lại</a>
+                </div>
+            </div>
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-primary">
+            <div class="card-body">
+                <div id="dvReport">
+                    <iframe id="ReportFramePhieu" src="" onload="HideLoader();" width="100%" height="1000" style="border:none;"></iframe>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</section>
+
+
+@section scripts{
+
+    <script type="text/javascript">
+        function HideLoader() {
+            $('.overlay').hide();
+            $('#btn_print').trigger('click')
+        }
+        $(document).ready(function () {
+            $('.overlay').show();
+            //load report in webform
+            $("#ReportFramePhieu").attr("src", "@Url.Content("~/PrintForms/InRDLCPhieu.aspx")");
+            //button in and export
+            $('#btn_print').click(function () {
+                $('.overlay').show();
+                //get button in iframe on webform
+                var el = $('#ReportFramePhieu').contents().find('#btnPrintFooter');
+                //run it
+                el.trigger('click');
+                $('.overlay').hide();
+            });
+            $('#btn_printNgay').click(function () {
+               var phieu_id =  '@Session["PhieuXuat_id"]';
+               var pagesize =  '@Session["PageSizePX"]';
+               $.ajax({  
+                    url: '@Url.Action("ExportToPDF", "QuanLyBan")',  
+                    type: 'GET',  
+                    contentType: 'application/json; charset=utf-8',  
+                    data: { id: phieu_id, pagesize: pagesize },
+                    success: function (result) {
+  
+                        $('#ReportFramePhieu').attr('src', '@Url.Content("~/")' + result);
+  
+                        setTimeout(function () {  
+                            frame = document.getElementById("ReportFramePhieu");
+                            frameframedoc = frame.contentWindow;  
+                            framedoc.focus();  
+                            framedoc.print();  
+                        }, 1000);  
+                    },  
+                    error: function (xhr, status, err) {  
+                        alert(err);  
+                    }  
+                });  
+  
+                return false;  
+            });
+
+        });
+    </script>
+}
+
+
+
+

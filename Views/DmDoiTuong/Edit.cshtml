@@ -1,0 +1,634 @@
+﻿
+@{
+    ViewBag.Title = "Sửa đối tượng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript">
+    function CheckNumeric(e) {
+        if (window.event) // IE
+        {
+            if ((e.keyCode < 48 || e.keyCode > 57) & e.keyCode != 8 & e.keyCode != 44 & e.keyCode != 46) {
+                alert("Bạn phải nhập số");
+                event.returnValue = false;
+                return false;
+
+            }
+        }
+        else { // Fire Fox
+            if ((e.which < 48 || e.which > 57) & e.which != 8 & e.which != 44 & e.which != 46) {
+                alert("Bạn phải nhập số");
+                e.preventDefault();
+                return false;
+
+            }
+        }
+
+    }
+</script>
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/home">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Sửa đối tượng <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div>
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <button type="button" id="btn_edit_object" class="btn btn-primary "><i class="fas fa-check"></i> Lưu</button>
+                    <a href="@Url.Action("Index","DmDoiTuong")" class="btn btn-warning"> <i class="fas fa-backward"></i> Quay lại</a>
+                </div>
+            </div>
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-primary">
+            <div class="card-body">
+                @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formCreate" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <!-- text input ma doi tuong -->
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Mã đối tượng<span style="color:red;">(*)</span>:</label>
+                                        <input type="hidden" id="txtDT_ID" name="txtDT_ID" class="form-control">
+                                        <input type="text" id="txtMaDT" name="txtMaDT" class="form-control" placeholder="Bắt buộc nhập mã ">
+                                        <div id="divStatus"></div>
+                                    </div>
+                                </div>
+                                <!-- text input Ten doi tuong -->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Tên đối tượng<span style="color:red;">(*)</span>:</label>
+                                        <input type="text" id="txtTenDT" name="txtTenDT" class="form-control" placeholder="Bắt buộc nhập tên ">
+                                    </div>
+                                </div>
+                                <!-- select nhom doi tuong -->
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Chọn nhóm đối tượng:</label>
+                                        <div class="input-group">
+                                            <select id="CategoryObject_ID" name="CategoryObject_ID" class="form-control selectdvt">
+                                            </select>
+                                            <span class="input-group-append">
+                                                <button type="button" id="btn_category" name="btn_category" class="btn btn-warning btn-flat"><i class="fas fa-plus"></i></button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <!-- text input dia chi-->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Địa chỉ:</label>
+                                        <input type="text" id="txtDiaChi" name="txtDiaChi" class="form-control" placeholder="Nhập địa chỉ">
+                                    </div>
+                                </div>
+                                <!-- text input dien thoai-->
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Điện thoại:</label>
+                                        <input type="text" id="txtDienThoai" name="txtDienThoai" class="form-control" placeholder="Nhập điện thoại">
+                                    </div>
+                                </div>
+                                <!-- text input so tai khoan-->
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Số tài khoản:</label>
+                                        <input type="text" id="txtSoTaiKhoan" name="txtSoTaiKhoan" class="form-control" placeholder="Nhập số tài khoản">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <!-- text input email-->
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Email:</label>
+                                        <input type="text" id="txtEmail" name="txtEmail" class="form-control" placeholder="Nhập email">
+                                    </div>
+                                </div>
+                                <!-- text input nguoi giao dich-->
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Người giao dịch:</label>
+                                        <input type="text" id="txtNguoiGiaoDich" name="txtNguoiGiaoDich" class="form-control" placeholder="Nhập người giao dịch">
+                                    </div>
+                                </div>
+                                <!-- text input ma so thue-->
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Mã số thuế:</label>
+                                        <input type="text" id="txtMaSoThue" name="txtMaSoThue" class="form-control" placeholder="Nhập mã số thuế">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="card card-footer">
+                <div class="row">
+                    <div class="col-sm-5">
+
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="float-right">
+                            <button type="button" id="btn_editFooter_object" class="btn btn-primary "><i class="fas fa-check"></i> Lưu</button>
+                            <a href="@Url.Action("Index","Objects")" class="btn btn-warning"> <i class="fas fa-backward"></i> Quay lại</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModalGroupObject" role="dialog" data-url='@Url.Action("_PartialGroupObject","DmDoiTuong")'></div>
+</section>
+
+@section scripts{
+    <style type="text/css">
+        .green {
+            color: Green;
+        }
+
+        .red {
+            color: Red;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            //check no space ma hang
+            $('#txtMaDT').keypress(function (event) {
+                if ($('#txtMaDT').val().indexOf(' ') !== -1) {
+                    toastr.error('Không được có khoản trắng !', 'Bị lỗi', { timeOut: 3000 });
+                    event.preventDefault();
+                }
+            });
+            $('#txtMaDT').keyup(function () {
+                var madt = $('#txtMaDT').val();
+                var statusLoi = $("#divStatus");
+                statusLoi.html("kiểm tra....").removeClass();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckInputMaDT", "DmDoiTuong")',
+                    data: {
+                       MaDT: madt
+                    },
+                    success: function (data) {
+                        if (data == false) {
+                            statusLoi.html("Mã này đã có!").addClass("red");
+                        }
+                        else {
+                            statusLoi.html("Mã này nhập được!").addClass("green");
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            });
+            //Load Dropdown CategoryObject list
+            //loadDropdownGroupObject();
+            function loadDropdownGroupObject() {
+                //load  CategoryObject list
+                $.ajax({
+                    url: "/DmDoiTuong/GetListNhomDT",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#CategoryObject_ID').empty();
+                        // $('#TenDVT').append("<option value=''>Chọn nhóm hàng</option>");
+                        $.each(data, function (key, value) {
+                            $("#CategoryObject_ID").append($("<option></option>").val(value.LoaiDT_ID).html(value.TenLoaiDT));
+                        });
+                        $("#CategoryObject_ID").prop('selectedIndex', 1);
+                        $('.selectdvt').select2();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            }
+            //Load edit danh muc doi tuong
+            loadFormObjectById();
+            function loadFormObjectById() {
+                var object_id = localStorage.getItem("myValue");
+                $.ajax({
+                    url: "/DmDoiTuong/EditObjectById",
+                    type: "GET",
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                        loadDropdownGroupObject();
+                    },
+                    data: { id: object_id },
+                    success: function (data) {
+                        $('#txtDT_ID').val(data.DT_ID);
+                        var myMa = data.MaDT;
+                        myMa = jQuery.trim(myMa);
+                        $('#txtMaDT').val(myMa);
+                        $('#txtTenDT').val(data.TenDT);
+                        $('#CategoryObject_ID').select2().val(data.LoaiDT_ID).trigger('change');
+                        $('#txtDiaChi').val(data.DiaChi);
+                        $('#txtDienThoai').val(data.Phone);
+                        $('#txtEmail').val(data.Email);
+                        $('#txtMaSoThue').val(data.MaST);
+                        $('#txtSoTaiKhoan').val(data.SoTK);
+                        $('#txtNguoiGiaoDich').val(data.NgGiaoDich);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+            //refresh form
+            function ClearFormObject() {
+                $('#txtMaDT').val('');
+                $('#txtTenDT').val('');
+                $('#txtDiaChi').val('');
+                $('#txtDienThoai').val('');
+                $('#txtMaSoThue').val('');
+                $('#txtEmail').val('');
+                $('#txtSoTaiKhoan').val('');
+                $('#txtNguoiGiaoDich').val('');
+
+            }
+            //btn link_refresh
+            $('#link_refresh').click(function () {
+                ClearFormObject();
+            })
+            //load Popup modal nhom object
+            $('#btn_category').click(function () {
+                $('.overlay').show();
+                var url = $('#myModalGroupObject').data('url');
+                $.get(url, function (data) {
+
+                    $('#myModalGroupObject').html(data);
+                    $('#myModalGroupObject').modal('show');
+
+                    $("#TableGroupObject").DataTable({
+                        "ajax": {
+                            "url": "/DmDoiTuong/LoadListGroupObjectTable",
+                            "type": "GET",
+                            "datatype": "json",
+                        },
+                        "columns": [
+                            { "data": "LoaiDT_ID", visible: false },
+                            { "data": "TenLoaiDT"},
+                            {
+                                "data": "LoaiDT_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit_groupobject' data-id=" + data + " class='btn btn-sm btn-info' style='margin-left:5px'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_delete_groupObject' data-id=" + data + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                },
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+                    });
+                    $('.overlay').hide();
+                });
+
+            })
+            //Create group object
+            $(document).on('click', '#btn_groupobject_save', function () {
+
+                var name = $('#GroupObjectName_add').val();
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                var statusLoi = $("#divStatus");
+                statusLoi.html("Checking....").removeClass();
+
+                if (name === "") {
+                    toastr.error('Chưa nhập tên !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                //check name already
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateGroupObject", "DmDoiTuong")',
+                    data: {TenLoaiDT: name,
+                           TenCongTy_ID: congty_id,
+                           Status: status
+                    },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            statusLoi.html(name + " Tên này nhập được!").addClass("green");
+                            toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                            $('#myModalGroupObject').modal('hide');
+                            $('#Loaidt_id_add').empty();
+                            loadDropdownGroupObject();
+                        }
+                        else {
+                            statusLoi.html(name + " tên này đã có!").addClass("red");
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            ////Create group object and continue
+            $(document).on('click', '#btn_groupobject_continue', function () {
+
+                var name = $('#GroupObjectName_add').val();
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                var statusLoi = $("#divStatus");
+                statusLoi.html("Checking....").removeClass();
+
+                if (name === "") {
+                    toastr.error('Chưa nhập tên !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                //check name already
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateGroupObject", "DmDoiTuong")',
+                    data: {
+                        TenLoaiDT: name,
+                        TenCongTy_ID: congty_id,
+                        Status: status
+                    },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            statusLoi.html(name + " Tên này nhập được!").addClass("green");
+                            toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                            $('#Loaidt_id_add').val("");
+                            $('#GroupObjectName_add').val("");
+                            $('#TableGroupObject').DataTable().ajax.reload();
+                            statusLoi.html(name + " Đã nhập thành công!").addClass("green");
+                            loadDropdownGroupObject();
+                        }
+                        else {
+                             statusLoi.html(name + " tên này đã có!").addClass("red");
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //btn Edit group object
+            $(document).on('click', '#btn_edit_groupobject', function () {
+                var edit_id = $(this).data("id");
+                $.ajax({
+                    url: "/DmDoiTuong/EditGroupObjectById",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { id: edit_id },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $('#Loaidt_id_add').val(data.LoaiDT_ID);
+                        $('#GroupObjectName_add').val(data.TenLoaiDT);
+                        //click link to show tabs
+                        $('#linkGroupTab').find('a').trigger('click');
+                        $('#btn_groupobject_continue').hide();
+                        $('#btn_groupobject_save').hide();
+                        $('#btn_groupobject_edit_save').show();
+                        $('#btn_groupobject_cancel').show();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //btn save Edit Group object
+            $(document).on('click', '#btn_groupobject_edit_save', function () {
+                var id = $('#Loaidt_id_add').val();
+                var name = $('#GroupObjectName_add').val();
+                var congty_id = "@Session["congty_id"]";
+                if (name === "") {
+                    toastr.error('Chưa nhập tên !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdateEditGroupObject", "DmDoiTuong")',
+                    data: { LoaiDT_ID: id, TenLoaiDT: name, TenCongTy_ID: congty_id },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            toastr.success('Bạn đã sửa đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                            $('#Loaidt_id_add').val('');
+                            $('#GroupObjectName_add').val('');
+                            $('#TableGroupObject').DataTable().ajax.reload();
+                            //click link to show tabs
+                            $('#linkListGroupTab').find('a').trigger('click');
+                            $('#btn_groupobject_continue').show();
+                            $('#btn_groupobject_save').show();
+                            $('#btn_groupobject_edit_save').hide();
+                            $('#btn_groupobject_cancel').hide();
+                        }
+                        else {
+                            toastr.error('Tên này đã có. Bạn phải nhập tên khác !', 'Không thành công Alert', { timeOut: 5000 });
+                            $('#GroupObjectName_add').focus();
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //btn cancel group object
+            $(document).on('click', '#btn_groupobject_cancel', function () {
+                $('#Loaidt_id_add').val('');
+                $('#GroupObjectName_add').val('');
+                //click link to show tabs
+                $('#linkListGroupTab').find('a').trigger('click');
+                $('#btn_groupobject_continue').show();
+                $('#btn_groupobject_save').show();
+                $('#btn_groupobject_edit_save').hide();
+                $('#btn_groupobject_cancel').hide();
+
+            });
+            //Delete group object
+            $(document).on('click', '#btn_delete_groupObject', function () {
+                var delete_id = $(this).data("id");
+                if (confirm('Bạn có muốn xóa tên đối tượng này ?')) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeleteGroupObject", "DmDoiTuong")',
+                        data: { id: delete_id },
+                        beforeSend: function () {
+                            $('.overlay').show();
+                        },
+                        success: function (data) {
+                            if (data == true) {
+                                $('#TableGroupObject').DataTable().ajax.reload();
+                                loadDropdownGroupObject();
+                                toastr.success('Bạn đã xóa được đối tượng này!', 'Thông báo', { timeOut: 5000 });
+                            } else {
+                                toastr.error('Bạn không thể xóa, tên này đã sử dụng trong đối tượng!', 'Thông báo', { timeOut: 5000 });
+                            }
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        },
+                        complete: function () {
+                            $('.overlay').hide();
+                        }
+                    });
+                }
+            });
+            //edit save object
+            $('#btn_edit_object,#btn_editFooter_object').click(function () {
+                var dt_id = $('#txtDT_ID').val();
+                var madt = $('#txtMaDT').val();
+                var tendt = $('#txtTenDT').val();
+                var loaidt_id = $('#CategoryObject_ID option:selected').val();
+                var diachi = $('#txtDiaChi').val();
+                var dienthoai = $('#txtDienThoai').val();
+                var sotaikhoan = $('#txtSoTaiKhoan').val();
+                var email = $('#txtEmail').val();
+                var nguoigiaodich = $('#txtNguoiGiaoDich').val();
+                var masothue = $('#txtMaSoThue').val();
+                var congty_id = "@Session["congty_id"].ToString()";
+                var status = 0;
+                if (madt === "") {
+                    toastr.error('Chưa nhập mã đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (madt.indexOf(' ') !== -1) {
+                    toastr.error('Không được có khoản trắng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (tendt === "") {
+                    toastr.error('Chưa nhập tên đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                var testEmail = /^[A-Z0-9._%+-]+ ([A-Z0-9-]+\.)+[A-Z]{2,4}$/i;
+                if (testEmail.test(email))
+                {
+                    toastr.error('Định dạng email sai !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdateObject", "DmDoiTuong")',
+                    data: {
+                        DT_ID: dt_id,
+                        MaDT: madt,
+                        TenDT: tendt,
+                        LoaiDT_ID: loaidt_id,
+                        DiaChi: diachi,
+                        Phone: dienthoai,
+                        Email: email,
+                        SoTK: sotaikhoan,
+                        MaST: masothue,
+                        NgGiaoDich: nguoigiaodich,
+                        TenCongTy_ID: congty_id,
+                        Status: status
+                    },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            toastr.success('Bạn đã sửa thành công!', 'Thông báo', { timeOut: 3000 });
+                            window.location.href = "/DmDoiTuong/Index";
+                            ClearFormObject();
+                        }
+                        else {
+                            toastr.error('Mã đối tượng này đã có !', 'Bị lỗi', { timeOut: 3000 });
+                            $('#txtMaDT').focus();
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            })
+            //check email input corect
+            $.validator.setDefaults({
+                submitHandler: function () {
+                    alert("Form successful submitted!");
+                }
+            });
+            $('#formCreate').validate({
+                rules: {
+                    txtEmailHoaDon: {
+                        required: true,
+                        email: true,
+                    },
+                    txtEmailPhuTrach: {
+                        required: true,
+                        email: true,
+                    },
+                },
+                messages: {
+                    txtEmailHoaDon: {
+                        required: "nhập một địa chỉ email",
+                        email: "Vui lòng nhập email đúng định dạng"
+                    },
+                    txtEmailPhuTrach: {
+                        required: "nhập một địa chỉ email",
+                        email: "Vui lòng nhập email đúng định dạng"
+                    },
+                },
+                errorElement: 'span',
+                errorPlacement: function (error, element) {
+                    error.addClass('invalid-feedback');
+                    element.closest('.form-group').append(error);
+                },
+                highlight: function (element, errorClass, validClass) {
+                    $(element).addClass('is-invalid');
+                },
+                unhighlight: function (element, errorClass, validClass) {
+                    $(element).removeClass('is-invalid');
+                }
+            });
+
+        });
+
+
+    </script>
+}
+
+
+
+
+
+
+
+

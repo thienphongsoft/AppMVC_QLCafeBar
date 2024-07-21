@@ -1,0 +1,319 @@
+﻿
+@{
+    ViewBag.Title = "Danh mục ngân hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Danh mục ngân hàng <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- Main content -->
+<!-- form input -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">Nhập thông tin</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-remove"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group input-group col-md-12">
+                            <label for="namebank">Tên ngân hàng</label>
+                        </div>
+                        <div class="input-group input-group col-md-12">
+                            <input type="hidden" id="txtNganHang_ID" name="txtNganHang_ID" />
+                            <input type="text" id="txtTenNganHang" name="txtTenNganHang" class="form-control" placeholder="Tên ngân hàng">
+                            <span class="input-group-append">
+                                <button id="SaveBanks" name="SaveBanks" class="btn btn-primary float-right"><i class="fas fa-plus"></i> Lưu</button>
+                                <button id="EditBanks" name="EditBanks" style="display: none;" class="btn btn-success float-right"><i class="fas fa-check"></i> Lưu sửa</button>
+                                <button id="btn_cancelEdit" name="btn_cancelEdit" style="display: none;" class="btn btn-warning float-right"><i class="fas fa-sync-alt"></i> Hủy sửa</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- list -->
+        <div class="card card-default">
+           
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table class="table table-striped table-bordered dt-responsive nowrap" id="TableList">
+                    <thead>
+                        <tr>
+                            <th>
+                                ID
+                            </th>
+                            <th>
+                                Tên ngân hàng
+                            </th>
+                            <th>
+                                Trạng thái
+                            </th>
+                            <th>
+                                Chức năng
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(function () {
+                GetAllBank();
+            });
+            //btn link_refresh
+            $('#link_refresh').click(function () {
+                Reset();
+            })
+            $('#SaveBanks').click(function () {
+                //var nganhang_id = $("#txtNganHang_ID").val();
+                var tennganhang = $("#txtTenNganHang").val();
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                if ($("#txtTenNganHang").val() == "") {
+                    toastr.error('Chưa nhập tên ngân hàng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Create", "DmNganHang")',
+                    data: {
+                        TenNganHang: tennganhang,
+                        TenCongTy_ID: congty_id,
+                        Status: status
+                    },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (result) {
+                        if (result == true) {
+                            toastr.success('Bạn đã tạo đối tượng thành công!', 'Thành công', { timeOut: 5000 });
+                            $('#TableList').DataTable().ajax.reload();
+                            Reset();
+                        }
+                        else {
+                            toastr.error('Tên này đã có. Bạn nhập tên khác!', 'Thông báo', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (result) {
+                        console.log('Error:', result);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+
+            });
+            $('#EditBanks').click(function () {
+                var nganhang_id = $("#txtNganHang_ID").val();
+                var tennganhang = $("#txtTenNganHang").val();
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                if (tennganhang == "") {
+                    toastr.error('Chưa nhập tên ngân hàng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+               $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Update", "DmNganHang")',
+                    data: {
+                       NganHang_ID: nganhang_id,
+                       TenNganHang: tennganhang,
+                       TenCongTy_ID: congty_id,
+                       Status: status
+                   },
+                   beforeSend: function () {
+                       $('.overlay').show();
+                   },
+                   success: function (data) {
+                        if (data == true) {
+                            //Update
+                            toastr.success('Bạn đã sửa thành công!', 'Thông báo', { timeOut: 5000 });
+                            $('#TableList').DataTable().ajax.reload();
+                            Reset();
+                        }
+                        // truong hop sua ten
+                        else {
+                            toastr.error('Tên này đã có. Bạn nhập tên khác!', 'Thông báo', { timeOut: 5000 });
+                        }
+                   },
+                   error: function (data) {
+                        console.log('Error:', data);
+                   },
+                   complete: function () {
+                       $('.overlay').hide();
+                   }
+                });
+
+            });
+            $('body').on('click', '#btn_edit', function () {
+                var edit_id = $(this).data("id");
+                $("#SaveBanks").hide();
+                $("#EditBanks").show();
+                $("#btn_cancelEdit").show();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetDmNganHangById", "DmNganHang")/' + edit_id,
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        //toastr.success('Bạn không thể xóa, tên này đã sử dụng!', 'Không thành công Alert', { timeOut: 5000 });
+                        $("#txtNganHang_ID").val(data.NganHang_ID);
+                        $("#txtTenNganHang").val(data.TenNganHang);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+            });
+            //set hien thi Hien/An
+            $('body').on('click', '#btn_eye', function () {
+                 var eye_id = $(this).data("id");
+                 $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("UpdateStatus", "DmNganHang")/' + eye_id,
+                        success: function (data) {
+                            toastr.success('Bạn đã thay đổi đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                            $('#TableList').DataTable().ajax.reload();
+                            Reset();
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+                 });
+
+            });
+            //delete
+            $('body').on('click', '#btn_delete', function () {
+                var delete_id = $(this).data("id");
+                if (confirm('Bạn có muốn xóa đối tượng này ?')) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Delete", "DmNganHang")',
+                        data: { id: delete_id },
+                        beforeSend: function () {
+                            $('.overlay').show();
+                        },
+                        success: function (data) {
+                            if (data == true) {
+                                toastr.success('Bạn đã xóa được đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                                $('#TableList').DataTable().ajax.reload();
+                                Reset();
+                            }
+                            else {
+                                toastr.error('Bạn không thể xóa, tên này đã sử dụng!', 'Không thành công Alert', { timeOut: 5000 });
+                            }
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        },
+                        complete: function () {
+                            $('.overlay').hide();
+                        }
+                    });
+                }
+            });
+            //huy bo sua
+            $('#btn_cancelEdit').click(function () {
+
+                $('#link_refresh').trigger('click');
+            });
+            function GetAllBank() {
+                $('.overlay').show();
+                var t = $("#TableList").DataTable({
+                    //"destroy": true,
+                    //"scrollY": "200px",
+                    "scrollX": true,
+                    "sScrollXInner": "100%",
+                    "scrollCollapse": true,
+                    "scroller": true,
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": true,
+                    "ordering": true,
+                    "info": true,
+                    "autoWidth": true,
+                    "autoHeight": false,
+                    "responsive": false,
+                    "ajax": {
+                        "url": "/DmNganHang/GetListDmNganHang",
+                        "type": "GET",
+                        "datatype": "json",
+                    },
+                    "columns": [
+                        { title: "STT", className: "text-center", width: "5%" },
+                        { "data": "TenNganHang", className: "text-center", width: "25%" },
+                        {
+                            "data": "Status",
+                            render: function (data, type, row) {
+                                return data == 0 ? 'Đang sử dụng' : 'Tạm khóa'
+                            }, className: "text-center", width: "25%"
+                        },
+                        {
+                            "data": "NganHang_ID", "render": function (data) {
+                                return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + " class='btn btn-success' style='margin-left:5px'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a><a href='javascript:void(0);' id='btn_eye' data-id=" + data + " class='btn btn-secondary' style='margin-left:5px'><i class='fas fa-eye'></i> Mở/khóa</a>";
+                            }, className: "text-center", width: "25%"
+                        },
+                    ],
+                    "columnDefs": [{
+                        "defaultContent": "-",
+                        "targets": "_all",
+                        "orderable": false
+                    }],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+                });
+                t.on('order.dt search.dt', function () {
+                    t.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
+                        cell.innerHTML = i + 1;
+                    });
+                }).draw();
+                $('.overlay').hide();
+            }
+            function Reset() {
+                $("#txtNganHang_ID").val(null);
+                $("#txtTenNganHang").val(null);
+                $("#SaveBanks").show();
+                $("#EditBanks").hide();
+                $("#btn_cancelEdit").hide();
+            }
+        });
+
+
+    </script>
+
+
+}
+
+
+
+

@@ -1,0 +1,563 @@
+﻿
+@{
+    ViewBag.Title = "Danh sách phiếu order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Phiếu order</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Tìm Từ ngày giờ - Đến ngày giờ:</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input type="text" class="form-control float-right" id="reportrange">
+                            <button type="button" name="filterXem" id="filterXem" value="Xem" class="btn btn-info"><i class="fas fa-eye"></i> Xem </button>
+                            <p style="display:none">Từ ngày: <b id="TuNgay"></b> </p>
+                            <p style="display:none">Đến ngày: <b id="DenNgay"></b></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Tìm theo bàn:</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <select id="searchBan" name="searchBan" class="form-control selectban" style="width: 100%;">
+                            </select>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label>Tìm theo số phiếu:</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="searchSoPhieu" name="searchSoPhieu" class="form-control" placeholder="Số phiếu">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <!-- Dm phieu xuat -->
+            <div class="row" id="Phieu">
+                <div class="col-md-6">
+                    <table class="table table-sm table-bordered nowrap" cellpadding="0" width="100%" id="TableOrder">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Số phiếu
+                                </th>
+                                <th>
+                                    Tên bàn
+                                </th>
+                                <th>
+                                    Nhân viên order
+                                </th>
+                                <th>
+                                    Ngày giờ in order
+                                </th>
+                                <th>
+                                   
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <div class="small-box bg-secondary disabled color-palette">
+                        <div class="inner">
+                            <h6>Tổng số: <span id="spInputCount" class="text-warning"> 0</span> phiếu xuất</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-sm table-bordered nowrap" cellpadding="0" width="100%" id="TableChiTiet">
+                        <thead>
+                            <tr>
+                                <th style="display:none;">
+                                    Mã hàng
+                                </th>
+                                <th style="text-wrap:none; width: 50%;">
+                                    Tên hàng hóa
+                                </th>
+                                <th style="width: 5%; text-align:center;">
+                                    ĐVT
+                                </th>
+                                <th style="width: 15%; text-align:right;">
+                                    Số lượng
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                    <div class="small-box bg-secondary disabled color-palette">
+                        <div class="inner">
+                            <h6>Tổng số: <span id="spCountHang" class="text-warning"> 0</span> mặt hàng - Tổng số lượng: <span id="spSoLuong" class="text-warning"> 0</span></h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+    </div>
+
+</div>
+
+
+@section scripts{
+
+    <script type="text/javascript">
+
+       $(document).ready(function () {
+            //Load PageSize default
+            $('.overlay').hide();
+            //load dm ban
+            $(function () {
+               $.ajax({
+                    url: "/QuanLyBan/GetListDmBanInPhieuOrder",
+                    type: "GET",
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $('#searchBan').empty();
+                        $('#searchBan').append("<option value=''>Chọn tên bàn</option>");
+                        $.each(data, function (key, value) {
+                            $("#searchBan").append($("<option></option>").val(value.Ban_ID).html(value.TenBan));
+                        });
+                        $('.selectban').select2()
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //Xem chi tiet order
+            $('body').on('click', '#btn_detail', function () {
+                var detail_id = $(this).data("id");
+                //phan chi tiet san pham
+                $('#TableChiTiet').DataTable().clear().destroy();
+                $('#TableChiTiet').DataTable({
+                    'scrollX': true,
+                    'scrollCollapse': true,
+                    'sScrollXInner': "100%",
+                    'paging': false,
+                    'lengthChange': false,
+                    'searching': false,
+                    'ordering': false,
+                    'info': false,
+                    'autoWidth': true,
+                    'responsive': false,
+                    'ajax': {
+                        "url": "/QuanLyBan/GetViewProductInOrderById",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": { id: detail_id },
+                    },
+                    'columns': [
+                        { "data": "MaHH", className: "text-left", width: "10%", visible: false},
+                        { "data": "TenHH", className: "text-left", width: "50%"  },
+                        { "data": "TenDVT", className: "text-center", width: "5%" },
+                        { "data": "SoLuong", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "15%" },
+
+                    ],
+                    "language": {
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+                });
+                //phan thanh toan cuoi form
+                $.ajax({
+                    url: "/QuanLyBan/GetEditOrderByID",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { id: detail_id },
+                    success: function (data) {
+                        $('#txtCongTienHang').val(CurrencyFormatted(data.TienHang));
+                        $('#txtTienThanhToan').val(CurrencyFormatted(data.TongTien));
+                        $('#txtTyLeGiam').val(CurrencyFormatted(data.TyLeGiamGia));
+                        $('#txtTienGiam').val(CurrencyFormatted(data.TienGiamGia));
+                        $('#txtTyLePhucVu').val(CurrencyFormatted(data.TyLePPhucVu));
+                        $('#txtTienPhucVu').val(CurrencyFormatted(data.TienPPhucVu));
+                        $('#txtTyLeThue').val(CurrencyFormatted(data.ThueSuat));
+                        $('#txtTienThue').val(CurrencyFormatted(data.TienThue));
+                        $('#txtTienPhatSinh').val(CurrencyFormatted(data.TienPhatSinh));
+
+                    },
+                });
+
+            });
+            //Search by Product and NgayPhieu
+            $('#searchProduct').on('keyup change', function () {
+                var ngaystart = $('#TuNgay').text();
+                var ngayend = $('#DenNgay').text();
+                var product = $('#searchProduct').val();
+                if (product != "") {
+                    $('#TableOrder').DataTable().clear().destroy();
+                    $("#TableOrder").DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": false,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": true,
+                        "responsive": false,
+                        //"select": true,
+                        "fixedHeader": true,
+                        "ajax": {
+                            "url": "/QuanLyBan/GetListInOrderByDateAndProduct",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: ngaystart, ngayEnd: ngayend, Product: product },
+                        },
+                        "columns": [
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.Id + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "5%",
+                            },
+                            { "data": "TenBan" },
+                            { "data": "TenTaiKhoan" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = moment(row.NgayGio).format('DD/MM/YYYY HH:mm');
+                                    return details;
+                                }, className: "text-center", width: "10%",
+                            },
+                            {
+                                "data": "Id", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xoá</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+
+                }
+                else {
+                    $('#TableOrder').DataTable().clear().destroy();
+                }
+
+            });
+            //Search by ten ban va ngay
+            $('#searchBan').change(function () {
+                var ngaystart = $('#TuNgay').text();
+                var ngayend = $('#DenNgay').text();
+                var ban_id = $('#searchBan option:selected').val();
+
+                if (ban_id != "") {
+                    $('#TableOrder').DataTable().clear().destroy();
+                    $("#TableOrder").DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": false,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": true,
+                        "responsive": false,
+                        //"select": true,
+                        //"fixedHeader": true,
+                        "ajax": {
+                            "url": "/QuanLyBan/GetListInOrderByBan_IDAndDate",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: ngaystart, ngayEnd: ngayend, Ban_ID: ban_id },
+                        },
+
+                        "columns": [
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.Id + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "5%",
+                            },
+                            { "data": "TenBan" },
+                            { "data": "TenTaiKhoan" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = moment(row.NgayGio).format('DD/MM/YYYY HH:mm');
+                                    return details;
+                                }, className: "text-center", width: "10%",
+                            },
+                            {
+                                "data": "Id", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xoá</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+
+                }
+                else {
+                    $('#TableOrder').DataTable().clear().destroy();
+                }
+
+            });
+            //Search by so phieu
+            $('#searchSoPhieu').on('keyup change', function () {
+                var sophieu = $('#searchSoPhieu').val();
+                if (sophieu != "") {
+                    $('#TableOrder').DataTable().clear().destroy();
+                    $("#TableOrder").DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": false,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": true,
+                        "responsive": false,
+                        //"select": true,
+                        "fixedHeader": true,
+                        "ajax": {
+                            "url": "/QuanLyBan/GetListInOrderBySoPhieu",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { soPhieu: sophieu },
+                        },
+                        "columns": [
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.Id + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "5%",
+                            },
+                            { "data": "TenBan" },
+                            { "data": "TenTaiKhoan" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = moment(row.NgayGio).format('DD/MM/YYYY HH:mm');
+                                    return details;
+                                }, className: "text-center", width: "10%",
+                            },
+                            {
+                                "data": "Id", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xoá</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+                else {
+                    $('#TableOrder').DataTable().clear().destroy();
+                }
+
+            });
+            //Delete orders
+            $('body').on('click', '#btn_delete', function () {
+                var delete_id = $(this).data("id");
+                if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                {
+                    //Delete
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeletePhieuOrder", "QuanLyBan")/' + delete_id,
+                        success: function (data) {
+                            $('#TableOrder').DataTable().ajax.reload();
+                            $('#TableChiTiet').DataTable().clear().destroy();
+                            toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+                    });
+                }
+                      
+              
+            });
+            //functon format number 100,000
+            function CurrencyFormatted(nStr) {
+                nStr += '';
+                x = nStr.split(',');
+                x1 = x[0];
+                x2 = x.length > 1 ? ',' + x[1] : '';
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                }
+                return x1 + x2;
+            }
+            //seach by daterange to load Dm Phieu
+            $(function () {
+
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrange').val(start.format('DD/MM/YYYY hh:mm A') + ' - ' + end.format('DD/MM/YYYY hh:mm A'));
+                    $('#TuNgay').text(start.format('YYYY-MM-DD hh:mm A'));
+                    $('#DenNgay').text(end.format('YYYY-MM-DD hh:mm A'));
+
+                    $('#TableOrder').DataTable().clear().destroy();
+                    $("#TableOrder").DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": false,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": true,
+                        "responsive": false,
+                       // "select": true,
+                        "fixedHeader": true,
+                        "ajax": {
+                            "url": "/QuanLyBan/GetListInOrderByDate",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: start.format('YYYY-MM-DD hh:mm A'), ngayEnd: end.format('YYYY-MM-DD hh:mm A') },
+                        },
+
+                        "columns": [
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.Id + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "5%",
+                            },
+                            { "data": "TenBan" },
+                            { "data": "TenTaiKhoan" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = moment(row.NgayGio).format('DD/MM/YYYY HH:mm');
+                                    return details;
+                                }, className: "text-center", width: "10%",
+                            },
+                            {
+                                "data": "Id", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xoá</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+
+                }
+
+                $('#reportrange').daterangepicker({
+                    timePicker: true,
+                    timePickerIncrement: 30,
+                    locale: {
+                        format: 'DD/MM/YYYY hh:mm A'
+                    },
+                }, cb);
+
+                cb(start, end);
+            });
+            //Xem tu ngay gio dan ngay gio
+            $('#filterXem').click(function () {
+                var ngaystart = $('#TuNgay').text();
+                var ngayend = $('#DenNgay').text();
+                $('#TableOrder').DataTable().clear().destroy();
+                $("#TableOrder").DataTable({
+                    "scrollY": "200px",
+                    "scrollX": true,
+                    "sScrollXInner": "100%",
+                    "scrollCollapse": true,
+                    "scroller": true,
+                    "paging": false,
+                    "lengthChange": false,
+                    "searching": false,
+                    "ordering": false,
+                    "info": false,
+                    "autoWidth": true,
+                    "responsive": false,
+                    //"select": true,
+                    "fixedHeader": true,
+                    "ajax": {
+                        "url": "/QuanLyBan/GetListInOrderByDate",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": { ngayStart: ngaystart, ngayEnd: ngayend },
+                    },
+
+                    "columns": [
+                        {
+                            "data": null, "render": function (data, type, row) {
+                                return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.Id + ">" + data.SoPhieu + "</a>";
+                            }, className: "text-center", width: "5%",
+                        },
+                        { "data": "TenBan" },
+                        { "data": "TenTaiKhoan" },
+                        {
+                            "data": null, render: function (data, type, row) {
+                                var details = moment(row.NgayGio).format('DD/MM/YYYY HH:mm');
+                                return details;
+                            }, className: "text-center", width: "10%",
+                        },
+                        {
+                            "data": "Id", "render": function (data) {
+                                return "<a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xoá</a>";
+                            }, className: "text-center", width: "10%"
+                        },
+                    ],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+
+                });
+            });
+      
+       });
+
+    </script>
+}

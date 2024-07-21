@@ -1,0 +1,103 @@
+﻿<div class="container">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Quản lý nhóm hàng hóa</h3>
+                    <div class="card-tools">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <form id="AddFormNhom" name="AddFormNhom" class="form-horizontal">
+                <div class="modal-body">
+                    <div class="card card-primary card-tabs">
+                        <div class="card-header p-0 pt-1">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item" id="linkGroupTab">
+                                    <a class="nav-link active" data-toggle="pill" href="#CreateGroupProduct" role="tab" aria-controls="CreateGroupProduct" aria-selected="true"><i class="fas fa-plus"></i> Tạo nhóm hàng hóa</a>
+                                </li>
+                                <li class="nav-item" id="linkListGroupTab">
+                                    <a class="nav-link" data-toggle="pill" href="#GroupProductList" role="tab" aria-controls="GroupProductList" aria-selected="false"><i class="fas fa-list"></i> Danh sách nhóm hàng hóa</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="custom-tabs-one-tabContent">
+                                <!-- Create Group Product -->
+                                <div class="tab-pane fade show active" id="CreateGroupProduct" role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                                    <div class="form-group row">
+                                        <input type="hidden" name="LoaiHH_id_add" id="LoaiHH_id_add">
+                                        <label for="inputName" class="col-sm-5 col-form-label">Tên nhóm hàng hóa</label>
+                                        <div class="col-sm-7">
+                                            <input type="text" id="GroupProductName_add" name="GroupProductName_add" class="form-control" placeholder="Nhập tên nhóm hàng hóa" value="">
+                                            <div id="divStatus"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox" id="cboxNguyenLieu" value="">
+                                            <label for="cboxNguyenLieu" class="custom-control-label">Loại nhóm nguyên liệu</label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <button type="button" id="btn_groupproduct_save" name="btn_groupproduct_save" class="btn btn-info btn-flat"><i class="fas fa-plus"></i> Lưu</button>
+                                                <button type="button" id="btn_groupproduct_continue" name="btn_groupproduct_continue" class="btn btn-info btn-flat"><i class="fas fa-save"></i> Lưu và tiếp tục</button>
+                                                <button type="button" style="display:none;" id="btn_groupproduct_edit_save" name="btn_groupproduct_edit_save" class="btn btn-info btn-flat"><i class="fas fa-check"></i> Lưu sửa</button>
+                                                <button type="button" style="display:none;" id="btn_groupproduct_cancel" name="btn_groupproduct_cancel" class="btn btn-info btn-flat"><i class="fas fa-undo-alt"></i> Hủy</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="tab-pane fade" id="GroupProductList" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+                                    <label>Danh sách nhóm hàng hóa</label>
+                                    <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%;" id="TableGroupProduct">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center">
+                                                    ID
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Tên nhóm hàng hóa
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Chức năng
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th style="text-align: center">
+                                                    ID
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Tên nhóm hàng hóa
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Chức năng
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <button type="submit" data-dismiss="modal" class="btn btn-default float-right">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

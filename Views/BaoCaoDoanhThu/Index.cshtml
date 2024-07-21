@@ -1,0 +1,1287 @@
+﻿@{
+    ViewBag.Title = "Báo cáo tổng hợp";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Báo cáo tổng hợp</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+             </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+    <div class="card card-primary card-tabs">
+        <div class="card-header p-0 pt-1">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#BaoCaoTongHopXuat" data-toggle="pill">Báo cáo bán hàng theo tài khoản</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#BaoCaoDanhThu" data-toggle="pill">Báo cáo danh thu</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#BaoCaoDanhThuNgay" data-toggle="pill">Báo cáo danh thu theo ngày</a>
+                </li>
+                <li style="display:none;" class="nav-item">
+                    <a class="nav-link" href="#BaoCaoHangHoa" data-toggle="pill">Báo cáo Hàng hoá</a>
+                </li>
+            </ul>
+        </div><!-- /.card-header -->
+        <div class="card-body">
+            <div class="tab-content">
+                <!-- Bao cao tong hop xuat theo tai khoan -->
+                <div class="tab-pane container active p-0" id="BaoCaoTongHopXuat">
+                    <!-- head report -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control float-right" id="reportrangeXH">
+                                    <p style="display:none">Từ ngày: <b id="TuNgayXH"></b> </p>
+                                    <p style="display:none">Đến ngày: <b id="DenNgayXH"></b></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <select id="UserIdXH" name="UserIdXH" class="form-control select2">
+                                        <option>Chọn tài khoản</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" name="filterXemTHXH" id="filterXemTHXH" value="Xem" class="btn btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button type="button" name="filterTHXH" id="filterTHXH" value="Xem" class="btn btn-info"><i class="fas fa-print"></i> Xem in</button>
+                                        <button type="button" style="display:none" name="btn_exportTH" id="btn_exportTH" value="Xem" onclick="PrintReport('pdf');" class="btn btn-warning">Export dpf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.head report -->
+                    <div class="row" id="TableTongHopXuat">
+                        <!-- Left col -->
+                        <section class="col-lg-8 connectedSortable">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        Chi tiết hàng xuất
+                                    </h3>
+                                    <div class="card-tools">
+
+                                    </div>
+                                </div><!-- /.card-header -->
+
+                                <div class="card-body">
+                                    <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%;" id="TableXuatHang">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center">
+                                                    Tên Hàng
+                                                </th>
+                                                <th style="text-align: center">
+                                                    ĐVT
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Số lượng
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Đơn giá
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Thành tiền
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </section> <!-- /.left col -->
+                        <!-- right col (We are only adding the ID to make the widgets sortable)-->
+                        <section class="col-lg-4 connectedSortable">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        Tổng cộng
+                                    </h3>
+                                </div>
+                                <div class="table-responsive">
+                                    <p id="rDataXH"></p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="row">
+                        <!--Crytall report Bao cao tong hop xuat hang -->
+                        <div id="ReportTongHopXuat" class="card-body">
+                            <iframe id="ReportFrameTHX" src="" onload="HideLoader();" width="100%" height="1000" style="border:none"></iframe>
+                        </div>
+                    </div>
+                </div>
+                <!-- Bao cao doanh thu -->
+                <div class="tab-pane container p-0" id="BaoCaoDanhThu">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control float-right" id="reportrangeDT">
+                                    <p style="display:none">Từ ngày: <b id="TuNgayDT"></b> </p>
+                                    <p style="display:none">Đến ngày: <b id="DenNgayDT"></b></p>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-append">
+                                        <button type="button" name="btn_XemDT" id="btn_XemDT" value="Xem" class="btn btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button type="button" name="btn_XemDT_in" id="btn_XemDT_in" value="Xem" class="btn btn-info"><i class="fas fa-print"></i> Xem in</button>
+                                        <button type="button" style="display:none" name="btn_exportTH" id="btn_exportTH" value="Xem" onclick="PrintReport('pdf');" class="btn btn-warning">Export dpf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chi tiet BaoCaoDanhThu -->
+                    <div class="row" id="TableDoanhThu">
+                        <!-- Left col -->
+                        <section class="col-lg-8 connectedSortable">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        Chi tiết doanh thu
+                                    </h3>
+                                    <div class="card-tools">
+
+                                    </div>
+                                </div><!-- /.card-header -->
+
+                                <div class="card-body">
+                                    <table class="table table-head-fixed table-bordered nowrap" cellpadding="0" width="100%" id="TableXuatHangDT">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center; display:none;">
+                                                    Mã hàng
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Tên hàng
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Doanh thu
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Giảm trừ
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Danh thu thuần
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </section> <!-- /.left col -->
+                        <!-- right col (We are only adding the ID to make the widgets sortable)-->
+                        <section class="col-lg-4 connectedSortable">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        Tổng cộng
+                                    </h3>
+                                </div>
+                                <div class="table-responsive">
+                                    <p id="rDataDT"></p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <!--Crytall report Bao cao daonh thu -->
+                    <div class="row">
+                        <div id="ReportDoanhThu" class="card-body">
+                            <iframe id="ReportFrameDT" src="" onload="HideLoader();" width ="100%" height="1000" style="border:none;"></iframe>
+                        </div>
+                    </div>
+                </div>  <!-- /.Bao cao doanh thu -->
+                <!--Bao cao doanh thu theo ngay -->
+                <div class="tab-pane container fade p-0" id="BaoCaoDanhThuNgay">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control float-right" id="reportrangeDTNgay">
+                                    <p style="display:none">Từ ngày: <b id="TuNgayDTNgay"></b> </p>
+                                    <p style="display:none">Đến ngày: <b id="DenNgayDTNgay"></b></p>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-append">
+                                        <button type="button" name="filterXemDTTN" id="filterXemDTTN" value="Xem" class="btn btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button type="button" name="filterDTNgay" id="filterDTNgay" value="Xem" class="btn btn-info"><i class="fas fa-print"></i> Xem in</button>
+                                        <button type="button" style="display:none" name="btn_exportTH" id="btn_exportTH" value="Xem" onclick="PrintReport('pdf');" class="btn btn-warning">Export dpf</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chi tiet BaoCaoDanhThuTheoNgay -->
+                    <div class="row" id="TableDoanhThuNgay">
+                        <!-- Left col -->
+                        <section class="col-lg-8 connectedSortable">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        Chi tiết doanh thu theo ngày
+                                    </h3>
+                                    <div class="card-tools">
+
+                                    </div>
+                                </div><!-- /.card-header -->
+
+                                <div class="card-body">
+                                    <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%;" id="TableXuatHangDTNgay">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center">
+                                                    Ngày phiếu
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Doanh thu
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Giảm trừ
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Danh thu thuần
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                                <th style="text-align: center">
+
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+
+                            </div>
+                        </section> <!-- /.left col -->
+                        <!-- right col (We are only adding the ID to make the widgets sortable)-->
+                        <section class="col-lg-4 connectedSortable">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        Tổng cộng
+                                    </h3>
+                                </div>
+                                <div class="table-responsive">
+                                    <p id="rDataDTNgay"></p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="row">
+                        <div id="ReportDoanhThuNgay" class="card-body">
+                            <iframe id="ReportFrameDTNgay" src="" onload="HideLoader();" width="100%" height="1000" style="border:none"></iframe>
+                        </div>
+                    </div>
+                </div>
+                <!-- Bao cao hang hoa -->
+                <div style="display:none;" class="tab-pane container fade p-0" id="BaoCaoHangHoa">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control float-right" id="reportrangeLG">
+                                    <p style="display:none">Từ ngày: <b id="TuNgayLG"></b> </p>
+                                    <p style="display:none">Đến ngày: <b id="DenNgayLG"></b></p>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-append">
+                                        <button type="button" name="filterXemLG" id="filterXemLG" value="Xem" class="btn btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button type="button" name="filterLG" id="filterLG" value="Xem" class="btn btn-info"><i class="fas fa-print"></i> Xem in</button>
+                                        <button type="button" style="display:none" name="btn_exportTH" id="btn_exportTH" value="Xem" onclick="PrintReport('pdf');" class="btn btn-warning">Export dpf</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chi tiet lai gop -->
+                    <div class="row" id="TableLaiGop">
+                        <!-- Left col -->
+                        <section class="col-lg-8 connectedSortable">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        Chi tiết lãi gộp
+                                    </h3>
+                                    <div class="card-tools">
+
+                                    </div>
+                                </div><!-- /.card-header -->
+
+                                <div class="card-body">
+                                    <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%;" id="TableXuatHangLG">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center">
+                                                    Mã hàng
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Tên hàng
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Giá vốn
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Danh thu thuần
+                                                </th>
+                                                <th style="text-align: center">
+                                                    Lãi lỗ
+                                                </th>
+                                            </tr>
+                                        </thead>
+
+                                    </table>
+                                </div>
+
+                            </div>
+                        </section> <!-- /.left col -->
+                        <!-- right col (We are only adding the ID to make the widgets sortable)-->
+                        <section class="col-lg-4 connectedSortable">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        Tổng cộng
+                                    </h3>
+                                </div>
+                                <div class="table-responsive">
+                                    <p id="rDataLG"></p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="row">
+                        <!--Crytall report Bao cao lai gop -->
+                        <div id="ReportLaiGop" class="card-body">
+                            <iframe id="ReportFrameLG" src="" onload="HideLoader();" width="100%" height="1000" style="border:none"></iframe>
+                        </div>
+                    </div>
+                </div>  <!-- /.Bao cao lai gop -->
+
+            </div>
+
+            <!-- /.tab-content -->
+        </div><!-- /.card-body -->
+
+    </div>
+</div>
+
+@section scripts{
+
+    <script type="text/javascript">
+        function HideLoader() {
+            $('.overlay').hide();
+        }
+        $(document).ready(function () {
+            $('#ReportTongHopXuat').hide();
+            $('#ReportDoanhThu').hide();
+            $('#ReportDoanhThuNgay').hide();
+            $('#ReportLaiGop').hide();
+            //load ngay thang tong hop xuat hang
+            $(function () {
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrangeXH').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgayXH').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgayXH').text(end.format('YYYY-MM-DD'));
+                }
+
+                $('#reportrangeXH').daterangepicker({
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    startDate: start,
+                    endDate: end,
+                    ranges: {
+                        'Hôm nay': [moment(), moment()],
+                        'ngày hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                        '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                        'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                        'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                }, cb);
+
+                cb(start, end);
+            });
+            //load ngay thang doanh thu
+            $(function () {
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrangeDT').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgayDT').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgayDT').text(end.format('YYYY-MM-DD'));
+                }
+
+                $('#reportrangeDT').daterangepicker({
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    startDate: start,
+                    endDate: end,
+                    ranges: {
+                        'Hôm nay': [moment(), moment()],
+                        'ngày hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                        '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                        'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                        'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                }, cb);
+
+                cb(start, end);
+            });
+            //load ngay thang doanh thu theo ngay
+            $(function () {
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrangeDTNgay').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgayDTNgay').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgayDTNgay').text(end.format('YYYY-MM-DD'));
+                }
+
+                $('#reportrangeDTNgay').daterangepicker({
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    startDate: start,
+                    endDate: end,
+                    ranges: {
+                        'Hôm nay': [moment(), moment()],
+                        'ngày hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                        '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                        'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                        'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                }, cb);
+
+                cb(start, end);
+            });
+            //load ngay thang lai gop
+            $(function () {
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrangeLG').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgayLG').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgayLG').text(end.format('YYYY-MM-DD'));
+                }
+
+                $('#reportrangeLG').daterangepicker({
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    startDate: start,
+                    endDate: end,
+                    ranges: {
+                        'Hôm nay': [moment(), moment()],
+                        'ngày hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                        '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                        'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                        'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                }, cb);
+
+                cb(start, end);
+            });
+            //load  select tai khoan
+            $(function () {
+                $.ajax({
+                    url: "/BaoCaoDoanhThu/GetListUsers",
+                    type: "GET",
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $('#UserIdXH').empty();
+                        $('#UserIdXH').append("<option value=''>Chọn tài khoản</option>");
+                        $.each(data, function (key, value) {
+                            $("#UserIdXH").append($("<option></option>").val(value.UserID).html(value.UserName));
+                        });
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //functon format number 100,000
+            function CurrencyFormatted(nStr) {
+                nStr += '';
+                x = nStr.split(',');
+                x1 = x[0];
+                x2 = x.length > 1 ? ',' + x[1] : '';
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                }
+                return x1 + x2;
+            }
+            //Xem bao cao tong hop xuat theo tai khoan
+            $('#filterXemTHXH').click(function () {
+
+                $('#TableTongHopXuat').show();
+                $('#ReportTongHopXuat').hide();
+                var ngaystart = $('#TuNgayXH').text();
+                var ngayend = $('#DenNgayXH').text();
+                var userid = $('#UserIdXH option:selected').val();
+                if (userid == "") {
+                    //search table
+                    $('#TableXuatHang').DataTable().clear().destroy();
+                    $("#TableXuatHang").DataTable({
+                        "ajax": {
+                            "url": "/BaoCaoDoanhThu/BaoCaoXuatHangNguoiDungTatCa",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: ngaystart, ngayEnd: ngayend},
+                            "beforeSend": function () {
+                                $('.overlay').show();
+                            },
+                        },
+                        "columns": [
+                            { "data": "TenHH" },
+                            { "data": "TenDVT" },
+                            { "data": "SoLuong", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right" },
+                            { "data": "DonGiaBan", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right" },
+                            { "data": "ThanhTienBan", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right" },
+                        ],
+                        "footerCallback": function (row, data, start, end, display) {
+                            var api = this.api(), data;
+
+                            // Remove the formatting to get integer data for summation
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+
+                            // Total over all pages
+                            total2 = api
+                                .column(2)
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+
+                            total4 = api
+                                .column(4)
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+
+                            // Total over this page
+                            pageTotal2 = api
+                                .column(2, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+
+                            pageTotal4 = api
+                                .column(4, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+
+                            // Update footer
+                            $(api.column(0).footer()).html('Cộng');
+                            $(api.column(2).footer()).html(
+                                CurrencyFormatted(pageTotal2) + ' ( Tổng ' + CurrencyFormatted(total2) + ')'
+                            );
+                            $(api.column(4).footer()).html(
+                                CurrencyFormatted(pageTotal4) + ' ( Tổng ' + CurrencyFormatted(total4) + ')'
+                            );
+                        },
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                    //Sum total footer
+                    $.ajax({
+                        url: "/BaoCaoDoanhThu/TongTienXuatHangNguoiDungTatCa",
+                        method: "GET", // or POST
+                        dataType: "json",
+                        data: { ngayStart: ngaystart, ngayEnd: ngayend },
+                        success: function (data) {
+                            var items = '<table class="table table-striped table-bordered dt-responsive nowrap">'
+                            $.each(data, function (i, item) {
+                                items += "<tr><td style='width: 50 %'>Cộng tiền hàng: </td><td align='right'>" + CurrencyFormatted(item.TienHang) + "</td></tr> " +
+                                    "<tr><td>- Tiền giảm giá: </td><td align='right'>" + CurrencyFormatted(item.TienGiamGia) + "</td></tr> " +
+                                    "<tr><td>+ Tiền phát sinh: </td><td align='right'>" + CurrencyFormatted(item.TienPhatSinh) + "</td></tr> " +
+                                    "<tr><td>+ Tiền dịch vụ: </td><td align='right'>" + CurrencyFormatted(item.TienPhucVu) + "</td></tr> " +
+                                    "<tr><td>+ Tiền thuế: </td><td align='right'>" + CurrencyFormatted(item.TienThue) + "</td></tr> " +
+                                    "<tr><td>Tổng doanh thu: </td><td align='right'>" + CurrencyFormatted(item.DoanhThuThuc) + "</td></tr>";
+                            });
+                            items += '</table>';
+                            $('#rDataXH').html(items);
+                        }
+
+                    });
+                }
+                else {
+                    $('#TableXuatHang').DataTable().clear().destroy();
+                    $("#TableXuatHang").DataTable({
+                        "ajax": {
+                            "url": "/BaoCaoDoanhThu/BaoCaoXuatHangNguoiDung",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { NgayStart: ngaystart, NgayEnd: ngayend, UserID: userid },
+                            "beforeSend": function () {
+                                $('.overlay').show();
+                            },
+                        },
+                        "columns": [
+                            { "data": "TenHH" },
+                            { "data": "TenDVT" },
+                            { "data": "SoLuong", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right" },
+                            { "data": "DonGiaBan", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right" },
+                            { "data": "ThanhTienBan", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right" },
+                            //data: 'price',render: $.fn.dataTable.render.number(',', '.', 2, '$')
+                        ],
+                        "footerCallback": function (row, data, start, end, display) {
+                            var api = this.api(), data;
+
+                            // Remove the formatting to get integer data for summation
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+
+                            // Total over all pages
+                            total2 = api
+                                .column(2)
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+
+                            total4 = api
+                                .column(4)
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+
+                            // Total over this page
+                            pageTotal2 = api
+                                .column(2, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+
+                            pageTotal4 = api
+                                .column(4, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+
+                            // Update footer
+                            $(api.column(0).footer()).html('Cộng');
+                            $(api.column(2).footer()).html(
+                                CurrencyFormatted(pageTotal2) + ' ( Tổng ' + CurrencyFormatted(total2) + ')'
+                            );
+                            $(api.column(4).footer()).html(
+                                CurrencyFormatted(pageTotal4) + ' ( Tổng ' + CurrencyFormatted(total4) + ')'
+                            );
+                        },
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                    //Sum total footer
+                    $.ajax({
+                        url: "/BaoCaoDoanhThu/TongTienXuatHangNguoiDung",
+                        method: "GET", // or POST
+                        dataType: "json",
+                        data: { NgayStart: ngaystart, NgayEnd: ngayend, UserID: userid },
+                        success: function (data) {
+                            var items = '<table class="table table-striped table-bordered dt-responsive nowrap">'
+                            $.each(data, function (i, item) {
+                                items += "<tr><td style='width: 50 %'>Cộng tiền hàng: </td><td align='right'>" + CurrencyFormatted(item.TienHang) + "</td></tr> " +
+                                    "<tr><td>- Tiền giảm giá: </td><td align='right'>" + CurrencyFormatted(item.TienGiamGia) + "</td></tr> " +
+                                    "<tr><td>+ Tiền phát sinh: </td><td align='right'>" + CurrencyFormatted(item.TienPhatSinh) + "</td></tr> " +
+                                    "<tr><td>+ Tiền dịch vụ: </td><td align='right'>" + CurrencyFormatted(item.TienPhucVu) + "</td></tr> " +
+                                    "<tr><td>+ Tiền thuế: </td><td align='right'>" + CurrencyFormatted(item.TienThue) + "</td></tr> " +
+                                    "<tr><td>Tổng doanh thu: </td><td align='right'>" + CurrencyFormatted(item.DoanhThuThuc) + "</td></tr>";
+                            });
+                            items += '</table>';
+                            $('#rDataXH').html(items);
+                        }
+
+                    });
+                }
+                $('.overlay').hide();
+            });
+            //Xem bao cao doanh thu
+            $('#btn_XemDT').click(function () {
+                $('#TableDoanhThu').show();
+                $('#ReportDoanhThu').hide();
+                var ngaystart = $('#TuNgayDT').text();
+                var ngayend = $('#DenNgayDT').text();
+                //search table
+                $('#TableXuatHangDT').DataTable().clear().destroy();
+                $("#TableXuatHangDT").DataTable({
+                    "scrollX": true,
+                    "sScrollXInner": "100%",
+                    "ajax": {
+                        "url": "/BaoCaoDoanhThu/BaoCaoDoanhThu",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": { ngayStart: ngaystart, ngayEnd: ngayend },
+                        "beforeSend": function () {
+                            $('.overlay').show();
+                        },
+                    },
+                    "columns": [
+                        { "data": "MaHH", visible: false },
+                        { "data": "TenHH" },
+                        { "data": "DoanhThu", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right" },
+                        { "data": "GiamTru", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right" },
+                        { "data": "DoanhThuThuan", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right" },
+                    ],
+                    "footerCallback": function (row, data, start, end, display) {
+                        var api = this.api(), data;
+                        // Remove the formatting to get integer data for summation
+                        var intVal = function (i) {
+                            return typeof i === 'string' ?
+                                i.replace(/[\$,]/g, '') * 1 :
+                                typeof i === 'number' ?
+                                    i : 0;
+                        };
+                        // Total over all pages
+                        total2 = api
+                            .column(2)
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        total3 = api
+                            .column(3)
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        total4 = api
+                            .column(4)
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        // Total over this page
+                        pageTotal2 = api
+                            .column(2, { page: 'current' })
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        pageTotal3 = api
+                            .column(3, { page: 'current' })
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        pageTotal4 = api
+                            .column(4, { page: 'current' })
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        // Update footer
+                        $(api.column(0).footer()).html('Cộng');
+                        $(api.column(2).footer()).html(
+                            CurrencyFormatted(pageTotal2) + ' ( Tổng ' + CurrencyFormatted(total2) + ')'
+                        );
+                        $(api.column(3).footer()).html(
+                            CurrencyFormatted(pageTotal3) + ' ( Tổng ' + CurrencyFormatted(total3) + ')'
+                        );
+                        $(api.column(4).footer()).html(
+                            CurrencyFormatted(pageTotal4) + ' ( Tổng ' + CurrencyFormatted(total4) + ')'
+                        );
+                    },
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+
+                });
+                //Sum total footer
+                $.ajax({
+                    url: "/BaoCaoDoanhThu/TongTienDoanhThu",
+                    method: "GET", // or POST
+                    dataType: "json",
+                    data: { ngayStart: ngaystart, ngayEnd: ngayend },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        var items = '<table class="table table-striped table-bordered dt-responsive nowrap">'
+                        $.each(data, function (i, country) {
+                            items += "<tr><td>Tổng doanh thu: </td><td align='right'>" + CurrencyFormatted(country.TienHang) + "</td></tr> " +
+                                     "<tr><td>- Tổng tiền giảm: </td><td align='right'>" + CurrencyFormatted(country.TienGiamGia) + "</td></tr> " +
+                                     "<tr><td>= Tổng d.thu thuần: </td><td align='right'>" + CurrencyFormatted(country.DoanhThuTruGiam) + "</td></tr> " +
+                                     "<tr><td>+ Tổng phục vụ: </td><td align='right'>" + CurrencyFormatted(country.TienPhucVu) + "</td></tr> " +
+                                     "<tr><td>+ Tổng phát sinh: </td><td align='right'>" + CurrencyFormatted(country.TienPhatSinh) + "</td></tr> " +
+                                     "<tr><td>+ Tổng tiền thuế: </td><td align='right'>" + CurrencyFormatted(country.TienThue) + "</td></tr> " +
+                                     "<tr><td>= Tổng d.thu thực: </td><td align='right'>" + CurrencyFormatted(country.DoanhThuThuc) + "</td></tr>";
+                        });
+                        items += '</table>';
+                        $('#rDataDT').html(items);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+            });
+            //Xem bao cao doanh thu theo ngay
+            $('#filterXemDTTN').click(function () {
+                $('#TableDoanhThuNgay').show();
+                $('#ReportDoanhThuNgay').hide();
+                var ngaystart = $('#TuNgayDTNgay').text();
+                var ngayend = $('#DenNgayDTNgay').text();
+
+                $('#TableXuatHangDTNgay').DataTable().clear().destroy();
+                $("#TableXuatHangDTNgay").DataTable({
+
+                    "ajax": {
+                        "url": "/BaoCaoDoanhThu/BaoCaoDoanhThuTheoNgay",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": { ngayStart: ngaystart, ngayEnd: ngayend },
+                        "beforeSend": function () {
+                            $('.overlay').show();
+                        },
+                    },
+                    "columns": [
+                        {
+                            "data": "NgayPhieu", render: function (d) {
+                                return moment(d).format('DD/MM/YYYY');
+                            }, className: "text-center"
+                        },
+                        { "data": "DoanhThu", render: $.fn.dataTable.render.number('.', ','), className: "text-right" },
+                        { "data": "GiamTru", render: $.fn.dataTable.render.number('.', ','), className: "text-right" },
+                        { "data": "DoanhThuThuan", render: $.fn.dataTable.render.number('.', ','), className: "text-right" },
+                    ],
+                    "footerCallback": function (row, data, start, end, display) {
+                        var api = this.api(), data;
+                        // Remove the formatting to get integer data for summation
+                        var intVal = function (i) {
+                            return typeof i === 'string' ?
+                                i.replace(/[\$,]/g, '') * 1 :
+                                typeof i === 'number' ?
+                                    i : 0;
+                        };
+                        // Total over all pages
+                        total1 = api
+                            .column(1)
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        total2 = api
+                            .column(2)
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        total3 = api
+                            .column(3)
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        // Total over this page
+                        pageTotal1 = api
+                            .column(1, { page: 'current' })
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        pageTotal2 = api
+                            .column(2, { page: 'current' })
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        pageTotal3 = api
+                            .column(3, { page: 'current' })
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+
+                        // Update footer
+                        $(api.column(0).footer()).html('Cộng');
+                        $(api.column(1).footer()).html(
+                            CurrencyFormatted(pageTotal1) + ' ( Tổng ' + CurrencyFormatted(total1) + ')'
+                        );
+                        $(api.column(2).footer()).html(
+                            CurrencyFormatted(pageTotal2) + ' ( Tổng ' + CurrencyFormatted(total2) + ')'
+                        );
+                        $(api.column(3).footer()).html(
+                            CurrencyFormatted(pageTotal3) + ' ( Tổng ' + CurrencyFormatted(total3) + ')'
+                        );
+                    },
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+
+                });
+
+                //Sum total footer
+                $.ajax({
+                    url: "/BaoCaoDoanhThu/TongTienDoanhThu",
+                    method: "GET", // or POST
+                    dataType: "json",
+                    data: { ngayStart: ngaystart, ngayEnd: ngayend },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        var items = '<table class="table table-striped table-bordered dt-responsive nowrap">'
+                        $.each(data, function (i, country) {
+                            items += "<tr><td>Tổng doanh thu: </td><td align='right'>" + CurrencyFormatted(country.TienHang) + "</td></tr> " +
+                                "<tr><td>- Tổng tiền giảm: </td><td align='right'>" + CurrencyFormatted(country.TienGiamGia) + "</td></tr> " +
+                                "<tr><td>= Tổng d.thu thuần: </td><td align='right'>" + CurrencyFormatted(country.DoanhThuTruGiam) + "</td></tr> " +
+                                "<tr><td>+ Tổng phục vụ: </td><td align='right'>" + CurrencyFormatted(country.TienPhucVu) + "</td></tr> " +
+                                "<tr><td>+ Tổng phát sinh: </td><td align='right'>" + CurrencyFormatted(country.TienPhatSinh) + "</td></tr> " +
+                                "<tr><td>+ Tổng tiền thuế: </td><td align='right'>" + CurrencyFormatted(country.TienThue) + "</td></tr> " +
+                                "<tr><td>= Tổng d.thu thực: </td><td align='right'>" + CurrencyFormatted(country.DoanhThuThuc) + "</td></tr>";
+                        });
+                        items += '</table>';
+                        $('#rDataDTNgay').html(items);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+            });
+            //Xem in bao cao xuat doanh thu
+            $('#btn_XemDT_in').click(function () {
+                $('#TableDoanhThu').hide();
+                $('#ReportDoanhThu').show();
+                var ngaystart = $('#TuNgayDT').text();
+                var ngayend = $('#DenNgayDT').text();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ReportDoanhThu", "BaoCaoDoanhThu")',
+                    data: { NgayStart: ngaystart, NgayEnd: ngayend },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                            $("#ReportFrameDT").attr("src", "@Url.Content("~/PrintForms/BaoCaoRDLCreport.aspx")");
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            });
+            //Xem in bao cao xuat doanh thu theo ngay
+            $('#filterDTNgay').click(function () {
+                $('#TableDoanhThuNgay').hide();
+                $('#ReportDoanhThuNgay').show();
+                var ngaystart = $('#TuNgayDTNgay').text();
+                var ngayend = $('#DenNgayDTNgay').text();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ReportDoanhThuNgay", "BaoCaoDoanhThu")',
+                    data: { NgayStart: ngaystart, NgayEnd: ngayend },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                            $("#ReportFrameDTNgay").attr("src", "@Url.Content("~/PrintForms/BaoCaoRDLCreport.aspx")");
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            });
+            //Xem in bao cao doanh thu theo tai khoan
+            $('#filterTHXH').click(function () {
+
+                $('#TableTongHopXuat').hide();
+                $('#ReportTongHopXuat').show();
+                var ngaystart = $('#TuNgayXH').text();
+                var ngayend = $('#DenNgayXH').text();
+                var userid = $('#UserIdXH option:selected').val();
+                if (userid == "") {
+                    //xem tat ca cac tai khoan
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("ReportDoanhThuTaiKhoanAll", "BaoCaoDoanhThu")',
+                        data: { NgayStart: ngaystart, NgayEnd: ngayend },
+                        beforeSend: function () {
+                            $('.overlay').show();
+                        },
+                        success: function (data) {
+                            $("#ReportFrameTHX").attr("src", "@Url.Content("~/PrintForms/BaoCaoRDLCreport.aspx")");
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+                    });
+                }
+                else {
+                    //xem theo tai khoan
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("ReportDoanhThuTheoTaiKhoan", "BaoCaoDoanhThu")',
+                        data: { NgayStart: ngaystart, NgayEnd: ngayend, UserID: userid },
+                        beforeSend: function () {
+                            $('.overlay').show();
+                        },
+                        success: function (data) {
+                            $("#ReportFrameTHX").attr("src", "@Url.Content("~/PrintForms/BaoCaoRDLCreport.aspx")");
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+                    });
+                }
+
+            });
+            //Xem bao cao lai gop
+            $('#filterXemLG').click(function () {
+                $('#TableLaiGop').show();
+                $('#ReportLaiGop').hide();
+                var ngaystart = $('#TuNgayLG').text();
+                var ngayend = $('#DenNgayLG').text();
+
+                //search table
+                $('#TableXuatHangLG').DataTable().clear().destroy();
+                $("#TableXuatHangLG").DataTable({
+                    "ajax": {
+                        "url": "/BaoCaoTongHop/GetDateByDateLG",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": { ngayStart: ngaystart, ngayEnd: ngayend },
+                        "beforeSend": function () {
+                            $('.overlay').show();
+                        },
+                    },
+                    "columns": [
+                        { "data": "MaHH" },
+                        { "data": "TenHH" },
+                        { "data": "GiaVon", render: $.fn.dataTable.render.number('.', ','), className: "text-right" },
+                        { "data": "DoanhThu", render: $.fn.dataTable.render.number('.', ','), className: "text-right" },
+                        { "data": "LaiLoi", render: $.fn.dataTable.render.number('.', ','), className: "text-right" },
+                    ],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+
+                });
+
+                //Sum total footer
+                $.ajax({
+                    url: "/BaoCaoTongHop/GetDateByDateLGSumTien",
+                    method: "GET", // or POST
+                    dataType: "json",
+                    data: { ngayStart: ngaystart, ngayEnd: ngayend },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        var items = '<table class="table table-striped table-bordered dt-responsive nowrap">'
+                        $.each(data, function (i, country) {
+                            items += "<tr><td>Cộng doanh thu thuần: </td><td align='right'>" + CurrencyFormatted(country.DoanhThuThuan) + "</td></tr><tr><td>- Cộng giá vốn: </td><td align='right'>" + CurrencyFormatted(country.GiaVon) + "</td></tr><tr><td>Cộng lãi lỗ: </td><td align='right'>" + CurrencyFormatted(country.LaiLo) + "</td></tr><tr><td>- Tiền giảm trừ: </td><td align='right'>" + CurrencyFormatted(country.TienGiamTru) + "</td></tr><tr><td>+ Tiền dịch vụ: </td><td align='right'>" + CurrencyFormatted(country.TienDichVu) + "</td></tr><tr><td>Tổng lãi lỗ: </td><td align='right'>" + CurrencyFormatted(country.LaiLo - country.TienGiamTru + country.TienDichVu) + "</td></tr>";
+                        });
+                        items += '</table>';
+                        $('#rDataLG').html(items);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+            });
+            //Xem in bao cao lai gop
+            $('#filterLG').click(function () {
+                $('#TableLaiGop').hide();
+                $('#ReportLaiGop').show();
+                var ngaystart = $('#TuNgayLG').text();
+                var ngayend = $('#DenNgayLG').text();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ReportLaiGop", "BaoCaoTongHop")',
+                    data: { NgayStart: ngaystart, NgayEnd: ngayend },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+
+                        $("#ReportFrameLG").attr("src", "@Url.Content("~/PrintForms/WebFormReport.aspx")");
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            });
+
+        });
+    </script>
+
+
+}
+
+
+

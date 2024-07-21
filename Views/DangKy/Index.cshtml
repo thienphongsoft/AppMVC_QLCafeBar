@@ -1,0 +1,191 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Đăng ký bản quyền sử dụng</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/AdminLTE310/plugins/fontawesome-free/css/all.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="~/AdminLTE310/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/AdminLTE310/dist/css/adminlte.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+</head>
+<body class="hold-transition login-page">
+
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="https://thienphong.net" target="_blank"><b>thienphong.net</b></a>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <p class="login-box-msg"><b>Thông tin tài khoản</b></p>
+                <p>
+                    Ngân hàng Ngoại thương – <b>VietCombank</b><br />
+                    Chủ tài khoản: <b>Nguyễn Ngọc Phương Giao</b><br />
+                    Số tài khoản: <b>0231 0001 55060</b>
+                </p>
+            </div>
+        </div>
+
+        <!-- Register  -->
+        <div class="card">
+            <div class="card-body">
+                <p class="login-box-msg"><b>Đăng ký bản quyền</b></p>
+                <div style="color:red;" id="uploadMsg"></div>
+                <section id="RegisterForm">
+                    @using (Html.BeginForm())
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <b>Mã số khách hàng : </b>
+                        <div class="input-group mb-3">
+                            <input type="text" id="txtMaKhachHang" name="txtMaKhachHang" class="form-control" placeholder="Full name">
+                            <div class="input-group-append">
+                                <div class="input-group-text">
+                                    <span class="fas fa-user"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputFile">File bản quyền:</label>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="fileOne" name="fileOne">
+                                    <label class="custom-file-label" for="exampleInputFile">Chọn file</label>
+                                </div>
+                                <span class="input-group-append">
+                                    <button type="button" id="btn_save_file" class="btn btn-info btn-flat">Lưu file</button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group" style="display:none;">
+                            <input type="text" id="txtMaBanQuyen1" name="txtMaBanQuyen1" class="form-control" placeholder="Nhập mã bản quyền 1">
+                            <input type="text" id="txtMaBanQuyen2" name="txtMaBanQuyen2" class="form-control" placeholder="Nhập mã bản quyền 2`">
+                            <input type="text" id="txtMaBanQuyen3" name="txtMaBanQuyen3" class="form-control" placeholder="Nhập mã bản quyền 3">
+                            <input type="text" id="txtMaBanQuyen4" name="txtMaBanQuyen4" class="form-control" placeholder="Nhập mã bản quyền 4">
+                        </div>
+                    }
+                </section>
+
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-6">
+                        <button type="button" id="btn_dangky" name="btn_dangky" class="btn btn-warning btn-block">Đăng ký</button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" id="btn_login" name="btn_login" class="btn btn-primary btn-block">Đăng nhập</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModalBanQuyen" role="dialog" data-url='@Url.Action("_BanQuyen","DangKy")'></div>
+    <!-- /.login-box -->
+    <!-- jQuery -->
+    <script src="~/AdminLTE310/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="~/AdminLTE310/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="~/AdminLTE310/dist/js/adminlte.min.js"></script>
+    <script src="~/AdminLTE310/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+</body>
+</html>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#btn_save_file').click(function () {
+            var file = $('#fileOne').get(0).files[0];
+            if (file == null) {
+                $('#uploadMsg').text('Bạn chưa chọn file bản quyền hoặc chọn lại file.');
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                //get the file result, split by comma to remove the prefix, then base64 decode the contents
+                var decodedText = atob(e.target.result.split(',')[1]);
+                var allLines = decodedText.split('\n');
+                $('#txtMaBanQuyen1').val(allLines[0]);
+                $('#txtMaBanQuyen2').val(allLines[1]);
+                $('#txtMaBanQuyen3').val(allLines[2]);
+                $('#txtMaBanQuyen4').val(allLines[3]);
+                //show the file contents
+                //alert(decodedText);
+            };
+            reader.readAsDataURL(file);
+            $('#uploadMsg').text('Bạn đã lưu file thành công tiếp theo nhấn vào đăng ký.');
+        });
+
+        $('#btn_dangky').click(function () {
+            var ma01 = $('#txtMaBanQuyen1').val();
+            var ma02 = $('#txtMaBanQuyen2').val();
+            var ma03 = $('#txtMaBanQuyen3').val();
+            var ma04 = $('#txtMaBanQuyen4').val();
+            if (ma01 === "") {
+                $('#uploadMsg').text('Chưa có file bản quyền hoặc chưa nhấn Lưu file.');
+                return;
+            }
+            //Save
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("UpdateDangKy", "DangKy")',
+                data: {
+                    Ma01: ma01,
+                    Ma02: ma02,
+                    Ma03: ma03,
+                    Ma04: ma04
+                },
+                dataType: "json",
+                success: function (response) {
+                    $('#uploadMsg').text(response.ServerMessage);
+                    Clearform();
+                },
+                error: function (data) {
+                    $('#uploadMsg').text('Bạn chưa đăng ký được, liên hệ Mr Giao - 0913 423 525');
+                }
+            });
+        });
+        function Clearform() {
+            $("#fileOne").val('');
+            $('#txtMaBanQuyen1').val('');
+            $('#txtMaBanQuyen2').val('');
+            $('#txtMaBanQuyen3').val('');
+            $('#txtMaBanQuyen4').val('');
+        }
+        $('#btn_login').click(function () {
+
+            window.location.href = "/Users/Login";
+
+        });
+        $(function () {
+            $.ajax({
+                url: "/Users/GetMaKhachHang",
+                type: "GET",
+                dataType: "JSON",
+                success: function (data) {
+                    var s = data;
+                    $('#txtMaKhachHang').val(s);
+                },
+            });
+        });
+        bsCustomFileInput.init();
+    });
+</script>
+

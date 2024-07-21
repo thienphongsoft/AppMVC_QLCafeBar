@@ -1,0 +1,1157 @@
+﻿
+@{
+    ViewBag.Title = "Danh sách phiếu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Phiếu xuất hàng</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <a href="@Url.Action("Index","QuanLyBan")" class="btn btn-primary"> <i class="fas fa-plus"></i> Tạo phiếu xuất</a>
+                    <a href="@Url.Action("CreateOrderBack","QuanLyBan")" class="btn btn-secondary" style="display:none;"> <i class="fas fa-plus"></i> Tạo phiếu xuất trả NCC</a>
+                </div>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Tìm Từ ngày - Đến ngày:</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="far fa-calendar-alt"></i>
+                                </span>
+                            </div>
+                            <input type="text" class="form-control float-right" id="reportrange">
+                            <p style="display:none">Từ ngày: <b id="TuNgay"></b> </p>
+                            <p style="display:none">Đến ngày: <b id="DenNgay"></b></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label>Tìm theo mặt hàng:</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="searchProduct" name="searchProduct" class="form-control" placeholder="Tên mặt hàng">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label>Tìm theo đối tượng:</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="searchObject" name="searchObject" class="form-control" placeholder="Tên khách hàng">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label>Tìm theo số phiếu:</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="searchSoPhieu" name="searchSoPhieu" class="form-control" placeholder="Số phiếu">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <div class="small-box-footer">
+                <div class="inner">
+                    <h6>Tổng số: <span id="spInputCount" class="text-danger"> 0</span> phiếu xuất -- Tổng doanh thu: <span id="spDoanhThu" class="text-danger"> 0</span> -- Tổng giảm giá: <span id="spTienGiamGia" class="text-danger"> 0</span> -- Tổng phục vụ: <span id="spTienPhucVu" class="text-danger"></span> -- Tổng phát sinh: <span id="spTienPhatSinh" class="text-danger"></span> -- Tổng tiền: <span id="spTongTien" class="text-danger"></span></h6>
+                </div>
+            </div>
+            <!-- Dm phieu xuat -->
+            <div class="row" id="Phieu">
+                <div class="col-md-12">
+                    <table class="table table-sm table-bordered nowrap" cellpadding="0" width="100%" id="TableOrder">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Số phiếu
+                                </th>
+                                <th>
+                                    Ngày phiếu
+                                </th>
+                                <th>
+                                    Tên bàn
+                                </th>
+                                <th style="text-wrap:none;">
+                                    Khách hàng
+                                </th>
+                                <th>
+                                    Tiền hàng
+                                </th>
+                                <th>
+                                    Tiền giảm
+                                </th>
+                                <th>
+                                    Tiền phục vụ
+                                </th>
+                                <th>
+                                    Tiền p.sinh
+                                </th>
+                                <th>
+                                    Tổng tiền
+                                </th>
+                                <th>
+                                    Chức năng
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+
+                </div>
+                <div class="col-md-12">
+                    <!-- chi tiet san pham -->
+                    <div class="card card-primary card-tabs">
+                        <nav class="w-100">
+                            <div class="nav nav-tabs" id="product-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="product-desc-tab" data-toggle="tab" role="tab" aria-controls="product-desc" aria-selected="true">Chi tiết sản phẩm</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content p-1" id="nav-tabContent">
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <table class="table table-sm table-bordered nowrap" cellpadding="0" width="100%" id="TableChiTiet">
+                                        <thead>
+                                            <tr>
+                                                <th style="display:none;">
+                                                    Mã hàng
+                                                </th>
+                                                <th style="text-wrap:none; width: 50%;">
+                                                    Tên hàng hóa
+                                                </th>
+                                                <th style="width: 5%; text-align:center;">
+                                                    ĐVT
+                                                </th>
+                                                <th style="width: 15%; text-align:right;">
+                                                    Số lượng
+                                                </th>
+                                                <th style="width: 15%; text-align:right;">
+                                                    Đơn giá
+                                                </th>
+                                                <th style="width: 15%; text-align:right;">
+                                                    Thành tiền
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                    <div class="small-box bg-secondary disabled color-palette">
+                                        <div class="inner">
+                                            <h6>Tổng số: <span id="spCountHang" class="text-warning"> 0</span> mặt hàng - Tổng số lượng: <span id="spSoLuong" class="text-warning"> 0</span> - Cộng tiền hàng: <span id="spCongTienHang" class="text-warning"> 0</span></h6>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- footer form -->
+                                <div class="col-sm-4">
+                                    <div class="small-box bg-warning">
+                                        <div class="inner">
+                                            <div class="form-group row">
+                                                <label class="col-md-5 col-form-label">Cộng tiền hàng:</label>
+                                                <div class="col-md-7 float-left">
+                                                    <div class="input-group">
+                                                        <input type="text" readonly="readonly" id="txtCongTienHang" name="txtCongTienHang" class="form-control" maxlength="15" value="0" style="text-align:right;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-md-4 col-form-label">- % Giảm giá:</label>
+                                                <div class="col-md-8 float-left">
+                                                    <div class="input-group">
+                                                        <span class="input-group-append">
+                                                            <input type="text" readonly="readonly" id="txtTyLeGiam" name="txtTyLeGiam" class="form-control" value="0" style="text-align:right;">
+                                                            <input type="text" readonly="readonly" id="txtTienGiam" name="txtTienGiam" class="form-control col-md-8" value="0" style="text-align:right;">
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-md-4 col-form-label">+ % Phục vụ:</label>
+                                                <div class="col-md-8 float-left">
+                                                    <div class="input-group">
+                                                        <span class="input-group-append">
+                                                            <input type="text" readonly="readonly" id="txtTyLePhucVu" name="txtTyLePhucVu" class="form-control" value="0" style="text-align:right;">
+                                                            <input type="text" readonly="readonly" id="txtTienPhucVu" name="txtTienPhucVu" class="form-control col-md-8" value="0" style="text-align:right;">
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-md-4 col-form-label">+ % Thuế:</label>
+                                                <div class="col-md-8 float-left">
+                                                    <div class="input-group">
+                                                        <span class="input-group-append">
+                                                            <input type="text" readonly="readonly" id="txtTyLeThue" name="txtTyLeThue" class="form-control" value="0" style="text-align:right;">
+                                                            <input type="text" readonly="readonly" id="txtTienThue" name="txtTienThue" class="form-control col-md-8" value="0" style="text-align:right;">
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-md-5 col-form-label">+ Tiền phát sinh:</label>
+                                                <div class="col-md-7 float-left">
+                                                    <div class="input-group">
+                                                        <input type="text" readonly="readonly" id="txtTienPhatSinh" name="txtTienPhatSinh" class="form-control" maxlength="15" value="0" style="text-align:right;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label class="col-md-5 col-form-label text-danger">Tổng thanh toán:</label>
+                                                <div class="col-md-7 float-left">
+                                                    <div class="input-group">
+                                                        <input type="text" readonly="readonly" id="txtTienThanhToan" name="txtTienThanhToan" class="form-control bg-danger" maxlength="15" value="0" style="text-align:right;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="col-md-12">
+                <div class="small-box-footer">
+                    <div class="inner">
+                        <h6>Khổ giấy in: <span id="spPageSize" class="text-danger"></span> <button type="button" id="btn_ConfigSize" class="btn btn-outline-primary"><i class="fas fa-tools" title="Chọn loại khổ giấy"></i></button></h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" style="display:none;">
+            <div id="dvReport">
+                <iframe id="ReportFramePhieu" src="" onload="HideLoader();" width="100%" height="1000" style="border:none;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myModalConfigIn" role="dialog" data-url='@Url.Action("_PartialKhoGiay","QuanLyBan")'></div>
+    <div class="modal fade" id="myModalMessage" role="dialog" data-url='@Url.Action("_PartialMessageBoxDel","QuanLyBan")'></div>
+</div>
+
+
+@section scripts{
+
+    <script type="text/javascript">
+
+        function HideLoader() {
+            $('.overlay').hide();
+        }
+        $(document).ready(function () {
+            $('.overlay').hide();
+            //Load page size
+            var ckpagesizex = $.cookie("ckPageSizeX");
+            var ckpagesizetext = $.cookie("ckPageSizeText");
+            if (ckpagesizex != null) {
+                $('#spPageSize').val(ckpagesizex);
+                $('#spPageSize').text(ckpagesizetext);
+            }
+            else {
+                $('#spPageSize').text("Khổ giấy - 8.0 cm");
+                $('#spPageSize').val("KhoGiay80");
+            }
+            //seach by daterange to load default danh muc Phieu
+            $(function () {
+
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrange').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgay').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgay').text(end.format('YYYY-MM-DD'));
+                    $('#TableOrder').DataTable().clear().destroy();
+                    $("#TableOrder").DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": false,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": true,
+                        "responsive": false,
+                        "select": true,
+                        //"fixedHeader": true,
+                        "ajax": {
+                            "url": "/QuanLyBan/SearchGetListPhieuByDate",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: start.format('YYYY-MM-DD'), ngayEnd: end.format('YYYY-MM-DD') },
+                        },
+                        "columns": [
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.Phieu_ID + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "5%",
+                            },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = moment(row.NgayPhieu).format('DD/MM/YYYY') + "<br>" + "giờ vào:" + moment(row.GioVao).format('HH:mm') + "<br>" + "giờ ra:" + moment(row.GioRa).format('HH:mm');
+                                    return details;
+                                }, className: "text-center", width: "10%",
+                            },
+                            { "data": "TenBan" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = row.TenDT + "<br>" + "Đc: " + row.Address;
+                                    return details;
+                                }, className: "text-wrap", width: "25%",
+                            },
+                            { "data": "TienHang", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienGiamGia", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienPPhucVu", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienPhatSinh", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            {
+                                "data": "TongTien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%"
+
+                            },
+                            {
+                                "data": "Phieu_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + " class='btn btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i> Sửa</a> " +
+                                           "<a href='javascript:void(0);' id='btn_in' data-id=" + data + " class='btn btn-primary' title ='In phiếu' style='margin-left:5px')><i class='fas fa-eye'></i> Xem in</a> " +
+                                           "<a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xoá</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "footerCallback": function () {
+                            var api = this.api();
+                            // Remove the formatting to get integer data for summation
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+                            // Total over this page doanh thu
+                            pageTotal4 = api
+                                .column(4, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spDoanhThu').text(tp_encode_currency_format(pageTotal4));
+                            // Total over this page giam gia
+                            pageTotal5 = api
+                                .column(5, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienGiamGia').text(tp_encode_currency_format(pageTotal5));
+                            // Total over this page tien phuc vu
+                            pageTotal6 = api
+                                .column(6, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienPhucVu').text(tp_encode_currency_format(pageTotal6));
+                            // Total over this page tien phat sinh
+                            pageTotal7 = api
+                                .column(7, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienPhatSinh').text(tp_encode_currency_format(pageTotal7));
+                            // Total over this page tien thu
+                            pageTotal8 = api
+                                .column(8, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTongTien').text(tp_encode_currency_format(pageTotal8));
+                            $('#spInputCount').text(this.fnSettings().fnRecordsTotal());
+                        },
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+
+                }
+
+                $('#reportrange').daterangepicker({
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    startDate: start,
+                    endDate: end,
+                    ranges: {
+                        'Hôm nay': [moment(), moment()],
+                        'ngày hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                        '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                        'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                        'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+
+                }, cb);
+
+                cb(start, end);
+            });
+            //Xem chi tiet order
+            $('body').on('click', '#btn_detail', function () {
+                var detail_id = $(this).data("id");
+                //phan chi tiet san pham
+                $('#TableChiTiet').DataTable().clear().destroy();
+                $('#TableChiTiet').DataTable({
+                    'scrollX': true,
+                    'scrollCollapse': true,
+                    'sScrollXInner': "100%",
+                    'paging': false,
+                    'lengthChange': false,
+                    'searching': false,
+                    'ordering': false,
+                    'info': false,
+                    'autoWidth': true,
+                    'responsive': false,
+                    'ajax': {
+                        "url": "/QuanLyBan/GetListProductByPhieu_ID",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": { id: detail_id },
+                    },
+                    'columns': [
+                        { "data": "MaHH", className: "text-left", width: "10%", visible: false},
+                        { "data": "TenHH", className: "text-left", width: "50%"  },
+                        { "data": "TenDVT", className: "text-center", width: "5%" },
+                        { "data": "SoLuong", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "15%" },
+                        { "data": "DonGiaBan", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "15%"  },
+                        { "data": "ThanhTienBan", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "15%"  },
+                        //{ "data": "SumMoney", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "15%" },
+                        //{ "data": "PurchasePrice", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "15%" },
+                        //{ "data": "Discount", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", visible: false },
+                        //data: 'price',render: $.fn.dataTable.render.number(',', '.', 2, '$')
+                    ],
+                    'drawCallback': function (row, data, start, end, display) {
+                        var api = this.api(),data;
+                        // Remove the formatting to get integer data for summation
+                        var intVal = function (i) {
+                            return typeof i === 'string' ?
+                                i.replace(/[\$,]/g, '') * 1 :
+                                typeof i === 'number' ?
+                                    i : 0;
+                        };
+                        //sum so luong
+                        pageTotal3 = api
+                            .column(3, { page: 'current' })
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+                        $('#spSoLuong').text(tp_encode_currency_format(pageTotal3));
+                        //sum tien hang
+                        pageTotal5 = api
+                            .column(5, { page: 'current' })
+                            .data()
+                            .reduce(function (a, b) {
+                                return intVal(a) + intVal(b);
+                            }, 0);
+                        $('#spCongTienHang').text(tp_encode_currency_format(pageTotal5));
+                        $('#spCountHang').text(this.fnSettings().fnRecordsTotal());
+                    },
+                    "language": {
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+                });
+                //phan thanh toan cuoi form
+                $.ajax({
+                    url: "/QuanLyBan/GetEditPhieuOrderByID",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { id: detail_id },
+                    success: function (data) {
+                        $('#txtCongTienHang').val(CurrencyFormatted(data.TienHang));
+                        $('#txtTienThanhToan').val(CurrencyFormatted(data.TongTien));
+                        $('#txtTyLeGiam').val(CurrencyFormatted(data.TyLeGiamGia));
+                        $('#txtTienGiam').val(CurrencyFormatted(data.TienGiamGia));
+                        $('#txtTyLePhucVu').val(CurrencyFormatted(data.TyLePPhucVu));
+                        $('#txtTienPhucVu').val(CurrencyFormatted(data.TienPPhucVu));
+                        $('#txtTyLeThue').val(CurrencyFormatted(data.ThueSuat));
+                        $('#txtTienThue').val(CurrencyFormatted(data.TienThue));
+                        $('#txtTienPhatSinh').val(CurrencyFormatted(data.TienPhatSinh));
+
+                    },
+                });
+
+            });
+
+            function tp_encode_currency_format(obs) {
+                return obs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            function tp_decode_currency_format(obs) {
+                if (obs == '')
+                    return 0;
+                else
+                    return parseInt(obs.replace(/,/g, ''));
+            }
+            //Edit phieu xuat
+            $('body').on('click', '#btn_edit', function () {
+                var edit_id = $(this).data("id");
+                localStorage.setItem("myValue", edit_id);
+                //Check quyen sua
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenEdit", "QuanLyBan")',
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                             //Get LoaiNhapXuat_id for order vote or OrderBack vote
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("GetIdLoaiNhapXuat", "QuanLyBan")',
+                                data: { id: edit_id },
+                                success: function (data) {
+                                    if (data.LoaiNhapXuat_ID == 2) {
+
+                                        window.location.href = "/QuanLyBan/EditPhieu";
+                                    }
+                                    else {
+
+                                        window.location.href = "/Orders/EditOrderBack";
+                                        //toastr.error('Phiếu nhập trả lại không thể sửa !', 'Bị lỗi', { timeOut: 3000 });
+                                    }
+                                }
+                            });
+                        }
+                        else {
+                            toastr.error('Bạn không thể sửa, chưa phân quyền sửa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+
+            });
+            //Search by Product and NgayPhieu
+            $('#searchProduct').on('keyup change', function () {
+                var ngaystart = $('#TuNgay').text();
+                var ngayend = $('#DenNgay').text();
+                var product = $('#searchProduct').val();
+                if (product != "") {
+                    $('#TableOrder').DataTable().clear().destroy();
+                    $("#TableOrder").DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": false,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": true,
+                        "responsive": false,
+                        "select": true,
+                        //"fixedHeader": true,
+                        "ajax": {
+                            "url": "/QuanLyBan/SearchGetListOrderByDateAndProduct",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: ngaystart, ngayEnd: ngayend, Product: product },
+                        },
+                        "columns": [
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.Phieu_ID + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "5%",
+                            },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = moment(row.NgayPhieu).format('DD/MM/YYYY') + "<br>" + "giờ vào:" + moment(row.GioVao).format('HH:mm') + "<br>" + "giờ ra:" + moment(row.GioRa).format('HH:mm');
+                                    return details;
+                                }, className: "text-center", width: "10%",
+                            },
+                            { "data": "TenBan" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = row.TenDT + "<br>" + "Đc: " + row.Address;
+                                    return details;
+                                }, className: "text-wrap", width: "25%",
+                            },
+                            { "data": "TienHang", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienGiamGia", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienPPhucVu", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienPhatSinh", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            {
+                                "data": "TongTien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%"
+
+                            },
+                            {
+                                "data": "Phieu_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + "  class='btn btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i> Sửa</a> " +
+                                           "<a href='javascript:void(0);' id ='btn_in' data-id=" + data + " class='btn btn-primary' title = 'In phiếu' style = 'margin-left:5px') > <i class='fas fa-eye'></i> Xem in</a > " +
+                                           "<a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xoá</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "footerCallback": function () {
+                            var api = this.api();
+                            // Remove the formatting to get integer data for summation
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+                            // Total over this page doanh thu
+                            pageTotal4 = api
+                                .column(4, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spDoanhThu').text(tp_encode_currency_format(pageTotal4));
+                            // Total over this page giam gia
+                            pageTotal5 = api
+                                .column(5, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienGiamGia').text(tp_encode_currency_format(pageTotal5));
+                            // Total over this page tien phuc vu
+                            pageTotal6 = api
+                                .column(6, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienPhucVu').text(tp_encode_currency_format(pageTotal6));
+                            // Total over this page tien phat sinh
+                            pageTotal7 = api
+                                .column(7, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienPhatSinh').text(tp_encode_currency_format(pageTotal7));
+                            // Total over this page tien thu
+                            pageTotal8 = api
+                                .column(8, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTongTien').text(tp_encode_currency_format(pageTotal8));
+                            $('#spInputCount').text(this.fnSettings().fnRecordsTotal());
+                        },
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+
+                }
+                else {
+                    $('#TableOrder').DataTable().clear().destroy();
+                }
+
+            });
+            //Search by name doi tuong
+            $('#searchObject').on('keyup change', function () {
+                var name = $('#searchObject').val();
+                if (name != "") {
+                    $('#TableOrder').DataTable().clear().destroy();
+                    $("#TableOrder").DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": false,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": true,
+                        "responsive": false,
+                        "select": true,
+                        //"fixedHeader": true,
+                        "ajax": {
+                            "url": "/QuanLyBan/SearchGetListPhieuByName",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { Name: name },
+                        },
+                        "columns": [
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.Phieu_ID + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "5%",
+                            },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = moment(row.NgayPhieu).format('DD/MM/YYYY') + "<br>" + "giờ vào:" + moment(row.GioVao).format('HH:mm') + "<br>" + "giờ ra:" + moment(row.GioRa).format('HH:mm');
+                                    return details;
+                                }, className: "text-center", width: "10%",
+                            },
+                            { "data": "TenBan" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = row.TenDT + "<br>" + "Đc: " + row.Address;
+                                    return details;
+                                }, className: "text-wrap", width: "25%",
+                            },
+                            { "data": "TienHang", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienGiamGia", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienPPhucVu", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienPhatSinh", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            {
+                                "data": "TongTien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%"
+
+                            },
+                            {
+                                "data": "Phieu_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + "  class='btn btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_in' data-id=" + data + " class='btn btn-secondary' title ='In phiếu' style='margin-left:5px')><i class='fas fa-print'></i> In</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xoá</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "footerCallback": function () {
+                            var api = this.api();
+                            // Remove the formatting to get integer data for summation
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+                            // Total over this page doanh thu
+                            pageTotal4 = api
+                                .column(4, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spDoanhThu').text(tp_encode_currency_format(pageTotal4));
+                            // Total over this page giam gia
+                            pageTotal5 = api
+                                .column(5, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienGiamGia').text(tp_encode_currency_format(pageTotal5));
+                            // Total over this page tien phuc vu
+                            pageTotal6 = api
+                                .column(6, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienPhucVu').text(tp_encode_currency_format(pageTotal6));
+                            // Total over this page tien phat sinh
+                            pageTotal7 = api
+                                .column(7, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienPhatSinh').text(tp_encode_currency_format(pageTotal7));
+                            // Total over this page tien thu
+                            pageTotal8 = api
+                                .column(8, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTongTien').text(tp_encode_currency_format(pageTotal8));
+                            $('#spInputCount').text(this.fnSettings().fnRecordsTotal());
+                        },
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+
+                }
+                else {
+                    $('#TableOrder').DataTable().clear().destroy();
+                }
+
+            });
+            //Search by so phieu
+            $('#searchSoPhieu').on('keyup change', function () {
+                var sophieu = $('#searchSoPhieu').val();
+                if (sophieu != "") {
+                    $('#TableOrder').DataTable().clear().destroy();
+                    $("#TableOrder").DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": false,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": true,
+                        "responsive": false,
+                        "select": true,
+                        //"fixedHeader": true,
+                        "ajax": {
+                            "url": "/QuanLyBan/SearchGetListPhieuBySoPhieu_ID",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { sophieu_id: sophieu },
+                        },
+                        "columns": [
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.Phieu_ID + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "5%",
+                            },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = moment(row.NgayPhieu).format('DD/MM/YYYY') + "<br>" + "giờ vào:" + moment(row.GioVao).format('HH:mm') + "<br>" + "giờ ra:" + moment(row.GioRa).format('HH:mm');
+                                    return details;
+                                }, className: "text-center", width: "10%",
+                            },
+                            { "data": "TenBan" },
+                            {
+                                "data": null, render: function (data, type, row) {
+                                    var details = row.TenDT + "<br>" + "Đc: " + row.Address;
+                                    return details;
+                                }, className: "text-wrap", width: "25%",
+                            },
+                            { "data": "TienHang", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienGiamGia", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienPPhucVu", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "TienPhatSinh", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            {
+                                "data": "TongTien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%"
+
+                            },
+                            {
+                                "data": "Phieu_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + "  class='btn btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_in' data-id=" + data + " class='btn btn-secondary' title ='In phiếu' style='margin-left:5px')><i class='fas fa-print'></i> In</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xoá</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "footerCallback": function () {
+                            var api = this.api();
+                            // Remove the formatting to get integer data for summation
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+                            // Total over this page doanh thu
+                            pageTotal4 = api
+                                .column(4, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spDoanhThu').text(tp_encode_currency_format(pageTotal4));
+                            // Total over this page giam gia
+                            pageTotal5 = api
+                                .column(5, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienGiamGia').text(tp_encode_currency_format(pageTotal5));
+                            // Total over this page tien phuc vu
+                            pageTotal6 = api
+                                .column(6, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienPhucVu').text(tp_encode_currency_format(pageTotal6));
+                            // Total over this page tien phat sinh
+                            pageTotal7 = api
+                                .column(7, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienPhatSinh').text(tp_encode_currency_format(pageTotal7));
+                            // Total over this page tien thu
+                            pageTotal8 = api
+                                .column(8, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTongTien').text(tp_encode_currency_format(pageTotal8));
+                            $('#spInputCount').text(this.fnSettings().fnRecordsTotal());
+                        },
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+                else {
+                    $('#TableOrder').DataTable().clear().destroy();
+                }
+
+            });
+            //Delete phieu xuat
+            $('body').on('click', '#btn_delete', function () {
+                var delete_id = $(this).data("id");
+                //Check quyen xoa
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenDelete", "QuanLyBan")',
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            var url = $('#myModalMessage').data('url');
+                            $.get(url, function (data) {
+                                $('#myModalMessage').html(data);
+                                $('#myModalMessage').modal('show');
+                            });
+                            $(document).on('click', '#btn_okDel', function () {
+                                //Delete
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("Delete", "QuanLyBan")/' + delete_id,
+                                    success: function (data) {
+                                        $('#TableOrder').DataTable().ajax.reload();
+                                    },
+                                    error: function (data) {
+                                        console.log('Error:', data);
+                                    },
+                                    complete: function () {
+                                        $('#myModalMessage').modal('hide');
+                                    }
+                                });
+                              
+                            });
+
+                            @*if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                            {
+                                //Delete
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("Delete", "QuanLyBan")/' + delete_id,
+                                    success: function (data) {
+                                        $('#TableOrder').DataTable().ajax.reload();
+                                        toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                                    },
+                                    error: function (data) {
+                                        console.log('Error:', data);
+                                    }
+                                });
+                            }*@
+                        }
+                        else {
+                            toastr.error('Bạn không thể xóa, chưa phân quyền xóa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //functon format number 100,000
+            function CurrencyFormatted(nStr) {
+                nStr += '';
+                x = nStr.split(',');
+                x1 = x[0];
+                x2 = x.length > 1 ? ',' + x[1] : '';
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                }
+                return x1 + x2;
+            }
+
+            //Load modal Config PageSize
+            $('#btn_ConfigSize').click(function () {
+                var url = $('#myModalConfigIn').data('url');
+                $.get(url, function (data) {
+                    $('#myModalConfigIn').html(data);
+                    $('#myModalConfigIn').modal('show');
+                });
+            });
+            //Save PageSize
+            $(document).on('click', '#btn_savePageSize', function () {
+                var sizeValue = $('#pageSize_id option:selected').val();
+                var sizeText = $('#pageSize_id option:selected').text();
+                $('#spPageSize').val(sizeValue)
+                $.cookie("ckPageSizeX", $('#spPageSize').val(), { expires: 360 });
+                $('#spPageSize').text(sizeText)
+                $.cookie("ckPageSizeText", $('#spPageSize').text(), { expires: 360 });
+                $('#myModalConfigIn').modal('hide');
+            });
+            //Xem In phieu dang dung
+            $('body').on('click', '#btn_in', function () {
+
+                var phieu_id = $(this).data("id");
+                var pagesize = $('#spPageSize').val();
+                //Check quyen phieu
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenInPhieu", "QuanLyBan")',
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("InPhieuXuat", "QuanLyBan")',
+                                data: { id: phieu_id, pagesize: pagesize },
+                                success: function (data) {
+                                    window.location.href = "/QuanLyBan/FormInRDLCPhieu";
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+                            });
+                        }
+                        else {
+                            toastr.error('Bạn không thể in phiếu, chưa phân quyền in phiếu!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+             //In ngay phieu chua dung
+            $('body').on('click', '#btn_inNgay', function () {
+
+                var phieu_id = $(this).data("id");
+                var pagesize = $('#spPageSize').val();
+                $.ajax({  
+                    url: '@Url.Action("ExportToPDF", "QuanLyBan")',  
+                    type: 'GET',  
+                    contentType: 'application/json; charset=utf-8',  
+                    data: { id: phieu_id, pagesize: pagesize },
+                    success: function (result) {
+  
+                        $('#ReportFramePhieu').attr('src', '@Url.Content("~/")' + result);
+  
+                        setTimeout(function () {  
+                            frame = document.getElementById("ReportFramePhieu");
+                            frameframedoc = frame.contentWindow;  
+                            framedoc.focus();  
+                            framedoc.print();  
+                        }, 1000);  
+                    },  
+                    error: function (xhr, status, err) {  
+                        alert(err);  
+                    }  
+                });  
+                @*$.ajax({
+                    type: "POST",
+                    url: '@Url.Action("InPhieuXuat", "QuanLyBan")',
+                    data: { id: phieu_id, pagesize: pagesize },
+                    success: function (data) {
+                        window.location.href = "/QuanLyBan/FormInRDLCPhieu";
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });*@
+
+            });
+            //in phieu ra may in ngay chua dung
+            $('#btn_inPhieu').click(function () {
+                var phieu_id = $('#txtprint_id').val();
+                var pagesize = $('#spPageSize').text();
+                var printerx = $('#spPrinterName').text();
+                var copyin = $('#spCopyIn').text();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("InPhieuXuat", "QuanLyBan")',
+                    data: { id: phieu_id, pagesize: pagesize, printer: printerx, copyin: copyin  },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $('#Report').hide();
+                        $('#Phieu').show();
+                        $('.overlay').hide();
+                        //window.open('../Reports/ReportPhieu.aspx', '_newtab');
+                        toastr.success('Bạn in phiếu thành công !', 'Thành công Alert', { timeOut: 5000 });
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+
+
+                });
+
+            });
+
+        });
+
+    </script>
+
+
+}
+
+
+
+
+
+
+
+

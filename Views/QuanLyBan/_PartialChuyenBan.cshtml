@@ -1,0 +1,52 @@
+﻿<div class="container">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Chọn bàn chuyển</h3>
+                    <div class="card-tools">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col-md-12">
+                            @Html.ValidationSummary(true)
+                            <div class="row">
+
+                                @foreach (var itemTrong in ViewBag.BanChuyen)
+                                {
+
+                                    <div class="col-lg-4 col-4">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <a href="javascript:void(0);" id="LinkSaveChuyenBan" name="LinkSaveChuyenBan" data-id="@itemTrong.Ban_ID" class="btn btn-default btn-block btn-sm">
+                                                    <h6 class="text-center" style="color:black;"><i class="fas fa-edit"></i> @itemTrong.TenBan</h6>
+                                                </a>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                }
+                            </div>
+
+
+                        </div>
+                    </div>
+                }
+
+            </div>
+            <div class="card-footer">
+
+                <button type="submit" data-dismiss="modal" class="btn btn-warning float-right"><i class="fas fa-backward"></i> Hủy bỏ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

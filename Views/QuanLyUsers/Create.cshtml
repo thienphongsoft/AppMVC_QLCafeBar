@@ -1,0 +1,529 @@
+﻿
+@{
+    ViewBag.Title = "Tạo người dùng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/home">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Tạo người dùng <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div>
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <button type="button" id="btn_create_object" name="btn_create_object" class="btn btn-primary "><i class="fas fa-check"></i> Lưu</button>
+                    <button type="button" id="btn_create_objectContinue" name="btn_create_objectContinue" class="btn btn-primary "><i class="fas fa-save"></i> Lưu và tiếp tục</button>
+                    <a href="@Url.Action("Index","QuanLyUsers")" class="btn btn-warning"> <i class="fas fa-backward"></i> Quay lại</a>
+                </div>
+                <span></span>
+            </div>
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="card card-primary">
+                <div class="card-body">
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <!-- text input ma doi tuong -->
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Tên tài khoản<span style="color:red;">(*)</span>: <span id="divStatus"></span></label>
+                                        <input type="hidden" id="txtPhieu_ID" name="txtPhieu_ID">
+                                        <input type="text" id="txtUserID" name="txtUserID" autocomplete="off" class="form-control" placeholder="Nhập người dùng ">
+                                       
+                                    </div>
+                                </div>
+                                <!-- text input Ten doi tuong -->
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Họ tên<span style="color:red;">(*)</span>:</label>
+                                        <input type="text" id="txtHoTen" name="txtHoTen" autocomplete="off" class="form-control" placeholder="Bắt buộc nhập tên ">
+                                    </div>
+                                </div>
+                                <!-- txt input pass -->
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Nhập mật khẩu<span style="color:red;">(*)</span>: <span id="strengthMessage"></span></label>
+                                        <div class="input-group">
+                                            <input type="password" id="txtPass" name="txtPass" autocomplete="off" class="form-control" placeholder="Bắt buộc nhập mật khẩu ">
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-striped table-bordered dt-responsive nowrap" id="TableChiTiet">
+                                <thead>
+                                    <tr>
+                                        <th style="display:none;">
+                                            ScreenID
+                                        </th>
+                                        <th>
+                                            Quyền truy cập
+                                        </th>
+                                        <th>
+                                            Loai quyen
+                                        </th>
+                                        <th>
+                                            Xem
+                                        </th>
+                                        <th>
+                                            Tạo
+                                        </th>
+                                        <th>
+                                            Sửa
+                                        </th>
+                                        <th>
+                                            Xóa
+                                        </th>
+                                        <th>
+                                            In
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card card-footer">
+                    <div class="row">
+                        <div class="col-sm-5">
+
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="float-right">
+                                <button type="button" id="btn_createFooter_object" class="btn btn-primary "><i class="fas fa-check"></i> Lưu</button>
+                                <button type="button" id="btn_createFooter_objectContinue" class="btn btn-primary "><i class="fas fa-save"></i> Lưu và tiếp tục</button>
+                                <a href="@Url.Action("Index","QuanLyUsers")" class="btn btn-warning"> <i class="fas fa-backward"></i> Quay lại</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+</section>
+
+@section scripts{
+
+    <script src="~/Scripts/CheckPass.js"></script>
+    <style type="text/css">
+        .green {
+            color: Green;
+        }
+        .red {
+            color: Red;
+        }
+        .yellow {
+            color: yellow;
+        }
+        .blue {
+            color: blue;
+        }
+        .hide_column {
+            display: none;
+        }
+     
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.overlay').hide();
+            //check no space txtUserID
+            $('#txtUserID').keypress(function (event) {
+                if ($('#txtUserID').val().indexOf(' ') !== -1) {
+                    toastr.error('Không được có khoản trắng !', 'Bị lỗi', { timeOut: 3000 });
+                    event.preventDefault();
+                }
+            });
+            $('#txtUserID').keyup(function () {
+                var madt = $('#txtUserID').val();
+                var statusLoi = $("#divStatus");
+                statusLoi.html("kiểm tra....").removeClass();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckInputDoiTuong", "QuanLyUsers")',
+                    data: {
+                       DoiTuong: madt
+                    },
+                    success: function (data) {
+                        if (data == false) {
+                            statusLoi.html("Tài khoản này đã có!").addClass("red");
+                        }
+                        else {
+                            statusLoi.html("Tài khoản này nhập được!").addClass("green");
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            });
+            //refresh form
+            ClearFormObject();
+            function ClearFormObject() {
+                $('#txtUserID').val('');
+                $('#txtHoTen').val('');
+                $('#txtPass').val('');
+
+            }
+            //btn link_refresh
+            $('#link_refresh').click(function () {
+                ClearFormObject();
+            })
+            //chi tiet tac ca cac quyen
+            var myTable = $('#TableChiTiet');
+            var t = myTable.DataTable({
+                 //"destroy": true,
+                //"scrollY": "200px",
+                "scrollX": true,
+                "sScrollXInner": "100%",
+                "scrollCollapse": true,
+                "scroller": true,
+                "paging": false,
+                "lengthChange": true,
+                "searching": false,
+                "ordering": false,
+                "info": false,
+                "autoWidth": true,
+                "autoHeight": false,
+                "responsive": false,
+                "ajax": {
+                    "url": "/QuanLyUsers/GetListQuyenAll",
+                    "type": "GET",
+                    "datatype": "json",
+                },
+                "columns": [
+                    { "data": "ScreenID", className: "hide_column" },
+                    { "data": "DeScr" },
+                    { "data": "LoaiQuyen", className: "hide_column" },
+                    {
+                        'title': '<span>Xem</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle01" id="chkHeader"><i class="far fa-square"></i></button >',
+                        "data": "Xem",
+                        "render": function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active01" name="txtXem" id="txtXem" value="' + row.Xem + '">';
+                        },
+                        className: "text-center"
+                    },
+                    {
+                        'title': '<span>Tạo</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle02"><i class="far fa-square"></i></button >',
+                        data: "Tao",
+                        render: function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active02" name="txtTao" id="txtTao" value="' + row.Tao + '">';
+                        },
+                        className: "text-center"
+                    },
+                    {
+                        'title': '<span>Sửa</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle03"><i class="far fa-square"></i></button >',
+                        data: "Sua",
+                        render: function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active03" name="txtSua" id="txtSua" value="' + row.Sua + '">';
+                        },
+                        className: "text-center"
+                    },
+                    {
+                        'title': '<span>Xóa</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle04"><i class="far fa-square"></i></button >',
+                        data: "Xoa",
+                        render: function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active04" name="txtXoa" id="txtXoa" value="' + row.Xoa + '">';
+                        },
+                        className: "text-center"
+                    },
+                    {
+                        'title': '<span>In</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle05"><i class="far fa-square"></i></button >',
+                        data: "InPhieu",
+                        render: function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active05" name="txtInPhieu" id="txtInPhieu" value="' + row.InPhieu + '">';
+                        },
+                        className: "text-center"
+                    },
+                ],
+                "rowCallback": function (row, data) {
+                    // Set the checked state of the checkbox in the table
+                    $('input.editor-active01', row).prop('checked', data.Xem == 1);
+                    $('input.editor-active02', row).prop('checked', data.Tao == 1);
+                    $('input.editor-active03', row).prop('checked', data.Sua == 1);
+                    $('input.editor-active04', row).prop('checked', data.Xoa == 1);
+                    $('input.editor-active05', row).prop('checked', data.InPhieu == 1);
+                },
+                "language": {
+
+                    "emptyTable": "Chưa có nội dung hiện thị"
+                }
+
+            });
+            //click chon row xem
+            $('#TableChiTiet').on('change', 'input.editor-active01', function () {
+                if ($(this).prop('checked')) {
+                    //alert(1);
+                    $(this).val('TRUE');
+                } else {
+                    //alert(2);
+                    $(this).val('FALSE');
+                }
+            });
+            //click chon row Tao
+            $('#TableChiTiet').on('change', 'input.editor-active02', function () {
+                if ($(this).prop('checked')) {
+                    $(this).val('TRUE');
+                } else {
+                    $(this).val('FALSE');
+                }
+            });
+            //click chon row Sua
+            $('#TableChiTiet').on('change', 'input.editor-active03', function () {
+                if ($(this).prop('checked')) {
+                    $(this).val('TRUE');
+                } else {
+                    $(this).val('FALSE');
+                }
+            });
+            //click chon row Xoa
+            $('#TableChiTiet').on('change', 'input.editor-active04', function () {
+                if ($(this).prop('checked')) {
+                    $(this).val('TRUE');
+                } else {
+                    $(this).val('FALSE');
+                }
+            });
+            //click chon row in phieu
+            $('#TableChiTiet').on('change', 'input.editor-active05', function () {
+                if ($(this).prop('checked')) {
+                    $(this).val('TRUE');
+                } else {
+                    $(this).val('FALSE');
+                }
+            });
+            //click XemAll check and uncheck all functionality
+            $('.checkbox-toggle01').click(function () {
+                var clicks = $(this).data('clicks')
+                if (clicks) {
+                    $('[id*=txtXem]').each(function () {
+                        $(this).val('FALSE');
+                        $(this).prop("checked", false);
+                    });
+                    $('.checkbox-toggle01 .far.fa-check-square').removeClass('fa-check-square').addClass('fa-square')
+                } else {
+                    //Check all checkboxes
+                    $('[id*=txtXem]').each(function () {
+                        $(this).val('TRUE');
+                        $(this).prop("checked", true);
+                    });
+                    $('.checkbox-toggle01 .far.fa-square').removeClass('fa-square').addClass('fa-check-square')
+                }
+                $(this).data('clicks', !clicks)
+            })
+            //click TaoAll check and uncheck all functionality
+            $('.checkbox-toggle02').click(function () {
+                var clicks = $(this).data('clicks')
+                if (clicks) {
+                    $('[id*=txtTao]').each(function () {
+                        $(this).val('FALSE');
+                        $(this).prop("checked", false);
+                    });
+                    $('.checkbox-toggle02 .far.fa-check-square').removeClass('fa-check-square').addClass('fa-square')
+                } else {
+                    //Check all checkboxes
+                    $('[id*=txtTao]').each(function () {
+                        $(this).val('TRUE');
+                        $(this).prop("checked", true);
+                    });
+                    $('.checkbox-toggle02 .far.fa-square').removeClass('fa-square').addClass('fa-check-square')
+                }
+                $(this).data('clicks', !clicks)
+            })
+            //click SuaAll check and uncheck all functionality
+            $('.checkbox-toggle03').click(function () {
+                var clicks = $(this).data('clicks')
+                if (clicks) {
+                    $('[id*=txtSua]').each(function () {
+                        $(this).val('FALSE');
+                        $(this).prop("checked", false);
+                    });
+                    $('.checkbox-toggle03 .far.fa-check-square').removeClass('fa-check-square').addClass('fa-square')
+                } else {
+                    //Check all checkboxes
+                    $('[id*=txtSua]').each(function () {
+                        $(this).val('TRUE');
+                        $(this).prop("checked", true);
+                    });
+                    $('.checkbox-toggle03 .far.fa-square').removeClass('fa-square').addClass('fa-check-square')
+                }
+                $(this).data('clicks', !clicks)
+            })
+            //click XoaAll check and uncheck all functionality
+            $('.checkbox-toggle04').click(function () {
+                var clicks = $(this).data('clicks')
+                if (clicks) {
+                    $('[id*=txtXoa]').each(function () {
+                        $(this).val('FALSE');
+                        $(this).prop("checked", false);
+                    });
+                    $('.checkbox-toggle04 .far.fa-check-square').removeClass('fa-check-square').addClass('fa-square')
+                } else {
+                    //Check all checkboxes
+                    $('[id*=txtXoa]').each(function () {
+                        $(this).val('TRUE');
+                        $(this).prop("checked", true);
+                    });
+                    $('.checkbox-toggle04 .far.fa-square').removeClass('fa-square').addClass('fa-check-square')
+                }
+                $(this).data('clicks', !clicks)
+            })
+            //click InphieuAll check and uncheck all functionality
+            $('.checkbox-toggle05').click(function () {
+                var clicks = $(this).data('clicks')
+                if (clicks) {
+                    $('[id*=txtInPhieu]').each(function () {
+                        $(this).val('FALSE');
+                        $(this).prop("checked", false);
+                    });
+                    $('.checkbox-toggle05 .far.fa-check-square').removeClass('fa-check-square').addClass('fa-square')
+                } else {
+                    //Check all checkboxes
+                    $('[id*=txtInPhieu]').each(function () {
+                        $(this).val('TRUE');
+                        $(this).prop("checked", true);
+                    });
+                    $('.checkbox-toggle05 .far.fa-square').removeClass('fa-square').addClass('fa-check-square')
+                }
+                $(this).data('clicks', !clicks)
+            })
+            //Create object
+            $('#btn_create_object,#btn_createFooter_object').click(function () {
+
+                var userid = $('#txtUserID').val();
+                    userid = jQuery.trim(userid);
+                var hoten = $('#txtHoTen').val();
+                var pass = $('#txtPass').val();
+                var congty_id = "@Session["congty_id"].ToString()";
+                var thamso = 0;
+                if (userid === "") {
+                    toastr.error('Chưa nhập tài khoản !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (userid.indexOf(' ') !== -1) {
+                    toastr.error('Không được có khoản trắng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (hoten === "") {
+                    toastr.error('Chưa nhập tên đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (pass === "" || pass.lengthChange <= 6) {
+                    toastr.error('Chưa nhập mật khẩu !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckInputDoiTuong", "QuanLyUsers")',
+                    data: { DoiTuong: userid },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            //Tao
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("CreatePhieu", "QuanLyUsers")',
+                                data: {
+                                    UserID: userid,
+                                    UserName: hoten,
+                                    PassWord: pass,
+                                    TenCongTy_ID: congty_id,
+                                    ThamSo: thamso,
+                                },
+                                success: function (output) {
+                                        var last_id = output.TK_ID; // this is the id
+                                        $('#txtPhieu_ID').val(last_id);
+                                        insertDetailPhieu();
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+                            });
+                        }
+                        else {
+                            toastr.error('Tài khoản này đã có !', 'Bị lỗi', { timeOut: 3000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            })
+            //Create detail for phieu
+            function insertDetailPhieu() {
+                var chitiets = new Array();
+                $("#TableChiTiet TBODY TR").each(function () {
+                    var row = $(this);
+                    var chitiet = {};
+
+                    chitiet.TK_ID = $('#txtPhieu_ID').val();
+                    chitiet.TaiKhoan = $('#txtUserID').val();
+                    chitiet.QuyenID = row.find('td:eq(0)').text();
+                    chitiet.TenQuyen = row.find('td:eq(1)').text();
+                    chitiet.LoaiQuyen = row.find('td:eq(2)').text();
+                    chitiet.Xem = row.find('#txtXem').val();
+                    chitiet.Tao = row.find("#txtTao").val();
+                    chitiet.Sua = row.find(".editor-active03").val();
+                    chitiet.Xoa = row.find('.editor-active04').val();
+                    chitiet.InPhieu = row.find(".editor-active05").val();
+                    chitiets.push(chitiet);
+
+                });
+                //Send the JSON array to Controller using AJAX.
+                $.ajax({
+                    type: "POST",
+                    url: "/QuanLyUsers/InsertChiTiets",
+                    data: JSON.stringify(chitiets),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (r) {
+                        window.location.href = "/QuanLyUsers/Index";
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+
+        });
+
+
+    </script>
+}
+
+
+
+
+
+

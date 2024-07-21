@@ -1,0 +1,1475 @@
+﻿
+@{
+    ViewBag.Title = "Update Program";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Chờ trong giây lát</div></div>
+</div>
+<!-- header page -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Update Program</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+    <div class="card card-primary card-tabs">
+        <div class="card-header p-0 pt-1">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#FixSystem" data-toggle="pill">Fix System</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#FixCongNoKH" data-toggle="pill">Fix công nợ khách hàng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#FixCongNoNCC" data-toggle="pill">Fix công nợ NCC</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#XoaSoDuĐauKy" data-toggle="pill">Xóa số DĐK</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#DmCongTy" data-toggle="pill">Danh mục Cty</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#DmNguoiDung" data-toggle="pill">Danh mục User</a>
+                </li>
+            </ul>
+        </div><!-- /.card-header -->
+        <div class="card-body">
+            <div class="tab-content">
+                <!-- Fix system -->
+                <div class="tab-pane container active p-0" id="FixSystem">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Reset lại mật khẩu thành(123):</label>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <select id="UserId" name="UserId" class="form-control selectTHN">
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" name="btn_resetPass" id="btn_resetPass" value="Reset" class="btn btn-danger"><i class="fas fa-refresh"></i> Reset Pass</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-5">
+                            <label>Table:</label>
+                            <div class="form-group">
+                                <table class="table table-striped table-bordered nowrap" cellpadding="0" width="100%" id="Table">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center">
+                                                ID
+                                            </th>
+                                            <th style="text-align: center">
+                                                Name
+                                            </th>
+                                            <th style="text-align: center">
+                                                Chức năng
+                                            </th>
+
+                                        </tr>
+                                    </thead>
+                                </table>
+
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Lỗi hệ thống:</label>
+                            <div class="form-group">
+                                <button type="button" id="btn_fixSystem" class="btn btn-danger"> <i class="fa fa-save"></i> Fix System</button>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="password" id="txtpass" name="txtpass" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <!-- Fix cong no khach hang -->
+                <div class="tab-pane container p-0" id="FixCongNoKH">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control float-right" id="reportrangeKH">
+                                    <p style="display:none">Từ ngày: <b id="TuNgayKH"></b> </p>
+                                    <p style="display:none">Đến ngày: <b id="DenNgayKH"></b></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group">
+                                        <select id="TenKH" name="TenKH" class="form-control select2" style="width: 70%;">
+                                            <option>Chọn đối tượng</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <button type="button" name="filterKH" id="filterKH" value="Xem" class="btn btn-success"><i class="fas fa-eye"></i> Tìm đối tượng</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%;" id="TableCongNoKH">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center">
+                                    CongNo_ID
+                                </th>
+                                <th style="text-align: center">
+                                    PhNhapXuat_ID
+                                </th>
+                                <th style="text-align: center">
+                                    ThuChi_ID
+                                </th>
+                                <th style="text-align: center">
+                                    MaDT
+                                </th>
+                                <th style="text-align: center">
+                                    Tên đối tượng
+                                </th>
+                                <th style="text-align: center">
+                                    Giá trị
+                                </th>
+                                <th style="text-align: center">
+                                    Diễn giải
+                                </th>
+                                <th style="text-align: center">
+                                    Chức năng
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- Fix cong no nha cung cap -->
+                <div class="tab-pane container fade p-0" id="FixCongNoNCC">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control float-right" id="reportrangeNCC">
+                                    <p style="display:none">Từ ngày: <b id="TuNgayNCC"></b> </p>
+                                    <p style="display:none">Đến ngày: <b id="DenNgayNCC"></b></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group">
+                                        <select id="TenNCC" name="TenNCC" class="form-control select2" style="width: 70%;">
+                                            <option>Chọn đối tượng</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <button type="button" name="filterNCC" id="filterNCC" value="Xem" class="btn btn-success"><i class="fas fa-eye"></i> Tìm đối tượng</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-striped table-bordered dt-responsive nowrap" style="width:100%;" id="TableCongNoNCC">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center">
+                                    CongNo_ID
+                                </th>
+                                <th style="text-align: center">
+                                    PhNhapXuat_ID
+                                </th>
+                                <th style="text-align: center">
+                                    ThuChi_ID
+                                </th>
+                                <th style="text-align: center">
+                                    MaDT
+                                </th>
+                                <th style="text-align: center">
+                                    Tên đối tượng
+                                </th>
+                                <th style="text-align: center">
+                                    Giá trị
+                                </th>
+                                <th style="text-align: center">
+                                    Diễn giải
+                                </th>
+                                <th style="text-align: center">
+                                    Chức năng
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- Fix xoa so du dau ky -->
+                <div class="tab-pane container fade p-0" id="XoaSoDuĐauKy">
+                    <p class="text-red">(Chỉ được thực hiện sau khi kết chuyển dữ liệu sang kỳ làm việc mới)</p>
+                    <button type="button" id="btn_HangDauKy" class="btn btn-danger"> <i class="fa fa-save"></i> Xóa dư đầu kỳ</button>
+                    <button type="button" id="btn_CongNoThu" class="btn btn-danger"> <i class="fa fa-save"></i> Xóa công nợ thu</button>
+                    <button type="button" id="btn_CongNoTra" class="btn btn-danger"> <i class="fa fa-save"></i> Xóa công nợ trả</button>
+                </div>
+                <!-- Dm mục Cong ty -->
+                <div class="tab-pane container fade p-0" id="DmCongTy">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Tài khoản:</label>
+                                <input type="hidden" id="txtTK_ID" name="txtTK_ID">
+                                <input type="text" class="form-control" id="txtTaiKhoan" name="txtTaiKhoan" placeholder="Nhập tài khoản">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Tên tài khoản:</label>
+                                <input type="text" class="form-control" id="txtTenTaiKhoan" name="txtTenTaiKhoan" placeholder="Nhập tài khoản">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Mật khẩu:</label>
+                                <input type="text" class="form-control" id="txtMatKhauTaiKhoan" name="txtMatKhauTaiKhoan" placeholder="Nhập tài khoản">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="hidden" class="form-control" id="txtTenCongTy_ID" name="txtTenCongTy_ID">
+                                <label>Tên công ty:</label>
+                                <input type="text" class="form-control" id="txtTenCongTy" name="txtTenCongTy" placeholder="Nhập tên cty">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Địa chỉ:</label>
+                                <input type="text" class="form-control" id="txtDiaChi" name="txtDiaChi" placeholder="Nhập địa chỉ">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Điện thoại:</label>
+                                <input type="text" class="form-control" id="txtDienThoai" name="txtDienThoai" placeholder="Nhập điện thoại">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Ghi chú phiếu:</label>
+                                <input type="text" class="form-control" id="txtGhiChuPhieu" name="txtGhiChuPhieu" placeholder="Ghi chú phiếu">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!-- text input ngay  dang ky-->
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>Tạo, Sửa ngày đăng ký mới:</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm float-right" id="inputNgayStart">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- text input ngay het han-->
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>Tạo, Sửa ngày hết hạn mới:</label>
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm float-right" id="inputNgayEnd">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- xem dang ky hien tai-->
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>Ngày đăng ký hiện tại:</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control form-control-sm float-right" id="inputNgayStartCu" readonly="readonly">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- xem ngay het han hien tai-->
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>Ngày hết hạn hiện tại:</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control form-control-sm float-right" id="inputNgayEndCu" readonly="readonly">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- button luu sua xoa -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <button type="button" id="btn_loadDm" class="btn btn-warning"> <i class="fa fa-refresh"></i> Load DM</button>
+                                <button type="button" id="btn_createDm" class="btn btn-success"> <i class="fa fa-save"></i> Tạo Dm</button>
+                                <button type="button" id="btn_suaDm" class="btn btn-primary"> <i class="fa fa-save"></i> Lưu sửa Dm</button>
+                                <button type="button" id="btn_clear" class="btn btn-danger"> <i class="fa fa-close"></i> Clear form</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Danh muc cong ty -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <table class="table table-head-fixed table-bordered nowrap" style="width:100%;" id="TableDm">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center">
+                                                ID
+                                            </th>
+                                            <th style="text-align: center">
+                                                Tên công ty
+                                            </th>
+                                            <th style="text-align: center">
+                                                Địa chỉ
+                                            </th>
+                                            <th style="text-align: center">
+                                                Điện thoại
+                                            </th>
+                                            <th style="text-align: center">
+                                                Ghi chú phiếu
+                                            </th>
+                                            <th style="text-align: center">
+                                                Status
+                                            </th>
+                                            <th style="text-align: center">
+                                                Chức năng
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- danh muc quyen nguoi dung -->
+                    <div class="row" style="display:none;">
+                        <div class="col-md-12">
+                            <table class="table table-striped table-bordered dt-responsive nowrap" id="TableChiTiet">
+                                <thead>
+                                    <tr>
+                                        <th style="display:none;">
+                                            ScreenID
+                                        </th>
+                                        <th>
+                                            Quyền truy cập
+                                        </th>
+                                        <th>
+                                            Loai quyen
+                                        </th>
+                                        <th>
+                                            Xem
+                                        </th>
+                                        <th>
+                                            Tạo
+                                        </th>
+                                        <th>
+                                            Sửa
+                                        </th>
+                                        <th>
+                                            Xóa
+                                        </th>
+                                        <th>
+                                            In
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Dm mục user -->
+                <div class="tab-pane container fade p-0" id="DmNguoiDung">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Tài khoản:</label>
+                                <input type="hidden" id="txtTK_IDMatKhau" name="txtTK_IDMatKhau">
+                                <input type="text" class="form-control" id="txtUserIDMatKhau" name="txtUserIDMatKhau" placeholder="Nhập tài khoản">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Tên tài khoản:</label>
+                                <input type="text" class="form-control" id="txtUserNameMatKhau" name="txtUserNameMatKhau" placeholder="Nhập tài khoản">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Mật khẩu:</label>
+                                <input type="text" class="form-control" id="txtNewMatKhau" name="txtNewMatKhau" placeholder="Nhập tài khoản">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- button luu sua xoa -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <button type="button" id="btn_loadNguoiDung" class="btn btn-warning"> <i class="fa fa-refresh"></i> Load UserID</button>
+                                <button type="button" id="btn_suaMatKhau" class="btn btn-success"> <i class="fa fa-save"></i> Sửa mật khẩu</button>
+                                <button type="button" id="btn_clearNguoiDung" class="btn btn-danger"> <i class="fa fa-close"></i> Clear form</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Table Danh muc user -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <table class="table table-head-fixed table-bordered nowrap" style="width:100%;" id="TableNguoiDung">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center">
+                                                ID
+                                            </th>
+                                            <th style="text-align: center">
+                                                Tài khoản
+                                            </th>
+                                            <th style="text-align: center">
+                                                Tên người dùng
+                                            </th>
+                                            <th style="text-align: center">
+                                                Mật khẩu
+                                            </th>
+                                            <th style="text-align: center">
+                                                Tên công ty
+                                            </th>
+                                            <th style="text-align: center">
+                                                Tham Số
+                                            </th>
+                                            <th style="text-align: center">
+                                                Chức năng
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                 
+                </div>
+            </div>
+            <!-- /.tab-content -->
+        </div><!-- /.card-body -->
+        <div class="card-footer">
+            <button type="button" id="btn_close" class="btn btn-danger"> <i class="fa fa-close"></i> Đóng lại</button>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            //close page
+            $('#btn_close').click(function () {
+                 window.location = window.close();
+                 //window.location.href = "/Home/Index";
+                 $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Logout", "UpdateProgram")',
+                    success: function (data) {
+                        window.location.href = "/Home/Index";
+                    },
+                    error: function (data) {
+                         console.log('Error:', data);
+                    }
+
+                });
+            });
+            //load ngay thang khach hang
+            $(function () {
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrangeKH').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgayKH').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgayKH').text(end.format('YYYY-MM-DD'));
+                }
+
+                $('#reportrangeKH').daterangepicker({
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    startDate: start,
+                    endDate: end,
+                    ranges: {
+                        'Hôm nay': [moment(), moment()],
+                        'ngày hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                        '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                        'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                        'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                }, cb);
+
+                cb(start, end);
+            });
+            //load ngay thang ncc
+            $(function () {
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrangeNCC').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgayNCC').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgayNCC').text(end.format('YYYY-MM-DD'));
+                }
+
+                $('#reportrangeNCC').daterangepicker({
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    startDate: start,
+                    endDate: end,
+                    ranges: {
+                        'Hôm nay': [moment(), moment()],
+                        'ngày hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                        '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                        'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                        'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                }, cb);
+
+                cb(start, end);
+            });
+            //load select ten doi tuong khach hang
+            $(function () {
+                $.ajax({
+                    url: "/BaoCaoCongNoPhaiThu/TenDTList",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#TenKH').empty();
+                        $('#TenKH').append("<option value=''>Chọn đối tượng</option>");
+                        $.each(data, function (key, value) {
+                            $("#TenKH").append($("<option></option>").val(value.DT_ID).html(value.TenDT));
+                        });
+                        $('.select2').select2();
+                    },
+                });
+
+            });
+            //load select ten doi tuong khach hang
+            $(function () {
+                $.ajax({
+                    url: "/BaoCaoCongNoPhaiThu/TenDTList",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#TenNCC').empty();
+                        $('#TenNCC').append("<option value=''>Chọn đối tượng</option>");
+                        $.each(data, function (key, value) {
+                            $("#TenNCC").append($("<option></option>").val(value.DT_ID).html(value.TenDT));
+                        });
+                        $('.select2').select2();
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+
+            });
+            //show date for start
+            $(function () {
+                var start = moment();
+                function cb(start, end) {
+                    $('#inputNgayStart').val(start.format('DD/MM/YYYY'));
+                }
+                $('#inputNgayStart').daterangepicker({
+                    startDate: start,
+                    singleDatePicker: true,
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    }
+                }, cb);
+                cb(start);
+            });
+            //show date for end
+            $(function () {
+                var start = moment();
+                function cb(start, end) {
+                    $('#inputNgayEnd').val(start.format('DD/MM/YYYY'));
+                }
+                $('#inputNgayEnd').daterangepicker({
+                    startDate: start,
+                    singleDatePicker: true,
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    }
+                }, cb);
+                cb(start);
+            });
+            //Xoa du dau ky
+            $('#btn_HangDauKy').click(function () {
+                if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                {
+                   //Delete
+                   $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeleteDuDauKy", "UpdateProgram")/',
+                        success: function (data) {
+                            toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                   });
+
+                }
+            });
+            //Xoa cong phai thu
+            $('#btn_CongNoThu').click(function () {
+                if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                {
+                   //Delete
+                   $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeletePhaiThu", "UpdateProgram")/',
+                        success: function (data) {
+                            toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                   });
+
+                }
+            });
+            //Xoa cong phai tra
+            $('#btn_CongNoTra').click(function () {
+                if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                {
+                   //Delete
+                   $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeletePhaiTra", "UpdateProgram")/',
+                        success: function (data) {
+                            toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                   });
+
+                }
+            });
+            //Tim cong no khach hang
+            $('#filterKH').click(function () {
+                var ngaystart = $('#TuNgayKH').text();
+                var ngayend = $('#DenNgayKH').text();
+                var dt_id = $('#TenKH option:selected').val();
+
+                if (dt_id === "") {
+                    //search table
+                    $('#TableCongNoKH').DataTable().clear().destroy();
+                    $("#TableCongNoKH").DataTable({
+                        "ajax": {
+                            "url": "/UpdateProgram/GetCongNoKHByDate",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: ngaystart, ngayEnd: ngayend },
+                        },
+                        "columns": [
+                            { "data": "CongNo_ID", width: "10%" },
+                            { "data": "PhNhapXuat_ID", width: "10%" },
+                            { "data": "ThuChi_ID", width: "10%" },
+                            { "data": "MaDT", width: "10%" },
+                            { "data": "TenDT", className: "text-wrap", width: "30%" },
+                            { "data": "GiaTri", render: $.fn.dataTable.render.number('.', ','), className: "text-right", width: "10%" },
+                            { "data": "DienGiai", className: "text-wrap", width: "10%" },
+                            {
+                                "data": "CongNo_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-sm btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i></a>";
+                                }, className: "text-center", width: "10%"
+                            },
+
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+                else {
+
+                    //search table
+                    $('#TableCongNoKH').DataTable().clear().destroy();
+                    $("#TableCongNoKH").DataTable({
+                        "ajax": {
+                            "url": "/UpdateProgram/GetCongNoKHByDateAndDT_ID",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { NgayStart: ngaystart, NgayEnd: ngayend, dt_id: dt_id },
+                        },
+                        "columns": [
+                            { "data": "CongNo_ID", width: "10%" },
+                            { "data": "PhNhapXuat_ID", width: "10%" },
+                            { "data": "ThuChi_ID", width: "10%" },
+                            { "data": "MaDT", width: "10%" },
+                            { "data": "TenDT", className: "text-wrap", width: "30%" },
+                            { "data": "GiaTri", render: $.fn.dataTable.render.number('.', ','), className: "text-right", width: "10%" },
+                            { "data": "DienGiai", className: "text-wrap", width: "10%" },
+                            {
+                                "data": "CongNo_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-sm btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i></a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+            });
+            //delete phieu cong no khach hang
+            $('body').on('click', '#btn_delete', function () {
+                var delete_id = $(this).data("id");
+                if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                {
+                   //Delete input
+                   $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeleteCongNoKH", "UpdateProgram")/' + delete_id,
+                        success: function (data) {
+                            $('#TableCongNoKH').DataTable().ajax.reload();
+                            toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                   });
+
+                }
+
+            });
+             //Tim cong no nha cung cap
+            $('#filterNCC').click(function () {
+                var ngaystart = $('#TuNgayNCC').text();
+                var ngayend = $('#DenNgayNCC').text();
+                var dt_id = $('#TenNCC option:selected').val();
+
+                if (dt_id === "") {
+                    //search table
+                    $('#TableCongNoNCC').DataTable().clear().destroy();
+                    $("#TableCongNoNCC").DataTable({
+                        "ajax": {
+                            "url": "/UpdateProgram/GetCongNoNCCByDate",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: ngaystart, ngayEnd: ngayend },
+                        },
+                        "columns": [
+                            { "data": "CongNo_ID", width: "10%" },
+                            { "data": "PhNhapXuat_ID", width: "10%" },
+                            { "data": "ThuChi_ID", width: "10%" },
+                            { "data": "MaDT", width: "10%" },
+                            { "data": "TenDT", className: "text-wrap", width: "30%" },
+                            { "data": "GiaTri", render: $.fn.dataTable.render.number('.', ','), className: "text-right", width: "10%" },
+                            { "data": "DienGiai", className: "text-wrap", width: "10%" },
+                            {
+                                "data": "CongNo_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_delete_ncc' data-id=" + data + " class='btn btn-sm btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i></a>";
+                                }, className: "text-center", width: "10%"
+                            },
+
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+                else {
+
+                    //search table
+                    $('#TableCongNoNCC').DataTable().clear().destroy();
+                    $("#TableCongNoNCC").DataTable({
+                        "ajax": {
+                            "url": "/UpdateProgram/GetCongNoNCCByDateAndDT_ID",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { NgayStart: ngaystart, NgayEnd: ngayend, dt_id: dt_id },
+                        },
+                        "columns": [
+                            { "data": "CongNo_ID", width: "10%" },
+                            { "data": "PhNhapXuat_ID", width: "10%" },
+                            { "data": "ThuChi_ID", width: "10%" },
+                            { "data": "MaDT", width: "10%" },
+                            { "data": "TenDT", className: "text-wrap", width: "30%" },
+                            { "data": "GiaTri", render: $.fn.dataTable.render.number('.', ','), className: "text-right", width: "10%" },
+                            { "data": "DienGiai", className: "text-wrap", width: "10%" },
+                            {
+                                "data": "CongNo_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_delete_ncc' data-id=" + data + " class='btn btn-sm btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i></a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+            });
+            //delete phieu cong no khach hang
+            $('body').on('click', '#btn_delete_ncc', function () {
+                var delete_id = $(this).data("id");
+                if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                {
+                   //Delete input
+                   $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeleteCongNoNCC", "UpdateProgram")/' + delete_id,
+                        success: function (data) {
+                            $('#TableCongNoNCC').DataTable().ajax.reload();
+                            toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                   });
+
+                }
+
+            });
+            //Fix system
+            $('#btn_fixSystem').click(function () {
+                if (confirm('Bạn có muốn Fix system này ?'))
+                {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("FixSysTem", "UpdateProgram")',
+                        success: function (data) {
+
+                            toastr.success('Bạn đã Fix system thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                   });
+
+                }
+            });
+            //reset mat khau
+            //load  select tai khoan
+            $(function () {
+                $.ajax({
+                    url: "/UpdateProgram/UserList",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#UserId').empty();
+                        $('#UserId').append("<option value=''>Chọn tài khoản</option>");
+                        $.each(data, function (key, value) {
+                            $("#UserId").append($("<option></option>").val(value.UserID).html(value.UserID));
+                        });
+                    },
+                });
+            });
+            //select user
+            $('#UserId').change(function () {
+                var user_id = $('#UserId option:selected').val();
+                $.ajax({
+                    url: "/UpdateProgram/GetUserById",
+                    type: "GET",
+                    dataType: "JSON",
+                    data: { user_id: user_id },
+                    success: function (data) {
+                        $('#txtpass').val(data)
+                    },
+                });
+            });
+            //btn_reset pass
+            $('#btn_resetPass').click(function () {
+                var user_id = $('#UserId option:selected').val();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ResetPass", "UpdateProgram")',
+                    data: { UserID: user_id },
+                    success: function (data) {
+                        toastr.success('Bạn đã reset mật khẩu thành công!', 'Thành công Alert', { timeOut: 5000 });
+                        window.location.href = "/Users/Logout";
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+            });
+            //loadForm();
+            function loadForm() {
+                $('#Table').DataTable().clear().destroy();
+                $("#Table").DataTable({
+                    "paging": false,
+                    "lengthChange": false,
+                    "searching": false,
+                    "ordering": false,
+                    "info": false,
+                    "autoWidth": true,
+                    "responsive": false,
+                    "ajax": {
+                        "url": "/UpdateProgram/GetList",
+                        "type": "GET",
+                        "datatype": "json",
+                    },
+
+                    "columns": [
+                        {
+                            "data": "Id"
+                        },
+                        {
+                            "data": "Name"
+                        },
+                        {
+                            "data": "Id", "render": function (data) {
+                                return "<a href='javascript:void(0);' id='btn_deleteTable' data-id=" + data + " class='btn btn-sm btn-danger' title='Xóa phiếu'><i class='fas fa-trash'></i></a>";
+                            }, className: "text-center", width: "10%"
+                        },
+                    ],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+
+                });
+            }
+             //delete
+            $('body').on('click', '#btn_deleteTable', function () {
+                var delete_id = $(this).data("id");
+                if (delete_id != 1) {
+
+                    if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                    {
+                       //Delete
+                       $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("DeleteTable", "UpdateProgram")/' + delete_id,
+                            success: function (data) {
+                                $('#Table').DataTable().ajax.reload();
+                                toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                            },
+                            error: function (data) {
+                                console.log('Error:', data);
+                            }
+
+                       });
+
+                    }
+                }
+            });
+            //Load Dm cong ty
+            $('#btn_loadDm').click(function () {
+                //Load table
+                $('#TableDm').DataTable().clear().destroy();
+                $("#TableDm").DataTable({
+                    "ajax": {
+                        "url": "/UpdateProgram/GetDmCongTy",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": { },
+                    },
+                    "columns": [
+                        { "data": "CongTy_ID", width: "5%" },
+                        { "data": "TenCongTy", width: "20%" },
+                        { "data": "DiaChi", width: "20%" },
+                        { "data": "DienThoai", width: "10%" },
+                        { "data": "GhiChuPhieu", width: "10%" },
+                        { "data": "Status", width: "5%"},
+                        {
+                            "data": "CongTy_ID", "render": function (data) {
+                                return "<a href='javascript:void(0);' id='btn_editCongTy' data-id=" + data + "  class='btn btn-sm btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i></a><a href='javascript:void(0);' id='btn_status_congty' data-id=" + data + "  class='btn btn-sm btn-warning' title ='Ẩn/Hiện' style='margin-left:5px')><i class='fas fa-eye'></i></a><a href='javascript:void(0);' id='btn_delete_congty' data-id=" + data + " class='btn btn-sm btn-danger' title='Xóa đối tượng' style='margin-left:5px'><i class='fas fa-trash'></i></a>";
+                            }, className: "text-center", width: "10%"
+                        },
+
+                    ],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+
+                });
+            });
+            //Clear form cong ty
+            $('#btn_clear').click(function () {
+                ClearDmCongTy();
+                //show date for start
+                $(function () {
+                    var start = moment();
+                    function cb(start, end) {
+                        $('#inputNgayStart').val(start.format('DD/MM/YYYY'));
+                    }
+                    $('#inputNgayStart').daterangepicker({
+                        startDate: start,
+                        singleDatePicker: true,
+                        locale: {
+                            format: 'DD/MM/YYYY'
+                        }
+                    }, cb);
+                    cb(start);
+                });
+                //show date for end
+                $(function () {
+                    var start = moment();
+                    function cb(start, end) {
+                        $('#inputNgayEnd').val(start.format('DD/MM/YYYY'));
+                    }
+                    $('#inputNgayEnd').daterangepicker({
+                        startDate: start,
+                        singleDatePicker: true,
+                        locale: {
+                            format: 'DD/MM/YYYY'
+                        }
+                    }, cb);
+                    cb(start);
+                });
+            });
+            //Create Dm cong ty
+            $('#btn_createDm').click(function () {
+
+                var tencongty = $('#txtTenCongTy').val();
+                var diachi = $('#txtDiaChi').val();
+                var dienthoai = $('#txtDienThoai').val();
+                var ghichuphieu = $('#txtGhiChuPhieu').val();
+                var ngaystart = $('#inputNgayStart').val();
+                var ngayend = $('#inputNgayEnd').val();
+                var status = 0;
+                //Save phieu xuat
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateCongTy", "UpdateProgram")',
+                    data: {
+                        TenCongTy: tencongty,
+                        DiaChi: diachi,
+                        DienThoai: dienthoai,
+                        GhiChuPhieu: ghichuphieu,
+                        MS01: ngaystart,
+                        MS02: ngayend,
+                        Status: status,
+                    },
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (output) {
+                        var last_id = output.CongTy_ID; // this is the id
+                        $('#txtTenCongTy_ID').val(last_id);
+                        InsertUserID();
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    },
+                    complete: function () {
+                       $('.overlay').hide();
+                    }
+                });
+            });
+            function InsertUserID() {
+                var congty_id = $('#txtTenCongTy_ID').val();
+                var taikhoan = $('#txtTaiKhoan').val();
+                var tentaikhoan = $('#txtTenTaiKhoan').val();
+                var matkhau = $('#txtMatKhauTaiKhoan').val();
+                var thamso = 1;
+                //Save phieu xuat
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateUserChinh", "UpdateProgram")',
+                    data: {
+                        UserID: taikhoan,
+                        UserName: tentaikhoan,
+                        PassWord: matkhau,
+                        TenCongTy_ID: congty_id,
+                        ThamSo: thamso,
+                    },
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (output) {
+                        var last_id = output.TK_ID; // this is the id
+                        $('#txtTK_ID').val(last_id);
+                        insertDetailQuyen();
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    },
+                    complete: function () {
+                       $('.overlay').hide();
+                    }
+                });
+            }
+            function ClearDmCongTy() {
+                $('#txtTenCongTy_ID').val('');
+                $('#txtTenCongTy').val('');
+                $('#txtDiaChi').val('');
+                $('#txtDienThoai').val('');
+                $('#txtGhiChuPhieu').val('');
+            }
+            //Luu Sua Dm cong ty
+            $('#btn_suaDm').click(function () {
+                var id = $('#txtTenCongTy_ID').val();
+                var tencongty = $('#txtTenCongTy').val();
+                var diachi = $('#txtDiaChi').val();
+                var dienthoai = $('#txtDienThoai').val();
+                var ghichuphieu = $('#txtGhiChuPhieu').val();
+                var ngaystart = $('#inputNgayStart').val();
+                var ngayend = $('#inputNgayEnd').val();
+                var status = 0;
+                //edit
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdateDmCongTy", "UpdateProgram")',
+                    data: {
+                        CongTy_ID: id,
+                        TenCongTy: tencongty,
+                        DiaChi: diachi,
+                        DienThoai: dienthoai,
+                        GhiChuPhieu: ghichuphieu,
+                        MS01: ngaystart,
+                        MS02: ngayend,
+                        Status: status,
+                    },
+                    dataType: "json",
+                    success: function (output) {
+                        $('#TableDm').DataTable().ajax.reload();
+                        ClearDmCongTy();
+                        toastr.success('Bạn đã sửa thành công!', 'Thành công Alert', { timeOut: 3000 });
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    }
+                });
+            });
+            //delete dm cong ty
+            $('body').on('click', '#btn_delete_congty', function () {
+                var delete_id = $(this).data("id");
+                if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                {
+                   //Delete
+                   $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeleteCongTy", "UpdateProgram")/' + delete_id,
+                        success: function (data) {
+                            $('#TableDm').DataTable().ajax.reload();
+                            toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                   });
+
+                }
+
+            });
+            //Sua dm cong ty
+            $('body').on('click', '#btn_editCongTy', function () {
+                var edit_id = $(this).data("id");
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetDmCongTyByID", "UpdateProgram")',
+                    data: { id: edit_id },
+                    success: function (data) {
+                        $('#txtTenCongTy_ID').val(data.ID);
+                        $('#txtTenCongTy').val(data.TenCongTy);
+                        $('#txtDiaChi').val(data.DiaChi);
+                        $('#txtDienThoai').val(data.DienThoai);
+                        $('#txtGhiChuPhieu').val(data.GhiChuPhieu);
+                        $('#inputNgayStartCu').val(data.MS01);
+                        $('#inputNgayEndCu').val(data.MS02);
+                        $('#txtTenCongTy').focus();
+                    }
+                });
+
+            });
+            //An/hien dm kho
+            $('body').on('click', '#btn_status_congty', function () {
+                var status_id = $(this).data("id");
+                if (confirm('Bạn có muốn ẩn hoặc hiện đối tượng này ?')) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("UpdateAnHienDmCongTy", "UpdateProgram")',
+                        data: { id: status_id },
+                        success: function (data) {
+                            $('#TableDm').DataTable().ajax.reload();
+                            toastr.success('Bạn đã ẩn/hiện thành công!', 'Thành công Alert', { timeOut: 3000 });
+                        }
+                    });
+                }
+            });
+            //format Json Date for show
+            function parseJsonDateShow(jsonDateString) {
+                return moment(jsonDateString).format("DD/MM/YYYY").toUpperCase();
+            }
+            //format Json Date for insert to sql
+            function parseJsonDateSQL(jsonDateString) {
+                return moment(jsonDateString).format("YYYY/MM/DD").toUpperCase();
+            }
+            //chi tiet tac ca cac quyen
+            var myTable = $('#TableChiTiet');
+            var t = myTable.DataTable({
+                //"destroy": true,
+                //"scrollY": "200px",
+                "scrollX": true,
+                "sScrollXInner": "100%",
+                "scrollCollapse": true,
+                "scroller": true,
+                "paging": false,
+                "lengthChange": true,
+                "searching": false,
+                "ordering": false,
+                "info": false,
+                "autoWidth": true,
+                "autoHeight": false,
+                "responsive": false,
+                "ajax": {
+                    "url": "/QuanLyUsers/GetListQuyenAll",
+                    "type": "GET",
+                    "datatype": "json",
+                },
+                "columns": [
+                    { "data": "ScreenID", className: "hide_column" },
+                    { "data": "DeScr" },
+                    { "data": "LoaiQuyen", className: "hide_column" },
+                    {
+                        'title': '<span>Xem</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle01" id="chkHeader"><i class="far fa-square"></i></button >',
+                        "data": "Xem",
+                        "render": function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active01" name="txtXem" id="txtXem" value="' + row.Xem + '">';
+                        },
+                        className: "text-center"
+                    },
+                    {
+                        'title': '<span>Tạo</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle02"><i class="far fa-square"></i></button >',
+                        data: "Tao",
+                        render: function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active02" name="txtTao" id="txtTao" value="' + row.Tao + '">';
+                        },
+                        className: "text-center"
+                    },
+                    {
+                        'title': '<span>Sửa</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle03"><i class="far fa-square"></i></button >',
+                        data: "Sua",
+                        render: function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active03" name="txtSua" id="txtSua" value="' + row.Sua + '">';
+                        },
+                        className: "text-center"
+                    },
+                    {
+                        'title': '<span>Xóa</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle04"><i class="far fa-square"></i></button >',
+                        data: "Xoa",
+                        render: function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active04" name="txtXoa" id="txtXoa" value="' + row.Xoa + '">';
+                        },
+                        className: "text-center"
+                    },
+                    {
+                        'title': '<span>In</span><br><button type="button" class="btn btn-default btn-sm checkbox-toggle05"><i class="far fa-square"></i></button >',
+                        data: "InPhieu",
+                        render: function (data, type, row) {
+                            return '<input type="checkbox" class="editor-active05" name="txtInPhieu" id="txtInPhieu" value="' + row.InPhieu + '">';
+                        },
+                        className: "text-center"
+                    },
+                ],
+                "rowCallback": function (row, data) {
+                    // Set the checked state of the checkbox in the table
+                    $('input.editor-active01', row).prop('checked', data.Xem == 1);
+                    $('input.editor-active02', row).prop('checked', data.Tao == 1);
+                    $('input.editor-active03', row).prop('checked', data.Sua == 1);
+                    $('input.editor-active04', row).prop('checked', data.Xoa == 1);
+                    $('input.editor-active05', row).prop('checked', data.InPhieu == 1);
+                },
+                "language": {
+
+                    "emptyTable": "Chưa có nội dung hiện thị"
+                }
+
+            });
+            //Create detail for phieu
+            function insertDetailQuyen() {
+                var chitiets = new Array();
+                $("#TableChiTiet TBODY TR").each(function () {
+                    var row = $(this);
+                    var chitiet = {};
+
+                    chitiet.TK_ID = $('#txtTK_ID').val();
+                    chitiet.TaiKhoan = $('#txtTaiKhoan').val();
+                    chitiet.QuyenID = row.find('td:eq(0)').text();
+                    chitiet.TenQuyen = row.find('td:eq(1)').text();
+                    chitiet.LoaiQuyen = row.find('td:eq(2)').text();
+                    chitiet.Xem = row.find('#txtXem').val();
+                    chitiet.Tao = row.find("#txtTao").val();
+                    chitiet.Sua = row.find(".editor-active03").val();
+                    chitiet.Xoa = row.find('.editor-active04').val();
+                    chitiet.InPhieu = row.find(".editor-active05").val();
+                    chitiets.push(chitiet);
+
+                });
+                //Send the JSON array to Controller using AJAX.
+                $.ajax({
+                    type: "POST",
+                    url: "/QuanLyUsers/InsertChiTiets",
+                    data: JSON.stringify(chitiets),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (r) {
+                        ClearDmCongTy();
+                        toastr.success('Bạn đã thanh toán thành công!', 'Thành công Alert', { timeOut: 3000 });
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+            //Load nguoi dung
+            $('#btn_loadNguoiDung').click(function () {
+                //Load table
+                $('#TableNguoiDung').DataTable().clear().destroy();
+                $("#TableNguoiDung").DataTable({
+                    "ajax": {
+                        "url": "/UpdateProgram/GetDmNguoiDung",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": {},
+                    },
+                    "columns": [
+                        { "data": "TK_ID", width: "5%" },
+                        { "data": "UserID", width: "15%" },
+                        { "data": "UserName", width: "10%" },
+                        { "data": "PassWord", width: "10%" },
+                        { "data": "TenCongTy", width: "20%" },
+                        { "data": "ThamSo", width: "5%" },
+                        {
+                            "data": "TK_ID", "render": function (data) {
+                                return "<a href='javascript:void(0);' id='btn_editMatKhau' data-id=" + data + "  class='btn btn-sm btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i></a>";
+                            }, className: "text-center", width: "10%"
+                        },
+
+                    ],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+
+                });
+            });
+            //load mat khau
+            $('body').on('click', '#btn_editMatKhau', function () {
+                var reset_id = $(this).data("id");
+                $("#txtTK_IDMatKhau").val(reset_id);
+                //get user
+                $.ajax({
+                    url: "/QuanLyUsers/GetUserByID",
+                    method: "GET",
+                    dataType: "json",
+                    data: { TK_ID: reset_id },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $("#txtUserIDMatKhau").val(data.UserID);
+                        $("#txtUserNameMatKhau").val(data.UserName);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+
+            });
+            //save lai mat khau
+            $('#btn_suaMatKhau').click(function () {
+                var tk_id = $('#txtTK_IDMatKhau').val();
+                var passnew = $('#txtNewMatKhau').val();
+                if (passnew == "") {
+                    toastr.error('Chưa nhập mật khẩu !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+               
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("UpdatePassNew", "QuanLyUsers")',
+                    data: {
+                        TK_ID: tk_id,
+                        PassWord: passnew,
+                    },
+                    success: function (data) {
+                        toastr.success('Bạn đã reset mật khẩu thành công!', 'Thông báo', { timeOut: 3000 });
+                        $('#TableNguoiDung').DataTable().ajax.reload();
+                        ResetFormMatKhau();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+
+            });
+            function ResetFormMatKhau() {
+                $("#txtTK_IDMatKhau").val('');
+                $("#txtUserIDMatKhau").val('');
+                $("#txtUserNameMatKhau").val('');
+                $('#txtNewMatKhau').val('');
+            }
+        });
+
+    </script>
+
+
+}

@@ -1,0 +1,152 @@
+﻿
+@model IEnumerable<MyDatabase.DmBanCF>
+@{
+    ViewBag.Title = "Quản lý bàn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- header page -->
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Quản lý bàn</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <a href="@Url.Action("PhieuList","QuanLyBan")" class="btn btn-primary"> <i class="fas fa-list"></i> Danh sách phiếu</a>
+
+                </div>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+    <div class="card card-primary card-tabs">
+        <div class="card-header p-0 pt-1">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#TatCa" data-toggle="pill">Tất cả</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#SuDung" data-toggle="pill">Sử dụng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#ConTrong" data-toggle="pill">Còn trống</a>
+                </li>
+            </ul>
+        </div><!-- /.card-header -->
+        <div class="card-body">
+            <div class="tab-content">
+                <!-- Tat ca -->
+                <div class="tab-pane container active p-0" id="TatCa">
+
+                    <div class="row">
+                        @foreach (var item in Model)
+                        {
+                            <div class="col-lg-2 col-4">
+                                @if (item.CoKhach == 0)
+                                {
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <a href="@Url.Action("Create", "QuanLyBan", new { Ban_ID = item.Ban_ID, TenBan = item.TenBan, GiaBan = item.GiaBan})" class="btn btn-default btn-block btn-sm">
+                                                <h6 class="text-center" style="color:black;"><i class="fas fa-edit"></i> @item.TenBan</h6>
+                                            </a>
+
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="card bg-gradient-warning">
+                                        <div class="card-body">
+                                            <a href="@Url.Action("EditAll", "QuanLyBan", new { Ban_ID = item.Ban_ID, TenBan = item.TenBan,GiaBan = item.GiaBan})" class="btn btn-default btn-block btn-sm">
+                                                <h6 class="text-center font-weight" style="color:black;"><i class="fas fa-edit"></i> @item.TenBan</h6>
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                        }
+                    </div>
+
+                </div>
+                <!-- Su dung -->
+                <div class="tab-pane container p-0" id="SuDung">
+                    <div class="row">
+                        @foreach (var itemCo in ViewBag.BanCo)
+                        {
+                            <div class="col-lg-2 col-4">
+                                <div class="card bg-gradient-warning">
+                                    <div class="card-body">
+                                        <a href="@Url.Action("Edit", "QuanLyBan", new {ID = itemCo.PhNhapXuat_ID, Ban_ID = itemCo.Ban_ID, TenBan = itemCo.TenBan, GiaBan = itemCo.GiaBan})" class="btn btn-default btn-block btn-sm">
+                                            <h6 class="text-center font-weight" style="color:black;"><i class="fas fa-edit"></i> @itemCo.TenBan</h6>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        }
+                    </div>
+                </div>
+                <!--con trong -->
+                <div class="tab-pane container fade p-0" id="ConTrong">
+                    <div class="row">
+                        @foreach (var itemTrong in ViewBag.BanTrong)
+                        {
+                            <div class="col-lg-2 col-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <a href="@Url.Action("Create", "QuanLyBan", new { Ban_ID = itemTrong.Ban_ID, TenBan = itemTrong.TenBan,GiaBan = itemTrong.GiaBan})" class="btn btn-default btn-block btn-sm">
+                                            <h6 class="text-center" style="color:black;"><i class="fas fa-edit"></i> @itemTrong.TenBan</h6>
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        }
+
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- /.tab-content -->
+        </div><!-- /.card-body -->
+        <div class="row" style="display:none;">
+            <iframe id="ReportFramePhieu" src="" onload="HideLoader();" width="100%" height="1000" style="border:none;"></iframe>
+        </div>
+
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        function HideLoader() {
+            $('.overlay').hide();
+        }
+        $(document).ready(function () {
+            //Load PageSize default
+            $('.overlay').hide();
+            var myvalue_in = localStorage.getItem("myValue_in");
+            if (myvalue_in == 1) {
+                $('.overlay').show();
+                $("#ReportFramePhieu").attr("src", "@Url.Content("~/PrintForms/PrintPhieuMobile.aspx")");
+            }
+
+        });
+
+    </script>
+
+}
+
+
+

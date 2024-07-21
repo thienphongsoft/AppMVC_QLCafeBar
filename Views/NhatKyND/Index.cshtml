@@ -1,0 +1,374 @@
+﻿
+@{
+    ViewBag.Title = "Nhật ký người dùng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Nhật ký người dùng</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <div class="float-right">
+
+                </div>
+
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Từ ngày giờ - Đến ngày giờ</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="far fa-calendar-alt"></i>
+                                </span>
+                            </div>
+                            <input type="text" class="form-control float-right" id="reportrangeDate">
+                            <p style="display:none">Từ ngày: <b id="TuNgay"></b> </p>
+                            <p style="display:none">Đến ngày: <b id="DenNgay"></b></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label>Chọn tài khoản</label>
+                        <div class="input-group">
+                            <select id="selectUserId" name="selectUserId" class="form-control">
+                            </select>
+                            <div class="input-group-append">
+                                <button type="button" name="filterXem" id="filterXem" value="Xem" class="btn btn-info"><i class="fas fa-eye"></i> Xem </button>
+                                <button type="button" name="btn_xoa" id="btn_xoa" value="Xoa" class="btn btn-warning"><i class="fas fa-trash-alt"></i> Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="card-body">
+                    <table class="table table-sm table-bordered nowrap" cellpadding="0" width="100%" id="TableChiTiet">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center">
+                                    Người dùng
+                                </th>
+                                <th style="text-align: center">
+                                    Chức năng
+                                </th>
+                                <th style="text-align: center">
+                                    Ngày giờ truy cập
+                                </th>
+                                <th style="text-align: center">
+                                    Thao tác
+                                </th>
+                                <th style="text-align: center">
+                                    Tham chiếu
+                                </th>
+                                <th style="text-align: center">
+                                    Tham số
+                                </th>
+                                <th style="text-align: center">
+                                    Số tiền
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="myModalPageSize" role="dialog" data-url='@Url.Action("_PartialPageSizeNhap","Input")'></div>
+
+@section scripts{
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            //Load PageSize default
+            $('.overlay').hide();
+            var ckpagesize = $.cookie("ckPageSizeC");
+            if (ckpagesize != null) {
+                $('#txtPageSize').text(ckpagesize);
+            }
+            else {
+                $('#txtPageSize').text("Khổ giấy A4");
+            }
+            //load ngay thang
+            $(function () {
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrangeDate').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgay').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgay').text(end.format('YYYY-MM-DD'));
+                }
+
+                $('#reportrangeDate').daterangepicker({
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    },
+                    startDate: start,
+                    endDate: end,
+                    ranges: {
+                        'Hôm nay': [moment(), moment()],
+                        'ngày hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                        '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                        'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                        'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                }, cb);
+
+                cb(start, end);
+            });
+            //load  select tai khoan
+            $(function () {
+                $.ajax({
+                    url: "/NhatKyND/UserList",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#selectUserId').empty();
+                        $('#selectUserId').append("<option value=''>Chọn tài khoản</option>");
+                        $.each(data, function (key, value) {
+                            $("#selectUserId").append($("<option></option>").val(value.UserID).html(value.UserName));
+                        });
+                    },
+                });
+            });
+            $('#filterXem').click(function () {
+
+                $('#TableNhatKy').show();
+                $('#ReportNhatKy').hide();
+                var ngaystart = $('#TuNgay').text();
+                var ngayend = $('#DenNgay').text();
+                var userid = $('#selectUserId option:selected').val();
+                if (userid == "") {
+
+                    $('#TableChiTiet').DataTable().clear().destroy();
+                    $('#TableChiTiet').DataTable({
+                        "scrollX": "100%",
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": true,
+                        "responsive": false,
+                        "select": true,
+                        "ajax": {
+                            "url": "/NhatKyND/GetListByDate",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: ngaystart, ngayEnd: ngayend },
+                            "beforeSend": function () {
+                                $('.overlay').show();
+                            },
+                        },
+                        "columns": [
+                            { "data": "userId", className: "text-center", width: "15%"},
+                            { "data": "chucnang", className: "text-center", width: "15%"},
+                            {
+                                "data": "ngaygio", render: function (d) {
+                                    return moment(d).format('DD/MM/YYYY hh:mm A');
+                                }, className: "text-center", width: "15%"
+                            },
+                            { "data": "thaotac", className: "text-center", width: "15%"},
+                            { "data": "thamchieu", className: "text-center", width: "15%"},
+                            { "data": "thamso", className: "text-center", width: "15%"},
+                            { "data": "sotien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                        ],
+                        //"order": [[2, "desc"]],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+                else {
+
+                    $('#TableChiTiet').DataTable().clear().destroy();
+                    $('#TableChiTiet').DataTable({
+                        "scrollX": "100%",
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": true,
+                        "responsive": false,
+                        "select": true,
+                        "ajax": {
+                            "url": "/NhatKyND/GetListByDateAndId",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: ngaystart, ngayEnd: ngayend, UserID: userid },
+                            "beforeSend": function () {
+                                $('.overlay').show();
+                            },
+                        },
+                        "columns": [
+                            { "data": "userId", className: "text-center", width: "15%" },
+                            { "data": "chucnang", className: "text-center", width: "15%" },
+                            {
+                                "data": "ngaygio", render: function (d) {
+                                    return moment(d).format('DD/MM/YYYY hh:mm A');
+                                }, className: "text-center", width: "15%"
+                            },
+                            { "data": "thaotac", className: "text-center", width: "15%" },
+                            { "data": "thamchieu", className: "text-center", width: "15%" },
+                            { "data": "thamso", className: "text-center", width: "15%" },
+                            { "data": "sotien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+                $('.overlay').hide();
+            });
+            //Delete phieu 
+            $('#btn_xoa').click(function () {
+                var ngaystart = $('#TuNgay').text();
+                var ngayend = $('#DenNgay').text();
+                var userid = $('#selectUserId option:selected').val();
+                if (confirm('Bạn có muốn xóa vĩnh viễn các thao tác này ?'))
+                {
+                    if (userid == "") {
+
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("DeleteDate", "NhatKyND")',
+                            data: { NgayStart: ngaystart, NgayEnd: ngayend },
+                            beforeSend: function () {
+                                $('.overlay').show();
+                            },
+                            success: function (data) {
+                                $('#TableChiTiet').DataTable().ajax.reload();
+                                toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                            },
+                            error: function (data) {
+                                console.log('Error:', data);
+                            },
+                            complete: function () {
+                                $('.overlay').hide();
+                            }
+                        });
+
+                    }
+                    else {
+
+                         $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("DeleteDateAndUser", "NhatKyND")',
+                            data: { NgayStart: ngaystart, NgayEnd: ngayend, UserID: userid },
+                            beforeSend: function () {
+                                 $('.overlay').show();
+                            },
+                            success: function (data) {
+                                $('#TableChiTiet').DataTable().ajax.reload();
+                                toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                            },
+                            error: function (data) {
+                                console.log('Error:', data);
+                            },
+                            complete: function () {
+                                 $('.overlay').hide();
+                             }
+                        });
+                    }
+                }
+
+            });
+            //functon format number 100,000
+            function CurrencyFormatted(nStr) {
+                nStr += '';
+                x = nStr.split(',');
+                x1 = x[0];
+                x2 = x.length > 1 ? ',' + x[1] : '';
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                }
+                return x1 + x2;
+            }
+            //format Json Date for show
+            function parseJsonDateShow(jsonDateString) {
+                return moment(jsonDateString).format("DD/MM/YYYY").toUpperCase();
+            }
+            //format Json Date for insert to sql
+            function parseJsonDateSQL(jsonDateString) {
+                return moment(jsonDateString).format("YYYY-MM-DD").toUpperCase();
+            }
+            //Load modal Config PageSize
+            $('#btn_ConfigSize').click(function () {
+                var url = $('#myModalPageSize').data('url');
+                $.get(url, function (data) {
+                    $('#myModalPageSize').html(data);
+                    $('#myModalPageSize').modal('show');
+                });
+            });
+            //Save PageSize
+            $(document).on('click', '#btn_savePageSize', function () {
+                var size = $('#pageSize_id option:selected').text();
+                ////toastr.success(size + 'thành công !', 'Thành công Alert', { timeOut: 5000 });
+                $('#txtPageSize').text(size)
+                $.cookie("ckPageSizeC", $('#txtPageSize').text(), { expires: 360 });
+                $('#myModalPageSize').modal('hide');
+            });
+             //In phieu
+            $('body').on('click', '#btn_in', function () {
+                var phieu_id = $(this).data("id");
+                var pagesize = $('#txtPageSize').text();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("InPhieu", "Payment")',
+                    data: { id: phieu_id, pagesize: pagesize},
+                    success: function (data) {
+
+                        //window.open('../Reports/ReportPhieu.aspx', '_newtab');
+                        //toastr.success('Bạn in phieu thanh cong !', 'Thành công Alert', { timeOut: 5000 });
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+
+                });
+            });
+
+        });
+    </script>
+
+
+}
+
+
+
+
+

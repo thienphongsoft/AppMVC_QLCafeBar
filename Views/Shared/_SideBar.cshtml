@@ -1,0 +1,197 @@
+﻿<!-- Brand Logo -->
+<a href="/Home/Index" class="brand-link">
+    <img src="~/AdminLTE310/dist/img/logo128.png" alt="ThienPhong Logo" class="brand-image img-circle elevation-3"
+         style="opacity: .8">
+    <span class="brand-text font-weight-light">Thiên Phong</span>
+</a>
+<!-- Sidebar -->
+<div class="sidebar">
+    <!-- Sidebar Menu -->
+    <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+      
+            <li class="nav-item">
+                <a href="/Home/Index" class="nav-link">
+                    <i class="nav-icon fas fa-tachometer-alt"></i>
+                    <p>
+                        TỔNG QUAN
+                    </p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="@Url.Action("Index","QuanLyBan")" class="nav-link">
+                    <i class="nav-icon fas fa-barcode"></i>
+                    <p>
+                        BÁN HÀNG POS
+                    </p>
+                </a>
+            </li>
+            <!-- Ban hang -->
+            <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-th"></i>
+                    <p>
+                        QUẢN LÝ BÀN
+                        <i class="fas fa-angle-left right"></i>
+                        <span class="badge badge-info right">4</span>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="@Url.Action("PhieuList","QuanLyBan")" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Danh sách Phiếu xuất</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","QuanLyBan")" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Quản lý bàn</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","PhieuThu")" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Phiếu thu</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("PhieuOrderList","QuanLyBan")" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Phiếu in order</p>
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
+            <!-- Bao cao -->
+            <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-chart-pie"></i>
+                    <p>
+                        BÁO CÁO
+                        <i class="right fas fa-angle-left"></i>
+                        <span class="badge badge-info right">6</span>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","BaoCaoDoanhThu")" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Báo cáo doanh thu</p>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <!-- Danh muc -->
+            <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-th">
+                    </i>
+                    <p>
+                        DANH MỤC
+                        <i class="fas fa-angle-left right"></i>
+                        <span class="badge badge-info right">6</span>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","DmBan")" class="nav-link">
+                            <i class="far fa-circle nav-icon">
+                            </i>
+                            <p>Danh mục Bàn</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","DmHangHoa")" class="nav-link">
+                            <i class="far fa-circle nav-icon">
+                            </i>
+                            <p>Danh mục Hàng hóa</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","DmDoiTuong")" class="nav-link">
+                            <i class="far fa-circle nav-icon">
+                            </i>
+                            <p>Danh mục đối tượng</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","DmLoaiThuChi")" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Danh mục thu chi</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","DmNganHang")" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Danh mục ngân hàng</p>
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
+            <!-- He thong -->
+            <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-cog"></i>
+                    <p>
+                        HỆ THỐNG
+                        <i class="fas fa-angle-left right"></i>
+                        <span class="badge badge-info right">5</span>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","QuanLyUsers")" class="nav-link">
+                            <i class="fas fa-users nav-icon"></i>
+                            <p>Quản lý người dùng</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","ChangePass")" class="nav-link">
+                            <i class="fas fa-key nav-icon"></i>
+                            <p>Đổi mật khẩu người dùng</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","NhatKyND")" class="nav-link">
+                            <i class="fas fa-history nav-icon"></i>
+                            <p>Xem nhật ký người dùng</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index","About")" class="nav-link">
+                            <i class="fas fa-info nav-icon"></i>
+                            <p>Thông tin bản quyền</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("LoginGiao","Users")" class="nav-link">
+                            <i class="fas fa-users-cog nav-icon"></i>
+                            <p>Update chương trình</p>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <!-- Trang thai -->
+            <li class="nav-header">Trạng thái</li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-user nav-icon"></i>
+                    @using WebAppMVC.ClassCommon
+                    @Html.RenderUserNameLogin()
+                    @*@Html.Action("CallSessionFullname", "Home")*@
+                </a>
+
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="@Url.Action("logout","Users")">
+                    <i class="nav-icon far fa-circle text-danger"></i>Đăng xuất
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+    <!-- /.sidebar-menu -->
+</div> 

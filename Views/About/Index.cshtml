@@ -1,0 +1,93 @@
+﻿
+@{
+    ViewBag.Title = "Thông tin bản quyền";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Thông tin bản quyền</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- Main content -->
+<!-- form input -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-blue">
+                    <div class="card-header">
+                        <h3 class="card-title">Thông tin chúng tôi</h3>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="text-center" style="color:red;"> <strong>THIÊN PHONG</strong></h3>
+                        <h5 class="text-center" style="font-size:larger; color:blue;">Đơn Giản - Dễ Sử Dụng - Hiệu Quả</h5>
+                        <p>
+                            Địa chỉ: 335A Lý Thường Kiệt TP. Buôn Ma Thuột - DakLak<br />
+                            Điện thoại: 0913 423 525 - 0327 32 32 66<br />
+                            Email: thienphongsoft@gmail.com<br />
+                            Liên hệ: Mr Giao
+
+                        </p>
+                    </div>
+                    <button id="btn_website" name="btn_website" class="btn btn-primary float-right"><i class="fas fa-atlas"></i> Website: https://thienphong.net</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">Thông tin khách hàng</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="text-center">PHÂN MỀM QUẢN LÝ TÍNH CƯỚC</h4>
+                        <h4 class="text-center">Biên bản v1.0</h4>
+                        <p>Sản phẩm được cấp bản quyền sử dụng cho:<br />Tên công ty: <span id="spTenCty"></span><br />Địa chỉ: <span id="spAddress"></span><br />Ngày cấp: <span id="spDateCap"></span> - Ngày hết hạn: <span id="spDateHetHan"></span></p>
+                    </div>
+                    <button id="btn_dangky" name="btn_dangky" class="btn btn-warning  float-right"><i class="fas fa-registered"></i> Đăng ký</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+@section scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(function () {
+                 $.ajax({
+                    url: "/About/GetBanQuyen",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#spTenCty').text(data.TenCty);
+                        $('#spAddress').text(data.Address);
+                        $('#spDateCap').text(data.DateCap);
+                        $('#spDateHetHan').text(data.DateHetHan);
+                    },
+                });
+            });
+            $('#btn_dangky').click(function () {
+                toastr.success('Liên hệ Mr - Giao - 0913 424 525!', 'Thông Báo', { timeOut: 10000 });
+                // window.location.href = "/DangKy/Index";
+            });
+            $('#btn_website').click(function () {
+                window.open('https://thienphong.net', '_blank');
+
+            });
+        });
+
+
+    </script>
+
+
+}
+
+
+

@@ -1,0 +1,169 @@
+﻿@using WebAppMVC.Models
+@model LoginViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Đăng nhập hệ thống</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/AdminLTE310/plugins/fontawesome-free/css/all.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="~/AdminLTE310/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/AdminLTE310/dist/css/adminlte.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <style type="text/css">
+        .modal-content {
+            -webkit-border-radius: 16px !important;
+            -moz-border-radius: 16px !important;
+            border-radius: 16px !important;
+            -webkit-border: 16px !important;
+            -moz-border: 16px !important;
+            border: 16px !important;
+        }
+     
+    </style>
+</head>
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="https://thienphong.net" target="_blank"><b>Quản lý Cafe-Bar</b></a>
+        </div>
+        <!-- /.login-logo -->
+        <div class="card">
+            <section id="loginForm">
+                @using (Html.BeginForm("Login", "Users", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                {
+                    <div class="card-body login-card-body">
+                        @using WebAppMVC.ClassCommon
+                        <p class="login-box-msg">Đăng nhập hệ thống<span class="text-danger"> @Html.RenderCompanyName()</span><br /> <span class="text-danger">@Html.RenderTenPhanMem() </span></p>
+
+                        @Html.AntiForgeryToken()
+                       
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.UserID, new { @class = "col-md-12 control-label" })
+                            <div class="input-group mb-3">
+                                @Html.TextBoxFor(m => m.UserID, new { @class = "form-control", @placeholder = "Nhập tài khoản" })
+                                @Html.ValidationMessageFor(m => m.UserID, "", new { @class = "text-danger" })
+                                <div class="input-group-append">
+                                    <div class="input-group-text">
+                                        <span class="fas fa-user"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.PassWord, new { @class = "col-md-12 control-label" })
+                            <div class="input-group mb-3">
+                                @Html.PasswordFor(m => m.PassWord, new { @class = "form-control", @placeholder = "Nhập mật khẩu" })
+                                @Html.ValidationMessageFor(m => m.PassWord, "", new { @class = "text-danger" })
+                                <div class="input-group-append">
+                                    <div class="input-group-text">
+                                        <span class="fas fa-lock"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-7">
+                                <div class="checkbox">
+                                    @Html.CheckBoxFor(m => m.RememberMe)
+                                    @Html.LabelFor(m => m.RememberMe)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Footer button  -->
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-6">
+                                <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" id="btn_quenMK" name="btn_quenMK" class="btn btn-warning btn-block">Quên mật khẩu</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="myModalMessage" role="dialog" data-url='@Url.Action("_PartialMessageBox","Users")'></div>
+                }
+            </section>
+            <!-- /.login-card-body -->
+        </div>
+        
+    </div>
+   
+    <!-- /.login-box -->
+    <!-- jQuery -->
+    <script src="~/AdminLTE310/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="~/AdminLTE310/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="~/AdminLTE310/dist/js/adminlte.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+</body>
+</html>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#btn_quenMK').click(function () {
+
+            window.location.href = "/Users/ResetPass";
+
+        });
+        $(function() {
+           var r = '@TempData["message"]';
+           if (r == 1)
+           {
+               var url = $('#myModalMessage').data('url');
+               $.get(url, function (data) {
+
+                   $('#myModalMessage').html(data);
+                   $('#myModalMessage').modal('show');
+
+               });
+           }
+        });
+        ////Load page 
+        var ckrepass = $.cookie("ckRePass");
+        if (ckrepass == "1") {
+            $('#RememberMe').prop('checked', true);
+            $('#UserID').val($.cookie("ckUserID"));
+            $('#PassWord').val($.cookie("ckPass"));
+        }
+        else {
+            $('#RememberMe').prop('checked', false);
+            $('#UserID').val("");
+            $('#PassWord').val("");
+        }
+        $('#RememberMe').click(function () {
+
+            if ($('#RememberMe').is(':checked')) {
+                $.cookie("ckRePass", "1", { expires: 360 });
+                $.cookie("ckUserID", $('#UserID').val(), { expires: 360 });
+                $.cookie("ckPass", $('#PassWord').val(), { expires: 360 });
+            } else {
+                $.cookie("ckRePass", "0", { expires: 360 });
+                $.cookie("ckUserID", "", { expires: 360 });
+                $.cookie("ckPass", "", { expires: 360 });
+            }
+        });
+       
+    });
+</script>

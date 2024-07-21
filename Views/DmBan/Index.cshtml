@@ -1,0 +1,478 @@
+﻿
+@{
+    ViewBag.Title = "Danh mục Bàn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Danh mục Bàn <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- Main content -->
+<!-- form input -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">Nhập thông tin</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-remove"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label for="code" class="col-sm-2 col-form-label">Tên Bàn</label>
+                    <div class="col-sm-6">
+                        <input type="hidden" id="txtPhieu_ID" />
+                        <input type="text" id="txtTenBan" name="txtTenBan" class="form-control" placeholder="Nhập tên bàn">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="Loai" class="col-sm-2 col-form-label">Giá bán cho bàn</label>
+                    <div class="col-sm-6">
+                        <select id="slGiaBan" name="slGiaBan" class="form-control select2">
+                            <option value="1">Giá bán 1</option>
+                            <option value="2">Giá bán 2</option>
+                            <option value="3">Giá bán 3</option>
+                        </select>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="card-footer col-sm-8">
+                <button id="btn_save" name="btn_save" class="btn btn-primary float-right"><i class="fas fa-plus"></i> Lưu</button>
+                <button id="btn_cancelEdit" name="btn_cancelEdit" style="display: none;" class="btn btn-warning float-right"><i class="fas fa-sync-alt"></i> Hủy sửa</button>
+                <button id="btn_saveEdit" name="btn_saveEdit" style="display: none;" class="btn btn-primary float-right"><i class="fas fa-save"></i> Lưu sửa</button>
+
+            </div>
+        </div>
+        <!-- list -->
+        <div class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">Danh mục bàn</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-remove"></i></button>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table class="table table-sm table-bordered nowrap" id="TableList">
+                    <thead>
+                        <tr>
+                            <th>
+                                Stt
+                            </th>
+                            <th>
+                                ID
+                            </th>
+                            <th>
+                                Tên Bàn
+                            </th>
+                            <th>
+                                Giá bán
+                            </th>
+                            <th>
+                                Trạng thái
+                            </th>
+                            <th>
+                                Chức năng
+                            </th>
+                        </tr>
+                    </thead>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            //btn link_refresh
+            $('#link_refresh').click(function () {
+                Reset();
+            })
+            //tao moi danh muc ban
+            $('#btn_save').click(function () {
+
+                var tenban = $('#txtTenBan').val();
+                var giaban = $('#slGiaBan option:selected').val();
+                var cokhach = 0;
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                if (tenban == "") {
+                    toastr.error('Chưa nhập tên bàn !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                //Check quyen tao
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenCreate", "DmBan")',
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                             $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("Create", "DmBan")',
+                                data: {
+                                    TenBan: tenban,
+                                    GiaBan: giaban,
+                                    CoKhach: cokhach,
+                                    TenCongTy_ID: congty_id,
+                                    Status: status
+                                },
+                                success: function (result) {
+                                    if (result == true) {
+                                        toastr.success('Bạn đã tạo mới thành công!', 'Thông báo', { timeOut: 5000 });
+                                        $('#TableList').DataTable().ajax.reload();
+                                        Reset();
+
+                                    }
+                                    else {
+                                        toastr.error('Tên này đã có. Bạn nhập tên khác!', 'Thông báo', { timeOut: 5000 });
+                                    }
+                                },
+                                error: function (result) {
+                                    console.log('Error:', result);
+                                }
+                             });
+                        }
+                        else {
+                            toastr.error('Bạn không thể xóa, chưa phân quyền tạo!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+
+            })
+            //chon danh muc de sua
+            $('body').on('click', '#btn_edit', function () {
+                $("#txtPhieu_ID").val('');
+                $("#txtTenBan").val('');
+                var edit_id = $(this).data("id");
+                //Check quyen edit
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenEdit", "DmBan")',
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                             $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("Edit", "DmBan")/' + edit_id,
+                                beforeSend: function () {
+                                    $("#btn_saveEdit").show();
+                                    $("#btn_cancelEdit").show();
+                                    $("#btn_save").hide();
+                                },
+                                success: function (data) {
+                                    $("#txtPhieu_ID").val(data.Ban_ID);
+                                    $("#txtTenBan").val(data.TenBan);
+                                    $('#slGiaBan').val(data.GiaBan).trigger('change');
+                                    $("#txtTenBan").focus();
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+
+                             });
+                        }
+                        else {
+                            toastr.error('Bạn không thể sửa, chưa phân quyền sửa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+
+            });
+            //save sua danh muc
+            $('#btn_saveEdit').click(function () {
+                var id = $("#txtPhieu_ID").val();
+                var tenban = $("#txtTenBan").val();
+                var giaban = $('#slGiaBan option:selected').val();
+                if (tenban == "") {
+                    toastr.error('Chưa nhập tên xe !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                //Check id and name
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckIdAndName", "DmBan")',
+                    data: { id: id, name: tenban },
+                    success: function (data) {
+                        if (data == true) {
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("SaveEdit", "DmBan")',
+                                data: {
+                                    Ban_ID: id,
+                                    TenBan: tenban,
+                                    GiaBan: giaban
+                                },
+                                dataType: "json",
+                                success: function (result) {
+                                    toastr.success('Bạn đã sửa thành công!', 'Thông báo', { timeOut: 5000 });
+                                    $('#TableList').DataTable().ajax.reload();
+                                    Reset();
+                                },
+                                error: function () {
+                                    alert("Error!");
+                                }
+                            });
+                        }
+                        // truong hop sua ten
+                        else {
+                            //kiem tra ten co trung khong
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("CheckNameAndCongTy", "DmBan")',
+                                data: { name: tenban },
+                                success: function (data) {
+                                    //neu khong trung
+                                    if (data == false) {
+                                        $.ajax({
+                                            type: "POST",
+                                            url: '@Url.Action("SaveEdit", "DmBan")',
+                                            data: {
+                                                Ban_ID: id,
+                                                TenBan: tenban,
+                                                GiaBan: giaban
+                                            },
+                                            dataType: "json",
+                                            success: function (result) {
+                                                toastr.success('Bạn đã lưu thành công!', 'Alert', { timeOut: 5000 });
+                                                $('#TableList').DataTable().ajax.reload();
+                                                Reset();
+                                            },
+                                            error: function () {
+                                                alert("Error!");
+                                            }
+                                          });
+                                    }
+                                    else {
+                                        toastr.error('Mã đối tượng này đã có !', 'Bị lỗi', { timeOut: 3000 });
+                                    }
+                                }
+                            });
+
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+
+            })
+            //delete dm ban
+            $('body').on('click', '#btn_delete', function () {
+                var delete_id = $(this).data("id");
+                //Check quyen xoa
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenDelete", "DmBan")',
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                            {
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("Delete", "DmBan")/' + delete_id,
+                                    success: function (data) {
+                                        if (data == true) {
+                                            toastr.success('Bạn đã xóa được đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                                            $('#TableList').DataTable().ajax.reload();
+                                            Reset();
+                                        }
+                                        else {
+                                            toastr.error('Bạn không thể xóa, đã được sử dụng trong phiếu tính cước!', 'Không thành công Alert', { timeOut: 5000 });
+                                        }
+                                    },
+                                    error: function (data) {
+                                        console.log('Error:', data);
+                                    }
+
+                                });
+                            }
+                        }
+                        else {
+                            toastr.error('Bạn không thể xóa, chưa phân quyền xóa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+
+            });
+             //set hien thi Hien/An
+            $('body').on('click', '#btn_eye', function () {
+                var eye_id = $(this).data("id");
+                //Check quyen sua
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenEdit", "DmBan")',
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                           $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("UpdateStatus", "DmBan")/' + eye_id,
+                                success: function (data) {
+                                    toastr.success('Bạn đã thay đổi đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                                    $('#TableList').DataTable().ajax.reload();
+                                    Reset();
+                                  
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+
+                           });
+                        }
+                        else {
+                            toastr.error('Bạn không thể sửa trạng thái, chưa phân quyền sửa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+
+            });
+            //huy bo sua
+            $('#btn_cancelEdit').click(function () {
+
+                $('#link_refresh').trigger('click');
+            });
+            GetAllList();
+            function GetAllList() {
+                var t = $("#TableList").DataTable({
+                    //"destroy": true,
+                    //"scrollY": "200px",
+                    "scrollX": true,
+                    "sScrollXInner": "100%",
+                    "scrollCollapse": true,
+                    "scroller": true,
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": true,
+                    "ordering": true,
+                    "info": true,
+                    "autoWidth": true,
+                    "autoHeight": false,
+                    "responsive": false,
+                    "ajax": {
+                        "url": "/DmBan/GetListDmBan",
+                        "type": "GET",
+                        "datatype": "json",
+                    },
+                    "columns": [
+                        { title: "STT", className: "text-center", width: "5%" },
+                        { "data": "Ban_ID", visible: false },
+                        { "data": "TenBan", className: "text-center", width: "35%" },
+                        {
+                            "data": null, "render": function (data) {
+                                if (data.GiaBan == 1) {
+
+                                    return "Giá bán 1";
+                                }
+                                if (data.GiaBan == 2) {
+                                    return "Giá bán 2";
+                                }
+                                if (data.GiaBan == 3) {
+                                    return "Giá bán 3";
+                                }
+                            }, className: "text-center", width: "20%",
+                        },
+                        {
+                            "data": "Status",
+                            render: function (data, type, row) {
+                                return data == 0 ? 'Đang sử dụng' : 'Tạm khóa'
+                            }, className: "text-center", width: "20%"
+                        },
+                        {
+                            "data": "Ban_ID", "render": function (data) {
+                                return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + " class='btn btn-success' style='margin-left:5px'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a><a href='javascript:void(0);' id='btn_eye' data-id=" + data + " class='btn btn-secondary' style='margin-left:5px'><i class='fas fa-eye'></i> Mở/khóa</a>";
+                            }, className: "text-center", width: "20%"
+                        },
+                    ],
+                    "columnDefs": [{
+                        "defaultContent": "-",
+                        "targets": "_all",
+                        "orderable": false
+                    }],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+                });
+                t.on('order.dt search.dt', function () {
+                    t.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
+                        cell.innerHTML = i + 1;
+                    });
+                }).draw();
+            }
+            function Reset() {
+                $("#txtPhieu_ID").val('');
+                $("#txtTenBan").val('');
+                $("#btn_saveEdit").hide();
+                $("#btn_cancelEdit").hide();
+                $("#btn_save").show();
+            }
+        });
+
+
+    </script>
+
+
+}
+
+
+
+
+
+
+
+
+
+

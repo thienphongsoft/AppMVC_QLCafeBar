@@ -1,0 +1,139 @@
+﻿
+@{
+    ViewBag.Title = "Đổi mật khẩu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Đổi mật khẩu <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</section>
+<!-- Main content -->
+<!-- form input -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-blue">
+            <div class="card-header">
+                <h3 class="card-title">Nhập thông tin</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-remove"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label for="OldPass" class="col-sm-2 col-form-label">Mật khẩu cũ:</label>
+                    <div class="col-sm-6">
+                        <input type="hidden" id="wareHouseId" />
+                        <input type="password" id="txtOldPassword" name="txtOldPassword" class="form-control" placeholder="Nhập mật khẩu cũ" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="NewPassword" class="col-sm-2 col-form-label">Mật khẩu mới</label>
+                    <div class="col-sm-6">
+                        <input type="password" id="txtNewPassword" name="txtNewPassword" class="form-control" placeholder="Nhập mật khẩu mới" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="confirm" class="col-sm-2 col-form-label">Xác nhận lại mật khẩu</label>
+                    <div class="col-sm-6">
+                        <input type="password" id="txtConfirm" name="txtConfirm" class="form-control" placeholder="Xác nhận lại mật khẩu" />
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer col-sm-8">
+                <button id="btn_cancel" name="btn_cancel" class="btn btn-warning  float-right"><i class="fas fa-remove"></i> Hủy bỏ</button>
+                <button id="btn_ok" name="btn_ok" class="btn btn-success"><i class="fas fa-check"></i> Đồng ý</button>
+            </div>
+        </div>
+        <div class="modal fade" id="myModalMessage" role="dialog" data-url='@Url.Action("_PartialMessageBox","Users")'></div>
+    </div>
+</section>
+@section scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            ClearForm();
+            function ClearForm() {
+                $('#txtOldPassword').val('');
+                $('#txtNewPassword').val('');
+                $('#txtConfirm').val('');
+            }
+            $('#link_refresh').click(function () {
+                ClearForm();
+            });
+
+            $('#btn_ok').click(function () {
+                //check old password
+                var oldpass = $('#txtOldPassword').val();
+                var newpass = $('#txtNewPassword').val();
+                var confirmpass = $('#txtConfirm').val();
+                var userid = "@Session["user_id"]";
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckOldPass", "ChangePass")',
+                    data: { OldPass: oldpass },
+                    success: function (data) {
+                        if (data == false) {
+                            if (newpass == confirmpass) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("UpdatePass", "ChangePass")',
+                                    data: { UserID: userid, PassWord: newpass },
+                                    success: function (data) {
+                                        //toastr.success('Bạn đã đổi mật khẩu thành công!', 'Thành công Alert', { timeOut: 5000 });
+                                        var url = $('#myModalMessage').data('url');
+                                        $.get(url, function (data) {
+                                            $('#myModalMessage').html(data);
+                                            $('#myModalMessage').modal('show');
+                                        });
+                                        window.location.href = "/Users/Logout";
+                                    },
+                                    error: function (data) {
+                                        console.log('Error:', data);
+                                    }
+                                });
+                            }
+                            else {
+                                var url = $('#myModalMessage').data('url');
+                                $.get(url, function (data) {
+                                    $('#myModalMessage').html(data);
+                                    $('#myModalMessage').modal('show');
+                                    var str = "Xác nhận lại mật khẩu không giống !";
+                                    $("#thongbao").text(str);
+                                });
+                                //toastr.error('Xác nhận lại mật khẩu không giống !', 'Bị lỗi', { timeOut: 3000 });
+                            }
+                        }
+                        else {
+                            var url = $('#myModalMessage').data('url');
+                            $.get(url, function (data) {
+                                $('#myModalMessage').html(data);
+                                $('#myModalMessage').modal('show');
+                            });
+                        }
+                    }
+                });
+
+            });
+            $('#btn_cancel').click(function () {
+                window.location.href = "/Home/Index";
+            });
+        });
+
+
+    </script>
+
+
+}
+
+
+
+

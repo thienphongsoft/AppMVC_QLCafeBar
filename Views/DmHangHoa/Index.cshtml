@@ -1,0 +1,587 @@
+﻿
+@{
+    ViewBag.Title = "Danh mục hàng hóa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Chờ trong giây lát</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Danh mục hàng hóa <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <a href="@Url.Action("CreatePhaChe","DmHangHoa")" class="btn btn-primary"> <i class="fas fa-plus"></i> Hàng chế biến/pha chế</a>
+                    <a href="@Url.Action("Create","DmHangHoa")" class="btn btn-primary"> <i class="fas fa-plus"></i> Hàng hóa</a>
+                </div>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-3">
+                    <label>Tìm theo mã, tên mặt hàng</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="searchName" name="searchName" class="form-control" placeholder="Mã hoặc tên hàng">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label>Trạng thái mặt hàng</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group">
+                                <select id="StatusProduct" name="StatusProduct" class="form-control select2" style="width: 100%;">
+                                    <option value="0" selected="selected">Đang kinh doanh</option>
+                                    <option value="1">Đã ngừng kinh doanh</option>
+                                    <option value="2">Đã xóa</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label>Tìm theo nhóm hàng</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group">
+                                <select id="NhomProductSearch" name="NhomProductSearch" class="form-control select" style="width: 100%;">
+                                    <option>Chọn nhóm hàng hóa</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <table class="table table-sm table-bordered nowrap" id="TableProduct">
+                <thead>
+                    <tr>
+                        <th>
+                            Mã hàng
+                        </th>
+                        <th>
+                            Tên hàng
+                        </th>
+                        <th>
+                            ĐVT
+                        </th>
+                        <th>
+                            Giá mua
+                        </th>
+                        <th>
+                            Giá bán 1
+                        </th>
+                        <th>
+                            Giá bán 2
+                        </th>
+                        <th>
+                            Giá bán 3
+                        </th>
+                        <th style="text-align:center;">
+                            Chức năng
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+           $('.overlay').hide();
+           //Load default table dang kinh doanh
+           $('#StatusProduct').val(0);
+           //Load select nhom hang tim kiem
+           loadListGroupProduct();
+           function loadListGroupProduct() {
+                //load  GroupProduct list
+                $.ajax({
+                    url: "/DmHangHoa/NhomHangList",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#NhomProductSearch').empty();
+                        $('#NhomProductSearch').append("<option value=''>Tất cả nhóm</option>");
+                        $.each(data, function (key, value) {
+                            $("#NhomProductSearch").append($("<option></option>").val(value.LoaiHH_ID).html(value.TenLoaiHH));
+                        });
+                    },
+                });
+           }
+           //Show list table default đang kinh doanh
+           loadListProduct();
+           function loadListProduct() {
+                $('#TableProduct').DataTable().clear().destroy();
+                $("#TableProduct").DataTable({
+                    //"destroy": true,
+                    //"scrollY": "200px",
+                    "scrollX": true,
+                    "sScrollXInner": "100%",
+                    "scrollCollapse": true,
+                    "scroller": true,
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": true,
+                    "ordering": true,
+                    "info": true,
+                    "autoWidth": true,
+                    "autoHeight": false,
+                    "responsive": false,
+                    "ajax": {
+                        "url": "/DmHangHoa/GetListDmHangHoa",
+                        "type": "GET",
+                        "datatype": "json",
+                    },
+                    "columns": [
+                        { "data": "MaHH", className: "text-left", width: "10%"},
+                        { "data": "TenHH", className: "text-left", width: "30%"},
+                        { "data": "TenDVT", className: "text-center", width: "10%" },
+                        { "data": "GiaMua", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%"},
+                        { "data": "GiaBan1", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                        { "data": "GiaBan2", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                        { "data": "GiaBan3", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%"},
+                        {
+                            "data": "MaHH", "render": function (data) {
+                                return "<a href='javascript:void(0);' id='btn_editProduct' data-id=" + data + "  class='btn btn-sm btn-success'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_copyProduct' data-id=" + data + "  class='btn btn-sm btn-secondary' style='margin-left:5px'><i class='fas fa-copy'></i> Copy</a><a href='javascript:void(0);' id='btn_pause' data-id=" + data + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-pause'></i>Dừng</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                            }, className: "text-center", width: "20%"
+                        },
+                    ],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+
+                });
+            }
+           //Search Status select option
+           $('#StatusProduct').change(function () {
+              var status = $('#StatusProduct option:selected').val();
+              $('#TableProduct').DataTable().clear().destroy();
+              $("#TableProduct").DataTable({
+                  //"destroy": true,
+                  //"scrollY": "200px",
+                  "scrollX": true,
+                  "sScrollXInner": "100%",
+                  "scrollCollapse": true,
+                  "scroller": true,
+                  "paging": true,
+                  "lengthChange": true,
+                  "searching": true,
+                  "ordering": true,
+                  "info": true,
+                  "autoWidth": true,
+                  "autoHeight": false,
+                  "responsive": false,
+                  "ajax": {
+                    "url": "/DmHangHoa/GetListProductByStatus",
+                    "type": "GET",
+                    "datatype": "json",
+                    "data": { id: status },
+                },
+                "columns": [
+                    { "data": "MaHH", className: "text-left", width: "10%" },
+                    { "data": "TenHH", className: "text-left", width: "30%" },
+                    { "data": "TenDVT", className: "text-center", width: "10%" },
+                    { "data": "GiaMua", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                    { "data": "GiaBan1", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                    { "data": "GiaBan2", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                    { "data": "GiaBan3", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                    {
+                        "data": null, "render": function (data) {
+                            if (data.Status == 0) {
+
+                                return "<a href='javascript:void(0);' id='btn_editProduct' data-id=" + data.MaHH + "  class='btn btn-sm btn-success'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_copyProduct' data-id=" + data.MaHH + "  class='btn btn-sm btn-secondary' style='margin-left:5px'><i class='fas fa-copy'></i> Copy</a><a href='javascript:void(0);' id='btn_pause' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-pause'></i>Dừng</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                            }
+                            if (data.Status == 1) {
+                                return "<a href='javascript:void(0);' id='btn_RestorePause' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-undo'></i>Khôi phục</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                            }
+                            if (data.Status == 2) {
+                                return "<a href='javascript:void(0);' id='btn_RestoreDelete' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-undo'></i>Khôi phục</a><a href='javascript:void(0);' id='btn_DeleteTrash' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='far fa-calendar-times'></i> Xóa</a>";
+                            }
+                        }, className: "text-center", width: "10%" ,
+                    },
+                ],
+                "language": {
+
+                    "emptyTable": "Chưa có nội dung hiện thị"
+                }
+
+              });
+
+           });
+           //Search product by name and code
+           $('#searchName').on('keyup change', function () {
+                var name = $('#searchName').val();
+                $('#TableProduct').DataTable().clear().destroy();
+                $('#TableProduct').DataTable({
+                    //"destroy": true,
+                    //"scrollY": "200px",
+                    "scrollX": true,
+                    "sScrollXInner": "100%",
+                    "scrollCollapse": true,
+                    "scroller": true,
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": true,
+                    "ordering": true,
+                    "info": true,
+                    "autoWidth": true,
+                    "autoHeight": false,
+                    "responsive": false,
+                    "ajax": {
+                        "url": "/DmHangHoa/GetListProductByCodeName",
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": { CodeName: name },
+                    },
+                    "columns": [
+                        { "data": "MaHH", className: "text-left", width: "10%" },
+                        { "data": "TenHH", className: "text-left", width: "30%" },
+                        { "data": "TenDVT", className: "text-center", width: "10%" },
+                        { "data": "GiaMua", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                        { "data": "GiaBan1", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                        { "data": "GiaBan2", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                        { "data": "GiaBan3", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                        {
+                            "data": null, "render": function (data) {
+                                if (data.Status == 0) {
+
+                                    return "<a href='javascript:void(0);' id='btn_editProduct' data-id=" + data.MaHH + "  class='btn btn-sm btn-success'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_copyProduct' data-id=" + data.MaHH + "  class='btn btn-sm btn-secondary' style='margin-left:5px'><i class='fas fa-copy'></i> Copy</a><a href='javascript:void(0);' id='btn_pause' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-pause'></i>Dừng</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                }
+                                if (data.Status == 1) {
+                                    return "<a href='javascript:void(0);' id='btn_RestorePause' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-undo'></i>Khôi phục</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                }
+                                if (data.Status == 2) {
+                                    return "<a href='javascript:void(0);' id='btn_RestoreDelete' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-undo'></i>Khôi phục</a><a href='javascript:void(0);' id='btn_DeleteTrash' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='far fa-calendar-times'></i> Xóa</a>";
+                                }
+                            }, className: "text-center", width: "10%",
+                        },
+                    ],
+                    "language": {
+
+                        "emptyTable": "Chưa có nội dung hiện thị"
+                    }
+                });
+            });
+           //Search product by search group product in table
+           $('#NhomProductSearch').change(function () {
+               var loaiProductid = $('#NhomProductSearch option:selected').val();
+               var status = $('#StatusProduct option:selected').val();
+
+               if (loaiProductid == "") {
+                    $('#TableProduct').DataTable().clear().destroy();
+                    $('#TableProduct').DataTable({
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": true,
+                        "autoHeight": false,
+                        "responsive": false,
+                        "ajax": {
+                            "url": "/DmHangHoa/GetListProductByStatus",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { id: status},
+                        },
+                        "columns": [
+                            { "data": "MaHH", className: "text-left", width: "10%" },
+                            { "data": "TenHH", className: "text-left", width: "30%" },
+                            { "data": "TenDVT", className: "text-center", width: "10%" },
+                            { "data": "GiaMua", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "GiaBan1", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "GiaBan2", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "GiaBan3", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            {
+                                "data": null, "render": function (data) {
+                                    if (data.Status == 0) {
+
+                                        return "<a href='javascript:void(0);' id='btn_editProduct' data-id=" + data.MaHH + "  class='btn btn-sm btn-success'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_copyProduct' data-id=" + data.MaHH + "  class='btn btn-sm btn-secondary' style='margin-left:5px'><i class='fas fa-copy'></i> Copy</a><a href='javascript:void(0);' id='btn_pause' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-pause'></i>Dừng</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                    }
+                                    if (data.Status == 1) {
+                                        return "<a href='javascript:void(0);' id='btn_RestorePause' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-undo'></i>Khôi phục</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                    }
+                                    if (data.Status == 2) {
+                                        return "<a href='javascript:void(0);' id='btn_RestoreDelete' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-undo'></i>Khôi phục</a><a href='javascript:void(0);' id='btn_DeleteTrash' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='far fa-calendar-times'></i> Xóa</a>";
+                                    }
+                                }, className: "text-center", width: "10%",
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+               }
+               else {
+                    $('#TableProduct').DataTable().clear().destroy();
+                    $('#TableProduct').DataTable({
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": true,
+                        "autoHeight": false,
+                        "responsive": false,
+                        "ajax": {
+                            "url": "/DmHangHoa/GetListProductByStatusAndIdGroup",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { id: loaiProductid, status: status },
+                        },
+                        "columns": [
+                            { "data": "MaHH", className: "text-left", width: "10%" },
+                            { "data": "TenHH", className: "text-left", width: "30%" },
+                            { "data": "TenDVT", className: "text-center", width: "10%" },
+                            { "data": "GiaMua", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "GiaBan1", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "GiaBan2", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            { "data": "GiaBan3", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            {
+                                "data": null, "render": function (data) {
+                                    if (data.Status == 0) {
+
+                                        return "<a href='javascript:void(0);' id='btn_editProduct' data-id=" + data.MaHH + "  class='btn btn-sm btn-success'><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_copyProduct' data-id=" + data.MaHH + "  class='btn btn-sm btn-secondary' style='margin-left:5px'><i class='fas fa-copy'></i> Copy</a><a href='javascript:void(0);' id='btn_pause' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-pause'></i>Dừng</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                    }
+                                    if (data.Status == 1) {
+                                        return "<a href='javascript:void(0);' id='btn_RestorePause' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-undo'></i>Khôi phục</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                    }
+                                    if (data.Status == 2) {
+                                        return "<a href='javascript:void(0);' id='btn_RestoreDelete' data-id=" + data.MaHH + " class='btn btn-sm btn-warning' style='margin-left:5px'><i class='fas fa-undo'></i>Khôi phục</a><a href='javascript:void(0);' id='btn_DeleteTrash' data-id=" + data.MaHH + " class='btn btn-sm btn-danger' style='margin-left:5px'><i class='far fa-calendar-times'></i> Xóa</a>";
+                                    }
+                                }, className: "text-center", width: "10%",
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+           });
+           //Delete dang kinh doanh into trash
+           $('body').on('click', '#btn_delete', function () {
+                var delete_code = $(this).data("id");
+                if(confirm('Bạn có muốn xóa đối tượng này ?'))
+                {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("MoveTrash", "DmHangHoa")',
+                        data: {Ma: delete_code},
+                        success: function (data) {
+                            $('#TableProduct').DataTable().ajax.reload();
+                            toastr.success('Bạn đã xóa được đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                    });
+                }
+
+            });
+           //Pause dang kinh doanh
+           $('body').on('click', '#btn_pause', function () {
+                var code = $(this).data("id");
+                if(confirm('Bạn có muốn tạm dừng đối tượng này ?'))
+                {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Pause", "DmHangHoa")',
+                        data: {Ma: code},
+                        success: function(data) {
+                            $('#TableProduct').DataTable().ajax.reload();
+                            toastr.success('Bạn đã tạm dừng được đối tượng này!', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                    });
+                }
+
+            });
+           //Restore pause trong tam dung kinh doanh
+           $('body').on('click', '#btn_RestorePause', function () {
+                var code = $(this).data("id");
+                if(confirm('Bạn có muốn khôi phục đối tượng này ?'))
+                {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("RestorePause", "DmHangHoa")',
+                        data: { Ma: code },
+                        success: function (data) {
+                            $('#TableProduct').DataTable().ajax.reload();
+                            toastr.success('Bạn đã khôi phục thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+                    });
+                }
+           });
+           //Restore delete trong da xoa
+           $('body').on('click', '#btn_RestoreDelete', function () {
+                var delete_code = $(this).data("id");
+                if(confirm('Bạn có muốn khôi phục đối tượng này ?'))
+                {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("RestoreTrash", "DmHangHoa")',
+                        data: { Ma: delete_code },
+                        success: function (data) {
+                            $('#TableProduct').DataTable().ajax.reload();
+                            toastr.success('Bạn đã khôi phục thành công !', 'Thành công Alert', { timeOut: 5000 });
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                        }
+
+                    });
+                }
+
+            });
+           //Delete luon trash trong da xoa
+           $('body').on('click', '#btn_DeleteTrash', function () {
+                var delete_code = $(this).data("id");
+                //Check quyen xoa
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenDelete", "DmHangHoa")',
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                              if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                              {
+                              //Check ID in product
+                                 $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("CheckProductCodeDelete", "DmHangHoa")',
+                                    data: { Ma: delete_code },
+                                    success: function (data) {
+                                        if (data == true) {
+                                            //Delete product
+                                            $.ajax({
+                                                type: "POST",
+                                                url: '@Url.Action("DeleteTrash", "DmHangHoa")',
+                                                data: { Ma: delete_code },
+                                                success: function (data) {
+                                                    $('#TableProduct').DataTable().ajax.reload();
+                                                    toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                                                },
+                                                error: function (data) {
+                                                    console.log('Error:', data);
+                                                }
+
+                                            });
+                                        }
+                                        else {
+                                            toastr.error('Bạn không thể xóa, tên này đã sử dụng!', 'Không thành công Alert', { timeOut: 5000 });
+                                        }
+                                    }
+                                 });
+                              }
+                        }
+                        else {
+                            toastr.error('Bạn không thể xóa, chưa phân quyền xóa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+
+            });
+           //Copy dang kinh doanh
+           $('body').on('click', '#btn_copyProduct', function () {
+                var copy_code = $(this).data("id");
+                localStorage.setItem("myValue", copy_code);
+                //Get LoaiNhapXuat_id for order vote or OrderBack vote
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckMaHHForEdit", "DmHangHoa")',
+                    data: { Ma: copy_code },
+                    success: function (data) {
+                        if (data == true) {
+                            window.location.href = "/DmHangHoa/Copy";
+                        }
+                        else {
+                            window.location.href = "/DmHangHoa/CopyPhaChe";
+                        }
+                    }
+                });
+
+            });
+           //edit dang kinh doanh
+           $('body').on('click', '#btn_editProduct', function () {
+               var mahh = $(this).data("id");
+               localStorage.setItem("myValue", mahh);
+               //Get hang hoa hay pha che
+               $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckMaHHForEdit", "DmHangHoa")',
+                    data: { Ma: mahh },
+                    success: function (data) {
+                        if (data == true) {
+                            window.location.href = "/DmHangHoa/Edit";
+                        }
+                        else {
+                            window.location.href = "/DmHangHoa/EditPhaChe";
+                        }
+                    }
+                });
+
+           });
+           //btn link_refresh
+           $('#link_refresh').click(function () {
+                $('#searchName').val('');
+                $('#StatusProduct').val(0);
+                loadListGroupProduct();
+                loadListProduct();
+            })
+       });
+
+
+    </script>
+
+
+}

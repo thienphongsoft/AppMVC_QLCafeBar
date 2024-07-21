@@ -1,0 +1,816 @@
+﻿
+@{
+    ViewBag.Title = "Phiếu thu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
+</div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Phiếu thu</li>
+                </ol>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <button type="button" id="btn_createPhieu" name="btn_createPhieu" class="btn btn-primary"><i class="fas fa-plus"></i> Tạo phiếu thu</button>
+                </div>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Tìm Từ ngày - Đến ngày:</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="far fa-calendar-alt"></i>
+                                </span>
+                            </div>
+                            <input type="text" class="form-control float-right" id="reportrange">
+                            <p style="display:none;">Từ ngày: <b id="TuNgay"></b> </p>
+                            <p style="display:none;">Đến ngày: <b id="DenNgay"></b></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label>Tìm tên đối tượng:</label>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="searchObject" name="searchObject" class="form-control" placeholder="Tên đối tượng">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <!-- search theo loai thu chi -->
+                    <label>Tìm tính chất thu:</label>
+                    <div class="form-group row">
+                        <div class="input-group">
+                            <select id="searchLoaiPhieuThu" name="searchLoaiPhieuThu" class="form-control">
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <div class="small-box-footer">
+                <div class="inner">
+                    <h6>Tổng số: <span id="spInputCount" class="text-danger"> 0</span> phiếu thu -- Tổng số tiền: <span id="spTienInput" class="text-danger"> 0</span></h6>
+                </div>
+            </div>
+            <table class="table table-sm table-bordered nowrap" cellpadding="0" width="100%" id="TablePayment">
+                <thead>
+                    <tr>
+                        <th>
+                            +/-
+                        </th>
+                        <th>
+                            Số phiếu
+                        </th>
+                        <th>
+                            Ngày phiếu
+                        </th>
+                        <th>
+                            Loại phiếu thu
+                        </th>
+                        <th>
+                            Tên đối tượng
+                        </th>
+                        <th>
+                            Địa chỉ
+                        </th>
+                        <th style="text-align:right;">
+                            Số tiền
+                        </th>
+                        <th>
+                            Chức năng
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="card card-footer">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h6>Khổ giấy in: <span id="spPageSize" class="text-danger"></span> <button type="button" id="btn_ConfigSize" name="btn_ConfigSize" class="btn btn-outline-secondary btn-sm"><i class="fas fa-tools" title="Chọn loại khổ giấy"></i></button></h6>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModalPageSizeIn" role="dialog" data-url='@Url.Action("_PartialPageSize","PhieuThu")'></div>
+<div class="modal fade" id="myModalListPageSize" role="dialog" data-url='@Url.Action("_PartialListPageSize","PhieuThu")'></div>
+@section scripts{
+    <style type="text/css">
+        td.details-control {
+            background: url('/AdminLTE310/dist/img/details_open.png') no-repeat center center;
+            cursor: pointer;
+        }
+
+        tr.details td.details-control {
+            background: url('/AdminLTE310/dist/img/details_close.png') no-repeat center center;
+        }
+    </style>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            //Load PageSize default
+            var ckpagesizex = $.cookie("ckPageSizeT");
+            var ckpagesizetext = $.cookie("ckPageSizeText");
+            if (ckpagesizex != null) {
+                $('#spPageSize').val(ckpagesizex);
+                $('#spPageSize').text(ckpagesizetext);
+            }
+            else {
+                $('#spPageSize').text("Khổ giấy - 8.0 cm");
+                $('#spPageSize').val("KhoGiay80");
+            }
+            //Load dropdowwn Loai phieu thu
+            loadDropdownPhieuChi();
+            function loadDropdownPhieuChi() {
+                $.ajax({
+                    url: "/PhieuThu/ListLoaiThuChi",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#searchLoaiPhieuThu').empty();
+                        $('#searchLoaiPhieuThu').append("<option value=''>-- Tất cả --</option>");
+                        $.each(data, function (key, value) {
+                            $("#searchLoaiPhieuThu").append($("<option></option>").val(value.LoaiThuChi_ID).html(value.TenLoaiThuChi));
+                        });
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+            //load table phieu thu ngay hien tai
+            var dt = $('#TablePayment').DataTable({
+                //"destroy": true,
+                //"scrollY": "200px",
+                "scrollX": true,
+                "sScrollXInner": "100%",
+                "scrollCollapse": true,
+                "scroller": true,
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": true,
+                "autoHeight": false,
+                "responsive": false,
+                //"order": [], //Initial no order.
+                //"aaSorting": [],
+                "ajax": {
+                    "url": "/PhieuThu/GetListDmPhieuThuByNow",
+                    "type": "GET",
+                    "datatype": "json",
+                },
+                "columns": [
+                    {
+                        "class": "details-control",
+                        "orderable": false,
+                        "data": null,
+                        "defaultContent": "", className: "text-center", width: "5%",
+                    },
+                    {
+                        "data": null, "render": function (data, type, row) {
+                            return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.ThuChi_ID + ">" + data.SoPhieu + "</a>";
+                        }, className: "text-center", width: "10%",
+                    },
+                    {
+                        "data": "NgayPhieu", render: function (d) {
+                            return moment(d).format('DD/MM/YYYY');
+                        }, className: "text-center", width: "10%",
+                    },
+                    { "data": "TenLoaiThuChi", className: "text-wrap", width: "25%" },
+                    { "data": "TenDT", className: "text-wrap", width: "25%" },
+                    { "data": "DiaChi", className: "text-wrap", width: "25%" },
+                    { "data": "SoTien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                    {
+                        "data": "ThuChi_ID", "render": function (data) {
+                            return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + "  class='btn btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_in' data-id=" + data + "  class='btn btn-secondary' title ='In phiếu' style='margin-left:5px')><i class='fas fa-print'></i> In phiếu</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                        }, className: "text-center", width: "10%"
+                    },
+                ],
+                "footerCallback": function () {
+                    var api = this.api();
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+                    // Total over this page
+                    pageTotal6 = api
+                        .column(6, { page: 'current' })
+                        .data()
+                        .reduce(function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0);
+                    $('#spTienInput').text(tp_encode_currency_format(pageTotal6));
+                    $('#spInputCount').text(this.fnSettings().fnRecordsTotal());
+                },
+                "language": {
+
+                    "emptyTable": "Chưa có nội dung hiện thị"
+                }
+
+            });
+            function format(d) {
+                return 'Lý do: ' + d.LyDo + '<br>' +
+                    'Người nhận: ' + d.NguoiNhanNop + '<br>' +
+                    'Hình thức thanh toán: ' + (d.HinhThucThanhToan == true ? 'Tiền mặt' : 'Chuyển khoản') + '<br>' +
+                    'Tên ngân hàng: ' + d.TenNganHang;
+            }
+            // Array to track the ids of the details displayed rows
+            var detailRows = [];
+            $('#TablePayment tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = dt.row(tr);
+                var idx = $.inArray(tr.attr('id'), detailRows);
+
+                if (row.child.isShown()) {
+                    tr.removeClass('details');
+                    row.child.hide();
+
+                    // Remove from the 'open' array
+                    detailRows.splice(idx, 1);
+                }
+                else {
+                    tr.addClass('details');
+                    row.child(format(row.data())).show();
+
+                    //// Add to the 'open' array
+                    if (idx === -1) {
+                        detailRows.push(tr.attr('id'));
+                    }
+                }
+            });
+            // On each draw, loop over the `detailRows` array and show any child rows
+            dt.on('draw', function () {
+                $.each(detailRows, function (i, id) {
+                    $('#' + id + ' td.details-control').trigger('click');
+                });
+            });
+            //Search by Loai thu chi
+            $('#searchLoaiPhieuThu').change(function () {
+                var loaithuchi_id = $('#searchLoaiPhieuThu option:selected').val();
+                if ($(this).val() === "") {
+                    toastr.error('Chưa chọn loại thu nào !', 'Bị lỗi', { timeOut: 3000 });
+                }
+                else {
+                    //search table
+                    $('.overlay').show();
+                    dt.clear().destroy();
+                    dt = $('#TablePayment').DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": false,
+                        "responsive": false,
+                        "ajax": {
+                            "url": "/PhieuThu/GetListDmPhieuThuByLoaiThuChiID",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { id: loaithuchi_id },
+                        },
+                        "columns": [
+                            {
+                                "class": "details-control",
+                                "orderable": false,
+                                "data": null,
+                                "defaultContent": "", className: "text-center", width: "5%",
+                            },
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.ThuChi_ID + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "10%",
+                            },
+                            {
+                                "data": "NgayPhieu", render: function (d) {
+                                    return moment(d).format('DD/MM/YYYY');
+                                }, className: "text-center", width: "10%",
+                            },
+                            { "data": "TenLoaiThuChi", className: "text-wrap", width: "25%" },
+                            { "data": "TenDT", className: "text-wrap", width: "25%" },
+                            { "data": "DiaChi", className: "text-wrap", width: "25%" },
+                            { "data": "SoTien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            {
+                                "data": "ThuChi_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + "  class='btn btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_in' data-id=" + data + "  class='btn btn-secondary' title ='In phiếu' style='margin-left:5px')><i class='fas fa-print'></i> In phiếu</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "footerCallback": function () {
+                            var api = this.api();
+                            //Remove the formatting to get integer data for summation
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+                            //Total over this page
+                            pageTotal6 = api
+                                .column(6, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienInput').text(tp_encode_currency_format(pageTotal6));
+                            $('#spInputCount').text(this.fnSettings().fnRecordsTotal());
+                        },
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                    $('.overlay').hide();
+                }
+            });
+            //Search by name and date
+            $('#searchObject').on('keyup change', function () {
+                var ngaystart = $('#TuNgay').text();
+                var ngayend = $('#DenNgay').text();
+                var name = $('#searchObject').val();
+                if (name != "") {
+                    $('.overlay').show();
+                    dt.clear().destroy();
+                    dt = $('#TablePayment').DataTable({
+                        "scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": false,
+                        "responsive": false,
+                        "ajax": {
+                            "url": "/PhieuThu/GetListPhieuThuByDateAndName",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: ngaystart, ngayEnd: ngayend, TenDT: name },
+                        },
+                        "columns": [
+                            {
+                                "class": "details-control",
+                                "orderable": false,
+                                "data": null,
+                                "defaultContent": "", className: "text-center", width: "5%",
+                            },
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.ThuChi_ID + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "10%",
+                            },
+                            {
+                                "data": "NgayPhieu", render: function (d) {
+                                    return moment(d).format('DD/MM/YYYY');
+                                }, className: "text-center", width: "10%",
+                            },
+                            { "data": "TenLoaiThuChi", className: "text-wrap", width: "25%" },
+                            { "data": "TenDT", className: "text-wrap", width: "25%" },
+                            { "data": "DiaChi", className: "text-wrap", width: "25%" },
+                            { "data": "SoTien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            {
+                                "data": "ThuChi_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + "  class='btn btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_in' data-id=" + data + "  class='btn btn-secondary' title ='In phiếu' style='margin-left:5px')><i class='fas fa-print'></i> In phiếu</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "footerCallback": function () {
+                            var api = this.api();
+                            // Remove the formatting to get integer data for summation
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+                            //Total over this page
+                            pageTotal6 = api
+                                .column(6, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienInput').text(tp_encode_currency_format(pageTotal6));
+                            $('#spInputCount').text(this.fnSettings().fnRecordsTotal());
+                        },
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                    $('.overlay').hide();
+                }
+                else {
+                    $('#TableInput').DataTable().clear().destroy();
+                }
+            });
+           //functon format number for keyup
+            function tp_encode_currency_format(obs) {
+                return obs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            //load ngay thang
+            $(function () {
+                var start = moment();
+                var end = moment();
+                function cb(start, end) {
+                    $('#reportrange').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgay').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgay').text(end.format('YYYY-MM-DD'));
+                }
+                cb(start, end);
+            });
+            //Load Default Phieu thu by ngay phieu in load page
+            $('#reportrange').daterangepicker({
+                locale: {
+                        format: 'DD/MM/YYYY'
+                },
+                timepicker: false,
+                datepicker: true,
+                startDate: moment(),
+                endDate: moment(),
+                ranges: {
+                    'Hôm nay': [moment(), moment()],
+                    'ngày hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                    '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                    'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                    'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+
+            },
+                function (start, end) {
+                    $('#reportrange').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                    $('#TuNgay').text(start.format('YYYY-MM-DD'));
+                    $('#DenNgay').text(end.format('YYYY-MM-DD'));
+                    //search table
+                    dt.clear().destroy();
+                    dt = $('#TablePayment').DataTable({
+                        //"destroy": true,
+                        //"scrollY": "200px",
+                        "scrollX": true,
+                        "sScrollXInner": "100%",
+                        "scrollCollapse": true,
+                        "scroller": true,
+                        "paging": true,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        "autoWidth": true,
+                        "autoHeight": false,
+                        "responsive": false,
+                        //"order": [], //Initial no order.
+                        //"aaSorting": [],
+                        "ajax": {
+                            "url": "/PhieuThu/GetListDmPhieuThuByDate",
+                            "type": "GET",
+                            "datatype": "json",
+                            "data": { ngayStart: start.format('YYYY-MM-DD'), ngayEnd: end.format('YYYY-MM-DD') },
+                        },
+                        "columns": [
+                            {
+                                "class": "details-control",
+                                "orderable": false,
+                                "data": null,
+                                "defaultContent": "", className: "text-center", width: "5%",
+                            },
+                            {
+                                "data": null, "render": function (data, type, row) {
+                                    return "<a href='javascript:void(0);' id='btn_detail' data-id=" + data.ThuChi_ID + ">" + data.SoPhieu + "</a>";
+                                }, className: "text-center", width: "10%",
+                            },
+                            {
+                                "data": "NgayPhieu", render: function (d) {
+                                    return moment(d).format('DD/MM/YYYY');
+                                }, className: "text-center", width: "10%",
+                            },
+                            { "data": "TenLoaiThuChi", className: "text-wrap", width: "25%" },
+                            { "data": "TenDT", className: "text-wrap", width: "25%" },
+                            { "data": "DiaChi", className: "text-wrap", width: "25%" },
+                            { "data": "SoTien", render: $.fn.dataTable.render.number(',', '.', 0), className: "text-right", width: "10%" },
+                            {
+                                "data": "ThuChi_ID", "render": function (data) {
+                                    return "<a href='javascript:void(0);' id='btn_edit' data-id=" + data + "  class='btn btn-success' title ='Sửa phiếu')><i class='fas fa-edit'></i> Sửa</a><a href='javascript:void(0);' id='btn_in' data-id=" + data + "  class='btn btn-secondary' title ='In phiếu' style='margin-left:5px')><i class='fas fa-print'></i> In phiếu</a><a href='javascript:void(0);' id='btn_delete' data-id=" + data + " class='btn btn-danger' title='Xóa phiếu' style='margin-left:5px'><i class='fas fa-trash'></i> Xóa</a>";
+                                }, className: "text-center", width: "10%"
+                            },
+                        ],
+                        "footerCallback": function () {
+                            var api = this.api();
+                            // Remove the formatting to get integer data for summation
+                            var intVal = function (i) {
+                                return typeof i === 'string' ?
+                                    i.replace(/[\$,]/g, '') * 1 :
+                                    typeof i === 'number' ?
+                                        i : 0;
+                            };
+                            // Total over this page
+                            pageTotal6 = api
+                                .column(6, { page: 'current' })
+                                .data()
+                                .reduce(function (a, b) {
+                                    return intVal(a) + intVal(b);
+                                }, 0);
+                            $('#spTienInput').text(tp_encode_currency_format(pageTotal6));
+                            $('#spInputCount').text(this.fnSettings().fnRecordsTotal());
+                        },
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+                }
+            )
+            //Load modal Config PageSize
+            $('#btn_ConfigSize').click(function () {
+                $('.overlay').show();
+                var url = $('#myModalPageSizeIn').data('url');
+                $.get(url, function (data) {
+                    //load list kho giay
+                    LoadSelectPageSize();
+                    $('#myModalPageSizeIn').html(data);
+                    $('#myModalPageSizeIn').modal('show');
+                });
+            });
+            //Load select page size
+            function LoadSelectPageSize() {
+                $.ajax({
+                    url: "/PhieuThu/GetPageSizeHien",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        //$("#PrinterName").html(data); // HTML DOM replace
+                        $('#pageSize_id').empty();
+                        $.each(data, function (key, value) {
+                            $("#pageSize_id").append($("<option></option>").val(value.TenFile).html(value.TenKhoGiay));
+                        });
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+            //Load modal list Page Size all
+            $(document).on('click', '#btn_ShowPageSize', function () {
+                $('.overlay').show();
+                var url = $('#myModalListPageSize').data('url');
+                $.get(url, function (data) {
+                    //load list page size
+                    $('#myModalListPageSize').html(data);
+                    $('#myModalListPageSize').modal('show');
+                    $("#TablePageSize").DataTable({
+                        'paging': true,
+                        "lengthChange": false,
+                        "searching": false,
+                        "ordering": false,
+                        "info": false,
+                        "autoWidth": false,
+                        "responsive": true,
+                        "ajax": {
+                            "url": "/PhieuThu/GetListPageSize",
+                            "type": "GET",
+                            "datatype": "json",
+                        },
+                        "columns": [
+                            { "data": "KhoGiay_ID", visible: false },
+                            { "data": "TenKhoGiay" },
+                            {
+                                "data": "AnHien",
+                                render: function (data, type, row) {
+                                    return data == 1 ? 'Hiện' : 'Ẩn'
+                                }
+                            },
+                            {
+                                "data": "KhoGiay_ID",
+                                "render": function (data) {
+                                    return "<a href='javascript: void (0); ' id='btn_showHide' data-id=" + data + " class='btn btn-sm btn-warning' style='margin - left: 5px'><i class='fas fa-check'></i> Ẩn/Hiện</a>";
+                                },
+                            },
+                        ],
+                        "language": {
+
+                            "emptyTable": "Chưa có nội dung hiện thị"
+                        }
+
+                    });
+
+                });
+                $('.overlay').hide();
+            });
+            //save cau hinh danh sach kho giay
+            $(document).on('click', '#btn_showHide', function () {
+                var showhide_id = $(this).data("id");
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ShowHideKhoGiay", "PhieuThu")/' + showhide_id,
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $('#TablePageSize').DataTable().ajax.reload();
+                        LoadSelectPageSize();
+                        //toastr.success('Bạn đã thực hiện thành công !', 'Thành công Alert', { timeOut: 5000 });
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+
+            });
+            //Save PageSize
+            $(document).on('click', '#btn_savePageSize', function () {
+                var tentile = $('#pageSize_id option:selected').val();
+                var sizeText = $('#pageSize_id option:selected').text();
+                $('#spPageSize').val(tentile)
+                $.cookie("ckPageSizeT", $('#spPageSize').val(), { expires: 360 });
+                $('#spPageSize').text(sizeText)
+                $.cookie("ckPageSizeText", $('#spPageSize').text(), { expires: 360 });
+                $('#myModalPageSizeIn').modal('hide');
+
+            });
+            //Tao phieu thu
+            $('#btn_createPhieu').click(function () {
+                //Check quyen tao
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenCreate", "PhieuThu")',
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            window.location.href = "/PhieuThu/Create";
+                        }
+                        else {
+                            toastr.error('Bạn không thể tạo, chưa phân quyền tạo!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //Delete phieu thu
+            $('body').on('click', '#btn_delete', function () {
+                var delete_id = $(this).data("id");
+                //Check quyen xoa
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenDelete", "PhieuThu")',
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                             if (confirm('Bạn có muốn xóa vĩnh viễn đối tượng này ?'))
+                             {
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@Url.Action("Delete", "PhieuThu")/' + delete_id,
+                                    success: function (data) {
+                                        $('#TablePayment').DataTable().ajax.reload();
+                                        toastr.success('Bạn đã xóa đối tượng này thành công !', 'Thành công Alert', { timeOut: 5000 });
+                                    },
+                                    error: function (data) {
+                                        console.log('Error:', data);
+                                    }
+                                });
+                             }
+                        }
+                        else {
+                            toastr.error('Bạn không thể xóa, chưa phân quyền xóa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //In phieu
+            $('body').on('click', '#btn_in', function () {
+                var phieu_id = $(this).data("id");
+                var pagesize = $('#spPageSize').val();
+                //Check quyen in phieu
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenInPhieu", "PhieuThu")',
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("InPhieuThu", "PhieuThu")',
+                                data: { id: phieu_id, pagesize: pagesize },
+                                success: function (data) {
+                                    window.location.href = "/PhieuThu/FormInPhieuThu";
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+
+                            });
+                        }
+                        else {
+                            toastr.error('Bạn không thể in phiếu, chưa phân quyền in phiếu!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //Edit phieu
+            $('body').on('click', '#btn_edit', function () {
+                var phieu_id = $(this).data("id");
+                //Check quyen sua
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckQuyenEdit", "PhieuThu")',
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        if (data == true) {
+                            localStorage.setItem("myValue", phieu_id);
+                            window.location.href = "/PhieuThu/Edit";
+                        }
+                        else {
+                            toastr.error('Bạn không thể sửa, chưa phân quyền sửa!', 'Không thành công Alert', { timeOut: 5000 });
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+        });
+    </script>
+
+
+}
+
+

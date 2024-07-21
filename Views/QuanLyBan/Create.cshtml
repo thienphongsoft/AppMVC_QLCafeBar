@@ -1,0 +1,2179 @@
+﻿
+@{
+    ViewBag.Title = "Order món";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="overlay-wrapper">
+    <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Chờ trong giây lát</div></div>
+</div>
+<section class="content" id="FormChonSP">
+    <div class="container-fluid">
+        <div class="card card-info">
+            <div class="card-header">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div>
+                    <input type="text" id="inputSearch" name="inputSearch" class="form-control form-control" placeholder="nhập sản phẩm">
+                    <span class="input-group-append">
+                        <button type="button" id="btn_backSPTop" class="btn btn-warning btn-flat" data-dismiss="modal">&times;</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- nhom san pham -->
+                <div class="col-md-3 col-3">
+                    <div id="colNhomProduct">
+                    </div>
+                </div>
+                <!-- Danh muc san pham -->
+                <div class="col-md-9 col-9">
+                    <table class="table table-striped table-bordered dt-responsive nowrap" id="TableProduct">
+                        <tbody id="trDiv"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" id="btn_backSP" name="btn_backSP" class="btn btn-warning float-right"><i class="fas fa-backward"></i> Quay lại</button>
+        </div>
+    </div>
+</section>
+<div class="content-header" id="FormMain">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Tổng quan</a></li>
+                    <li class="breadcrumb-item active">Tạo phiếu xuất <a href="#" id="link_refresh"><i class="nav-icon fas fa-sync-alt"></i></a></li>
+                </ol>
+            </div>
+            <div class="col-sm-8">
+                <div class="float-right">
+                    <button type="button" id="btn_create_ok" name="btn_create_ok" class="btn btn-app bg-success"><i class="fas fa-save"></i> Tính tiền</button>
+                    <button type="button" id="btn_create_in" name="btn_create_in" class="btn btn-app bg-success"><i class="fas fa-print"></i> Tính tiền + in</button>
+                    <button type="button" id="btn_order" name="btn_order" class="btn btn-app bg-primary"><i class="fas fa-check"></i>Tạm tính</button>
+                    <button type="button" id="btn_in_order" name="btn_in_order" class="btn btn-app bg-danger"><i class="fas fa-print"></i> In order</button>
+                    <a href="@Url.Action("Index","QuanLyBan")" class="btn btn-app bg-warning"> <i class="fas fa-backward"></i> Quay lại</a>
+                </div>
+            </div>
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+<!-- Main content -->
+<section class="content" id="ContentMain">
+    <div class="container-fluid">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="card card-primary">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- text input ten ban -->
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <input type="hidden" id="txtBan_ID" name="txtBan_ID" value="@ViewBag.Ban_ID" />
+                                <input type="hidden" id="txtGiaBan_ID" name="txtGiaBan_ID" value="@ViewBag.GiaBan" />
+                                <label for="TenBan" class="col-md-4 col-form-label">Tên bàn:</label>
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" readonly="readonly" id="txtTenBan" name="txtTenBan" value="@ViewBag.TenBan" />
+                                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                            <i class="far fa-file-alt mr-1"></i> Chi tiết
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+               
+                    </div>
+                    <div class="collapse" id="collapseExample">
+                        <div class="card card-body">
+                            <div class="row">
+                                <!-- text input date -->
+                                <div class="col-md-3">
+                                    <div class="form-group row">
+                                        <label for="inputDate" class="col-md-5 col-form-label">Ngày phiếu:</label>
+                                        <div class="col-md-7">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control float-right" id="inputNgay">
+                                                <p style="display:none;">Ngày phiếu: <b id="txtNgayPhieu"></b></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- text so phieu -->
+                                <div class="col-md-3">
+                                    <div class="form-group row">
+                                        <label for="sophieu" class="col-md-4 col-form-label">Số phiếu:</label>
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <input type="hidden" id="txtPhieu_ID" name="txtPhieu_ID" />
+                                                <input type="text" class="form-control" readonly="readonly" id="txtSoPhieu" name="txtSoPhieu" value="" placeholder="Mới" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                             
+                            </div>
+                            <div class="row">
+                                <!-- text ma khach hang -->
+                                <div class="col-md-5">
+                                    <div class="form-group row">
+                                        <label for="khachhang" class="col-md-3 col-form-label">khách hàng:</label>
+                                        <div class="col-md-9">
+                                            <div class="input-group">
+                                                <input type="text" id="txtNhapObject" name="txtNhapObject" autocomplete="off" class="form-control" value="" placeholder="Nhập mã, tên khách" />
+                                                <input type="text" id="txtObjectCode" name="txtObjectCode" class="form-control" value="" readonly="readonly" placeholder="mã khách" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- text ten khach hang -->
+                                <div class="col-md-7">
+                                    <div class="form-group row">
+                                        <input type="hidden" id="txtThuChi_ID" name="txtThuChi_ID" />
+                                        <input type="hidden" id="txtDT_ID" name="txtDT_ID" />
+                                        <div class="col-md-12">
+                                            <div class="input-group">
+                                                <input type="text" id="txtObjectName" name="txtObjectName" class="form-control" placeholder="Tên khách hàng" readonly="readonly" style="font-weight:bold;" />
+                                                <span class="input-group-append">
+                                                    <button type="button" id="btn_createObject" name="btn_createObject" class="btn btn-warning btn-flat"><i class="fas fa-plus"></i></button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <!-- text input address -->
+                                <div class="col-md-12">
+                                    <div class="form-group row">
+                                        <label for="orderAddress" class="col-md-2 col-form-label">Địa chỉ:</label>
+                                        <div class="col-md-10">
+                                            <div class="input-group">
+                                                <input type="text" id="txtDiaChi" name="txtDiaChi" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- text code product -->
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <input type="hidden" id="txtProduct_id" name="txtProduct_id" placeholder="id_hh" />
+                                <input type="hidden" id="txtDnMH_id" name="txtDnMH_id" placeholder="id_dn" />
+                                <input type="hidden" id="txtDVT_id" name="txtDVT_id" placeholder="dvt_id" />
+                                <input type="hidden" id="txtTenDVT" name="txtTenDVT" placeholder="TenDVT" />
+                                <input type="hidden" id="txtGiaMua" name="txtGiaMua" placeholder="txtGiaMua" />
+                                <input type="hidden" id="txtGiaBan1" name="txtGiaBan1" placeholder="txtGiaBan1" />
+                                <input type="hidden" id="txtGiaBan2" name="txtGiaBan2" placeholder="txtGiaBan2" />
+                                <input type="hidden" id="txtGiaBan3" name="txtGiaBan3" placeholder="txtGiaBan3" />
+                                <div class="input-group">
+                                    <input type="text" id="txtCodeProduct" autocomplete="off" name="txtCodeProduct" class="form-control" placeholder="Nhập mã hoặc tên hàng" />
+                                </div>
+                            </div>
+                        </div>
+                        <!-- text so luong -->
+                        <div class="col-sm-3" style="display:none;">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-append">
+                                        <button type="button" id="btn_minus" name="btn_minus" class="btn btn-default btn-flat"><i class="fa fas fa-minus"></i></button>
+                                    </span>
+                                    <input type="text" id="txtSoLuongNhap" name="txtSoLuongNhap" class="form-control" placeholder="Nhập SL" style="text-align:center;" />
+                                    <span class="input-group-append">
+                                        <button type="button" id="btn_plus" name="btn_plus" class="btn btn-default btn-flat"><i class="fa fas fa-plus"></i></button>
+                                    </span>
+                                    <span class="input-group-append">
+                                        <button type="button" id="btn_enter" name="btn_enter" class="btn btn-info btn-flat">Enter</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- text ten hang hoa -->
+                        <div class="col-sm-5" style="display:none;">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <input type="text" id="txtNameProduct" name="txtNameProduct" class="form-control" placeholder="Tên hàng hóa" readonly="readonly" style="font-weight:bold;" />
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- table order product -->
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="card-body table-responsive p-0">
+                                <table class="table table-head-fixed table-bordered nowrap" cellpadding="0" width="100%" id="TableXuatHang">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;">
+                                                Mã Hàng
+                                            </th>
+                                            <th>
+                                                Tên Hàng
+                                            </th>
+                                            <th>
+                                                ĐVT
+                                            </th>
+                                            <th>
+                                                Số lượng
+                                            </th>
+                                            <th>
+                                                Đơn giá
+                                            </th>
+                                            <th>
+                                                Thành tiền
+                                            </th>
+                                            <th>
+
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <div class="small-box bg-secondary disabled color-palette">
+                                    <div class="inner">
+                                        <h6>Tổng số: <span id="spCount" class="text-warning"> 0</span> mặt hàng -- Tổng số lượng: <span id="spSoLuong" class="text-warning"> 0</span> -- Cộng tiền hàng: <span id="spTienHang" class="text-warning"> 0</span></h6>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--Nhap tien thanh toan -->
+                            <div class="col-sm-8 offset-sm-3">
+                                <div class="card card-primary card-tabs">
+                                    <div class="card-header p-0 pt-1">
+                                        <ul class="nav nav-tabs" role="tablist">
+                                            <li class="nav-item">
+                                                <a class="nav-link active" href="#ThanhToan" data-toggle="pill">Thanh toán</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="#PhatSinh" data-toggle="pill">Phát sinh</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tab-content">
+                                            <div class="tab-pane container active p-0" id="ThanhToan">
+                                                <div class="row">
+                                                    <div class="col-sm-8">
+                                                        <div class="info-box md-3 bg-warning">
+                                                            <div class="info-box-content">
+                                                                <div class="form-group row">
+                                                                    <label class="col-md-4 col-form-label">% Giảm giá:</label>
+                                                                    <div class="col-md-8 float-left">
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-append">
+                                                                                <select id="TyLeGiamGia" name="TyLeGiamGia" class="form-control">
+                                                                                    <option value="0">0</option>
+                                                                                    <option value="5">5</option>
+                                                                                    <option value="10">10</option>
+                                                                                    <option value="15">15</option>
+                                                                                    <option value="20">20</option>
+                                                                                    <option value="25">25</option>
+                                                                                    <option value="30">30</option>
+                                                                                </select>
+                                                                            </span>
+                                                                            <input type="text" id="txtTienGiamGia" name="txtTienGiamGia" class="form-control" readonly="readonly" maxlength="15" value="0" style="text-align:right;">
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="small-box bg-danger">
+                                                            <div class="inner">
+                                                                <label>Tiền thanh toán:</label>
+                                                                <div class="col-sm-12 float-left">
+                                                                    <input type="text" id="txtTienThanhToan" name="txtTienThanhToan" class="form-control" maxlength="15" value="0" readonly="readonly" style="text-align:right;">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane container p-1" id="PhatSinh">
+                                                <div class="row">
+                                                    <div class="col-sm-8">
+                                                        <div class="info-box md-3 bg-warning">
+                                                            <div class="info-box-content">
+                                                                <div class="form-group row">
+                                                                    <label class="col-md-4 col-form-label">% phí phục vụ:</label>
+                                                                    <div class="col-md-8 float-left">
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-append">
+                                                                                <select id="TyLePhucVu" name="TyLePhucVu" class="form-control">
+                                                                                    <option value="0">0</option>
+                                                                                    <option value="5">5</option>
+                                                                                    <option value="10">10</option>
+                                                                                    <option value="15">15</option>
+                                                                                    <option value="20">20</option>
+                                                                                    <option value="25">25</option>
+                                                                                    <option value="30">30</option>
+                                                                                </select>
+                                                                            </span>
+                                                                            <input type="text" id="txtTienPhucVu" name="txtTienPhucVu" class="form-control" readonly="readonly" maxlength="15" value="0" style="text-align:right;">
+                                                                        </div>
+
+                                                                    </div>
+                                                                    <label class="col-md-4 col-form-label">% Thuế suất:</label>
+                                                                    <div class="col-md-8 float-left">
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-append">
+                                                                                <select id="TyLeThue" name="TyLeThue" class="form-control">
+                                                                                    <option value="0">0</option>
+                                                                                    <option value="5">5</option>
+                                                                                    <option value="10">10</option>
+                                                                                    <option value="15">15</option>
+                                                                                    <option value="20">20</option>
+                                                                                    <option value="25">25</option>
+                                                                                    <option value="30">30</option>
+                                                                                </select>
+                                                                            </span>
+                                                                            <input type="text" id="txtTienThue" name="txtTienThue" class="form-control" readonly="readonly" maxlength="15" value="0" style="text-align:right;">
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="small-box bg-warning">
+                                                            <div class="inner">
+                                                                <label>Tiền phát sinh:</label>
+                                                                <div class="col-sm-12 float-left">
+                                                                    <input type="text" id="txtTienPhatSinh" name="txtTienPhatSinh" class="form-control" maxlength="15" value="0" style="text-align:right;">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--hinh thuc thanh toan -->
+                            <div class="col-sm-8 offset-sm-3">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <!-- radio -->
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-danger d-inline">
+                                                <input type="radio" id="radioThuTien" name="rThu" checked>
+                                                <label for="radioThuTien"> Thu tiền
+                                                </label>
+                                            </div>
+                                            <div class="icheck-danger d-inline">
+                                                <input type="radio" id="radioGhiNo" name="rThu">
+                                                <label for="radioGhiNo"> Ghi nợ
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <!-- radio -->
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radioTienMat" name="rTien" checked>
+                                                <label for="radioTienMat">
+                                                    Tiền mặt
+                                                </label>
+                                            </div>
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radioChuyenKhoan" name="rTien">
+                                                <label for="radioChuyenKhoan">
+                                                    Chuyển khoản
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="input-group input-group">
+                                            <select id="NganHang_ID" name="NganHang_ID" class="form-control form-control-sm">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="card card-footer">
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <h6>Khổ giấy in: <span id="spPageSize" class="text-danger"></span> <button type="button" id="btn_ConfigSize" class="btn btn-outline-primary btn-sm"><i class="fas fa-tools" title="Chọn loại khổ giấy in"></i></button></h6>
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="float-right">
+                                <button type="button" id="btn_createFooter_ok" name="btn_createFooter_ok" class="btn btn-app bg-success"><i class="fas fa-save"></i> Tính tiền</button>
+                                <button type="button" id="btn_createFooter_in" name="btn_createFooter_in" class="btn btn-app bg-success"><i class="fas fa-print"></i> Tính tiền + in</button>
+                                <button type="button" id="btn_orderFooter" name="btn_orderFooter" class="btn btn-app bg-primary "><i class="fas fa-check"></i> Tạm tính</button>
+                                <button type="button" id="btn_in_orderFooter" name="btn_in_orderFooter" class="btn btn-app bg-danger "><i class="fas fa-print"></i> In order</button>
+                                <a href="@Url.Action("Index", "QuanLyBan")" class="btn btn-app bg-warning"> <i class="fas fa-backward"></i> Quay lại</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="modal fade" id="myModalObject" role="dialog" data-url='@Url.Action("_PartialObject","QuanLyBan")'></div>
+    <div class="modal fade" id="myModalConfigIn" role="dialog" data-url='@Url.Action("_PartialKhoGiay","QuanLyBan")'></div>
+
+</section>
+
+@section scripts{
+    <script src="~/Scripts/thienphong/formatnumber.js"></script>
+    <style type="text/css">
+        .green {
+            color: Green;
+        }
+
+        .red {
+            color: Red;
+        }
+
+        .col-md-3.col-3 {
+            margin-top: 0.4em;
+        }
+
+        .modal-body {
+            margin-top: -1.6em;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //set defautl load form
+            $('#FormChonSP').hide();
+            //Form quay lai
+            $('#btn_backSP, #btn_backSPTop').click(function () {
+                $('#FormChonSP').hide();
+                $('#FormMain').show();
+                $('#ContentMain').show();
+                $('#txtCodeProduct').val('');
+                $('#txtTienPhatSinh').focus();
+            });
+            //load khach mua le
+            loadKML();
+            function loadKML () {
+                $.ajax({
+                    url: "/QuanLyBan/GetKhachMuaLe",
+                    method: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#txtDT_ID").val(data.DT_ID);
+                        var myMa = data.MaDT;
+                        myMa = jQuery.trim(myMa);
+                        $("#txtObjectCode").val(myMa);
+                        $("#txtObjectName").val(data.TenDT);
+                        $("#txtCodeProduct").focus();
+                        LoadSoPhieuMoi();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                        toastr.error('Mã đối tượng khách mua lẻ không có !', 'Bị lỗi', { timeOut: 3000 });
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+            }
+            //Load so phieu moi
+            function LoadSoPhieuMoi() {
+                $.ajax({
+                    url: "/QuanLyBan/GetSoPhieuMoi",
+                    type: "GET",
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $('#txtSoPhieu').val(data.SoPhieu_ID + 1);
+                    },
+                    error: function (data) {
+                        $('#txtSoPhieu').val('1');
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+            //Load page size
+            var ckpagesizex = $.cookie("ckPageSizeX");
+            var ckpagesizetext = $.cookie("ckPageSizeText");
+            if (ckpagesizex != null) {
+                $('#spPageSize').val(ckpagesizex);
+                $('#spPageSize').text(ckpagesizetext);
+            }
+            else {
+                $('#spPageSize').text("Khổ giấy 8.0 cm");
+                $('#spPageSize').val("KhoGiay80");
+            }
+            //show date for create
+            $(function () {
+                var start = moment();
+                function cb(start, end) {
+                    $('#inputNgay').val(start.format('DD/MM/YYYY'));
+                    $('#txtNgayPhieu').text(start.format('YYYY/MM/DD'));
+                }
+                $('#inputNgay').daterangepicker({
+                    startDate: start,
+                    singleDatePicker: true,
+                    locale: {
+                        format: 'DD/MM/YYYY'
+                    }
+                }, cb);
+                cb(start);
+            });
+            //Press enter txtSoLuongNhap
+            $('#txtSoLuongNhap').keyup(function (e) {
+                if (e.which === 13) {
+                    if ($("#txtCodeProduct").val() == '' || $("#txtSoLuongNhap").val() == '0' || $("#txtSoLuongNhap").val() == '') {
+
+                    }
+                    else {
+                        var name = $("#txtNameProduct").val();
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("CheckProductName", "QuanLyBan")',
+                            data: { Name: name },
+                            success: function (data) {
+                                if (data == true) {
+                                    autocomplete_enter_import();
+                                }
+                                else {
+                                    toastr.error('Tên hàng này không có !', 'Bị lỗi', { timeOut: 3000 });
+                                }
+                            }
+                        });
+                    }
+                }
+
+            });
+            //keydown txtSoLuongNhap
+            $("#txtSoLuongNhap").keydown(function (e) {
+                // Allow: backspace, delete, tab, escape, enter and .
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                    // Allow: Ctrl+A, Command+A
+                    (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                    // Allow: home, end, left, right, down, up
+                    (e.keyCode >= 35 && e.keyCode <= 40)) {
+                    // let it happen, don't do anything
+                    return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+            //btn enter product
+            $('#btn_enter').click(function () {
+                if ($("#txtCodeProduct").val() == '' || $("#txtSoLuongNhap").val() == '0' || $("#txtSoLuongNhap").val() == '') {
+                    toastr.error('Chưa chọn sản phẩm hay số lượng = 0 !', 'Bị lỗi', { timeOut: 3000 });
+                }
+                else {
+                    var name = $("#txtNameProduct").val();
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("CheckProductName", "DmHangHoa")',
+                            data: { Name: name },
+                            success: function (data) {
+                                if (data == true) {
+                                    autocomplete_enter_import();
+                                }
+                                else {
+                                    toastr.error('Tên hàng này không có !', 'Bị lỗi', { timeOut: 3000 });
+                                }
+                            }
+                        });
+                }
+            })
+            //nhap san pham vao bang
+            function autocomplete_enter_DmHangHoa() {
+
+                var hh_id = $("#txtProduct_id").val();
+                var dnmh_id = $("#txtDnMH_id").val();
+                var dvt_id = $("#txtDVT_id").val();
+                var tendvt = $("#txtTenDVT").val();
+                var giamua = $("#txtGiaMua").val();
+
+                var mahh = $("#txtCodeProduct").val();
+                var tenhh = $("#txtNameProduct").val();
+                var sl = $('#txtSoLuongNhap').val();
+
+                if ($('#txtGiaBan_ID').val() == 0) {
+                    var dg = $("#txtGiaBan1").val();
+                }
+                else if ($('#txtGiaBan_ID').val() == 1) {
+                    var dg = $("#txtGiaBan2").val();
+                }
+                else {
+                    var dg = $("#txtGiaBan3").val();
+                }
+
+                var dongia = dg;
+                var ttban = sl * dg;
+                var ttvon = sl * giamua;
+
+                myTable.find('tr').each(function () {
+                    if ($(this).find('td:first').parent().find('td:eq(3)').text().trim() == mahh) {
+                        sl = tp_decode_currency_format(sl) + tp_decode_currency_format($(this).find('td:first').parent().find('#txtSoLuong').val());
+                        ttban = sl * tp_decode_currency_format($(this).find('td:first').parent().find('#txtDonGia').val());
+                        ttvon = sl * tp_decode_currency_format($(this).find('td:first').parent().find('#txtGiaVon').val());
+                        $(this).addClass('remove');
+                    }
+                });
+
+                t.row('.remove').remove().draw(false);
+
+                var newrow = $('<tr>')
+                    .append('<td style="display:none;">' + hh_id + '</td>')
+                    .append('<td style="display:none;">' + dnmh_id + '</td>')
+                    .append('<td style="display:none;">' + dvt_id + '</td>')
+                    .append('<td style="display:none;"> ' + mahh + '</td>')
+                    .append('<td style="text-align:left !important; white-space:normal; width: 30%;">' + tenhh + '</td>')
+                    .append('<td style="width: 5%;">' + tendvt + '</td>')
+                    .append('<td style="width: 30%;"><span class="input-group-append"><button type="button" id="btn_minusTable" name="btn_minusTable" class="btn btn-default btn-flat"><i class="fa fas fa-minus"></i></button><input type="text" id="txtSoLuong" class="form-control text-center" value = "' + sl + '"><button type="button" id="btn_plusTable" name="btn_plusTable" class="btn btn-default btn-flat"><i class="fa fas fa-plus"></i></button></span></td>')
+                    .append('<td style="width: 15%;"><input type="text" id="txtDonGia" class="form-control text-center" value="' + CurrencyFormatted(dongia) + '"></td>')
+                    .append('<td style="width: 15%;"><input type="text" id="txtTotal" class="form-control text-center" readonly="readonly" value="' + CurrencyFormatted(ttban) + '"></td>')
+                    .append('<td style="display:none;"><input type="text" id="txtGiaVon" class="form-control text-center" value="' + giamua + '"></td>')
+                    .append('<td style="display:none;"><input type="text" id="txtTienVon" class="form-control text-center" value="' + CurrencyFormatted(ttvon) + '"></td>')
+                    .append('<td style="width: 5%;"><a href = "javascript:void(0);" id="btnxoaRow" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></a></td>')
+                t.row.add(newrow).draw(false);
+                ////$('#TableXuatHang tbody').prepend(newrow);
+                $('#TableXuatHang tbody').append(newrow);
+                updateFooterForm();
+
+                $('#txtProduct_id').val('');
+                $("#txtDnMH_id").val('');
+                $("#txtDVT_id").val('');
+                $("#txtTenDVT").val('');
+                $("#txtGiaMua").val('');
+                $("#txtGiaBan1").val('');
+                $("#txtGiaBan2").val('');
+                $("#txtGiaBan3").val('');
+                $("#txtCodeProduct").val('');
+                $("#txtNameProduct").val('');
+                $('#txtSoLuongNhap').val('1');
+                //$("#txtCodeProduct").focus();
+                //$(".ui-menu").hide();
+                //
+                var sumSL = 0;
+                $('[id*=txtSoLuong]').each(function () {
+                    sumSL += tp_decode_currency_format($(this).val());
+                });
+                $('#spSoLuong').text(tp_encode_currency_format(sumSL - 1));
+
+            }
+            //Load table
+            var myTable = $('#TableXuatHang');
+            var t = myTable.DataTable({
+                'scrollX': true,
+                'sScrollXInner': "100%",
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'ordering': false,
+                'info': false,
+                'autoWidth': true,
+                'responsive': false,
+                'columns': [
+                    { 'title': 'Mã hàng'},
+                    { 'title': 'Tên hàng hóa', className: 'text-left', width: "30%" },
+                    { 'title': 'ĐVT', className: 'text-center', width: "5%" },
+                    { 'title': '-.......Số lượng.......+', className: 'text-center', width: "30%" },
+                    { 'title': 'Đơn giá bán', className: 'text-center', width: "15%" },
+                    { 'title': 'Thành tiền bán', className: 'text-center', width: "15%" },
+                    {
+                        'title': '', className: 'text-center', width: "5%"
+                    }
+                ],
+                'language': {
+                    "emptyTable": "Chưa có hàng hóa nào hiện thị"
+                }
+
+            });
+            //Delete row in table
+            $('#TableXuatHang tbody').on('click', '[id*=btnxoaRow]', function () {
+                t.row($(this).parents('tr')).remove().draw();
+                updateFooterForm();
+            });
+            //event keyup txtSoLuong
+            $('#TableXuatHang tbody').on('keyup', '[id*=txtSoLuong]', function () {
+                if ($("#txtSoLuong").val() == '') {
+                    $("#txtSoLuong").val(0);
+                    $("#txtSoLuong").focus().select();
+                    $(this).parent().parent().parent().find('#txtTotal').val(0);
+                    updateFooterForm();
+                }
+                else {
+                    //var value = tp_decode_currency_format($(this).val());
+                    //$(this).val(tp_encode_currency_format(value));
+
+                    var sl = $(this).parent().parent().find('#txtSoLuong').val();
+                    var dg = tp_decode_currency_format($(this).parent().parent().parent().find('#txtDonGia').val());
+                    var total = sl * dg;
+                    $(this).parent().parent().parent().find('#txtTotal').val(tp_encode_currency_format(total));
+                    $(this).parent().parent().parent().find('#txtTienVon').val(sl * tp_decode_currency_format($(this).parent().parent().parent().find('#txtGiaVon').val()));
+                    updateFooterForm();
+                }
+                var sumSL = 0;
+                $('[id*=txtSoLuong]').each(function () {
+                    sumSL += tp_decode_currency_format($(this).val());
+                });
+                $('#spSoLuong').text(tp_encode_currency_format(sumSL - 1));
+
+            });
+            $('#TableXuatHang tbody').on('keydown', '[id*=txtSoLuong]', function (e) {
+                // Allow: backspace, delete, tab, escape, enter and .
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                    // Allow: Ctrl+A, Command+A
+                    (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                    // Allow: home, end, left, right, down, up
+                    (e.keyCode >= 35 && e.keyCode <= 40)) {
+                    // let it happen, don't do anything
+                    return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+            $('#TableXuatHang tbody').on('keydown', '[id*=txtDonGia]', function (e) {
+                // Allow: backspace, delete, tab, escape, enter and .
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                    // Allow: Ctrl+A, Command+A
+                    (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                    // Allow: home, end, left, right, down, up
+                    (e.keyCode >= 35 && e.keyCode <= 40)) {
+                    // let it happen, don't do anything
+                    return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+            $('#TableXuatHang tbody').on('keyup', '[id*=txtDonGia]', function () {
+                if ($("#txtDonGia").val() == '') {
+                    $("#txtDonGia").val(0);
+                    $("#txtDonGia").focus().select();
+                    $(this).parent().parent().find('#txtTotal').val(0);
+                    updateFooterForm();
+                }
+                else {
+                    //dinh dang la so chinh no
+                    var value = tp_decode_currency_format($(this).val());
+                    $(this).val(tp_encode_currency_format(value));
+                    var sl = $(this).parent().parent().find('#txtSoLuong').val();
+                    var dg = tp_decode_currency_format($(this).parent().find('#txtDonGia').val());
+                    var total = sl * dg;
+                    $(this).parent().parent().find('#txtTotal').val(tp_encode_currency_format(total));
+                    updateFooterForm();
+                }
+            });
+            //change select ty le giam gia
+            $("#TyLeGiamGia").change(function () {
+                var tyleGiam = $('#TyLeGiamGia option:selected').val();
+                if ($('#spTienHang').text() != 0) {
+
+                    if (tyleGiam == 0) {
+                        $("#txtTienGiamGia").val(0);
+                        var tienphucvu = (tp_decode_currency_format($('#spTienHang').text()) * tp_decode_currency_format($('#TyLePhucVu').val())) / 100;
+                        $("#txtTienPhucVu").val(tp_encode_currency_format(tienphucvu));
+                        var tienthue = ((tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val())) * tp_decode_currency_format($('#TyLeThue').val())) / 100;
+                        $("#txtTienThue").val(tp_encode_currency_format(tienthue));
+                        var tienthanhtoan = tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val()) + tp_decode_currency_format($('#txtTienThue').val());
+                        $('#txtTienThanhToan').val(tp_encode_currency_format(tienthanhtoan));
+                    }
+                    else {
+                        var tiengiamgia = (tp_decode_currency_format($('#spTienHang').text()) * tp_decode_currency_format($('#TyLeGiamGia').val())) / 100;
+                        $("#txtTienGiamGia").val(tp_encode_currency_format(tiengiamgia));
+                        var tienthue = ((tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val())) * tp_decode_currency_format($('#TyLeThue').val())) / 100;
+                        $("#txtTienThue").val(tp_encode_currency_format(tienthue));
+                        var tienthanhtoan = tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val()) + tp_decode_currency_format($('#txtTienThue').val());
+                        $('#txtTienThanhToan').val(tp_encode_currency_format(tienthanhtoan));
+                    }
+                }
+                else {
+                    $("#txtTienGiamGia").val(0)
+                }
+            });
+            //change select ty le phi phuc vu
+            $("#TyLePhucVu").change(function () {
+                var tylephucvu = $('#TyLePhucVu option:selected').val();
+                if ($('#spTienHang').text() != 0) {
+
+                    if (tylephucvu == 0) {
+                        $("#txtTienPhucVu").val(0);
+
+                        //var tiengiamgia = (tp_decode_currency_format($('#spTienHang').text()) * tp_decode_currency_format($('#TyLeGiamGia').val())) / 100;
+                        //$("#txtTienGiamGia").val(tp_encode_currency_format(tienphucvu));
+                        var tienthue = ((tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val())) * tp_decode_currency_format($('#TyLeThue').val())) / 100;
+                        $("#txtTienThue").val(tp_encode_currency_format(tienthue));
+                        var tienthanhtoan = tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val()) + tp_decode_currency_format($('#txtTienThue').val());
+                        $('#txtTienThanhToan').val(tp_encode_currency_format(tienthanhtoan));
+                    }
+                    else {
+                        var tienphucvu = (tp_decode_currency_format($('#spTienHang').text()) * tp_decode_currency_format($('#TyLePhucVu').val())) / 100;
+                        $("#txtTienPhucVu").val(tp_encode_currency_format(tienphucvu));
+                        var tienthue = ((tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val())) * tp_decode_currency_format($('#TyLeThue').val())) / 100;
+                        $("#txtTienThue").val(tp_encode_currency_format(tienthue));
+                        var tienthanhtoan = tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val()) + tp_decode_currency_format($('#txtTienThue').val());
+                        $('#txtTienThanhToan').val(tp_encode_currency_format(tienthanhtoan));
+                    }
+
+                }
+                else {
+                    $("#txtTienPhucVu").val(0);
+                }
+            });
+            //change select ty le thue suat
+            $("#TyLeThue").change(function () {
+                var tylethue = $('#TyLeThue option:selected').val();
+                if ($('#spTienHang').text() != 0) {
+
+                    if (tylethue == 0) {
+                        $("#txtTienThue").val(0);
+
+                        var tienthanhtoan = tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val()) + tp_decode_currency_format($('#txtTienThue').val());
+                        $('#txtTienThanhToan').val(tp_encode_currency_format(tienthanhtoan));
+                    }
+                    else {
+
+                        var tienthue = ((tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val())) * tp_decode_currency_format($('#TyLeThue').val())) / 100;
+                        $("#txtTienThue").val(tp_encode_currency_format(tienthue));
+                        var tienthanhtoan = tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val()) + tp_decode_currency_format($('#txtTienThue').val());
+                        $('#txtTienThanhToan').val(tp_encode_currency_format(tienthanhtoan));
+                    }
+
+                }
+                else {
+                    $("#txtTienThue").val(0);
+                }
+            });
+            //keyup tien phat sinh
+            $('#txtTienPhatSinh').keyup(function () {
+                if ($('#spTienHang').text() != 0) {
+
+                    if ($("#txtTienPhatSinh").val() == "" || $("#txtTienPhatSinh").val() == "," || $("#txtTienPhatSinh").val() == ".") {
+                        $("#txtTienPhatSinh").val(0);
+                        var tienthue = ((tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val())) * tp_decode_currency_format($('#TyLeThue').val())) / 100;
+                        $("#txtTienThue").val(tp_encode_currency_format(tienthue));
+                        var tienthanhtoan = tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val()) + tp_decode_currency_format($('#txtTienThue').val());
+                        $('#txtTienThanhToan').val(tp_encode_currency_format(tienthanhtoan));
+                    }
+                    else {
+                        var value = tp_decode_currency_format($(this).val());
+                        $(this).val(tp_encode_currency_format(value));
+                        var tienthue = ((tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val())) * tp_decode_currency_format($('#TyLeThue').val())) / 100;
+                        $("#txtTienThue").val(tp_encode_currency_format(tienthue));
+                        var tienthanhtoan = tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val()) + tp_decode_currency_format($('#txtTienThue').val());
+                        $('#txtTienThanhToan').val(tp_encode_currency_format(tienthanhtoan));
+                    }
+
+                }
+                else {
+                    $("#txtTienPhatSinh").val(0);
+                }
+            });
+            $('#txtTienPhatSinh').keydown(function (e) {
+                // Allow: backspace, delete, tab, escape, enter and .
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                    // Allow: Ctrl+A, Command+A
+                    (e.keyCode == 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                    // Allow: home, end, left, right, down, up
+                    (e.keyCode >= 35 && e.keyCode <= 40)) {
+                    // let it happen, don't do anything
+                    return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+            function updateFooterForm() {
+                var sumTotal = 0;
+                $('[id*=txtTotal]').each(function () {
+                    sumTotal += tp_decode_currency_format($(this).val());
+                });
+                $('#spTienHang').text(tp_encode_currency_format(sumTotal));
+
+                var tiengiamgia = (tp_decode_currency_format($('#spTienHang').text()) * tp_decode_currency_format($('#TyLeGiamGia').val())) / 100;
+                $("#txtTienGiamGia").val(tp_encode_currency_format(tiengiamgia));
+                var tienthue = ((tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val())) * tp_decode_currency_format($('#TyLeThue').val())) / 100;
+                $("#txtTienThue").val(tp_encode_currency_format(tienthue));
+                var tienthanhtoan = tp_decode_currency_format($('#spTienHang').text()) - tp_decode_currency_format($('#txtTienGiamGia').val()) + tp_decode_currency_format($('#txtTienPhucVu').val()) + tp_decode_currency_format($('#txtTienPhatSinh').val()) + tp_decode_currency_format($('#txtTienThue').val());
+                $('#txtTienThanhToan').val(tp_encode_currency_format(tienthanhtoan));
+
+                //update lai tong so luong va mat hang
+                var records = t.data().length;
+                $('#spCount').text(records);
+                var sumSL = 0;
+                $('[id*=txtSoLuong]').each(function () {
+                    sumSL += tp_decode_currency_format($(this).val());
+                });
+                $('#spSoLuong').text(tp_encode_currency_format(sumSL - 1));
+            }
+            function tp_encode_currency_format(obs) {
+                return obs.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            function tp_decode_currency_format(obs) {
+                if (obs == '')
+                    return 0;
+                else
+                    return parseInt(obs.replace(/,/g, ''));
+            }
+            //format number for display
+            function CurrencyFormatted(nStr) {
+                nStr += '';
+                x = nStr.split(',');
+                x1 = x[0];
+                x2 = x.length > 1 ? ',' + x[1] : '';
+                var rgx = /(\d+)(\d{3})/;
+                while (rgx.test(x1)) {
+                    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+                }
+                return x1 + x2;
+            }
+            //Create phieu thanh toan ngay
+            $('#btn_create_ok, #btn_createFooter_ok').click(function () {
+                $("#txtCodeProduct").focus(); //để rời khoản ô tính tiền
+                var loainhapxuat = 2;
+                var objectid = $('#txtDT_ID').val();
+                var address = $('#txtDiaChi').val();
+                var nguoigiaonhan = " ";
+                var ghichu = " ";
+                var congty_id = "@Session["congty_id"]";
+                var userid = "@Session["user_id"]";
+                var sophieu_id = $('#txtSoPhieu').val();
+                var sophieu = "XB";
+                var ngayphieu = $('#txtNgayPhieu').text();
+                var giovao = new Date().toUTCString();
+                var giora = new Date().toUTCString();
+                var tienhang = $('#spTienHang').text().replace(/,/g, "");
+                var tongtien = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var tylegiamgia = $('#TyLeGiamGia option:selected').val();
+                var tiengiamgia = $('#txtTienGiamGia').val().replace(/,/g, "");
+                var tylephucvu = $('#TyLePhucVu option:selected').val();
+                var tienphucvu = $('#txtTienPhucVu').val().replace(/,/g, "");
+                var tylethue = $('#TyLeThue option:selected').val();
+                var tienthue = $('#txtTienThue').val().replace(/,/g, "");
+                var tienphatsinh = $('#txtTienPhatSinh').val().replace(/,/g, "");
+                var lydophatsinh = " ";
+                var ban_id = $('#txtBan_ID').val();
+                var thanhtoan = 1;
+                var status = 1;
+                var thutienngay = $('#radioThuTien').is(":checked");
+                var ghino = $('#radioGhiNo').is(":checked");
+                var tienmat = $('#radioTienMat').is(":checked");
+                var chuyenkhoan = $('#radioChuyenKhoan').is(":checked");
+                //phan hinh thuc thanh toan
+                var nganhang_id = 0;
+                if (tienmat == true) {
+                    nganhang_id = 0;
+                }
+                else {
+                    nganhang_id = $('#NganHang_ID option:selected').val();
+                }
+
+                if (objectid == "") {
+                    toastr.error('Chưa nhập khách hàng !', 'Bị lỗi', { timeOut: 3000 });
+                    $("#txtObjectName").focus();
+                    return;
+                }
+                if (Number($('#spSoLuong').text()) == 0) {
+                    toastr.error('Chưa có sản phẩm nào để lưu !', 'Bị lỗi', { timeOut: 3000 });
+                    $("#txtSoLuongNhap").focus();
+                    return;
+                }
+
+                //Save phieu xuat
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ThanhToanOrder", "QuanLyBan")',
+                    data: {
+                        LoaiNhapXuat_ID: loainhapxuat,
+                        DT_ID: objectid,
+                        DiaChi: address,
+                        DienGiai: ghichu,
+                        NguoiGiaoNhan: nguoigiaonhan,
+                        NguoiDung_ID: userid,
+                        SoPhieu: sophieu,
+                        SoPhieu_ID: sophieu_id,
+                        NgayPhieu: ngayphieu,
+                        GioVao: giovao,
+                        GioRa: giora,
+                        TienHang: tienhang,
+                        TongTien: tongtien,
+                        ThueSuat: tylethue,
+                        TienThue: tienthue,
+                        TyLeGiamGia: tylegiamgia,
+                        TienGiamGia: tiengiamgia,
+                        TylePPhucVu: tylephucvu,
+                        TienPPhucVu: tienphucvu,
+                        TienPhatSinh: tienphatsinh,
+                        LyDoPhatSinh: lydophatsinh,
+                        ThuTienNgay: thutienngay,
+                        Ban_ID: ban_id,
+                        Status: status,
+                        ThanhToan: thanhtoan,
+                        GhiNo: ghino,
+                        TienMat: tienmat,
+                        ChuyenKhoan: chuyenkhoan,
+                        TenCongTy_ID : congty_id
+                    },
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (output) {
+                        var last_id = output.PhNhapXuat_ID; // this is the id
+                        $('#txtPhieu_ID').val(last_id);
+                        GhiCongNoPhieuXuat();
+                        toastr.success('Bạn đã thanh toán thành công!', 'Thành công Alert', { timeOut: 3000 });
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    }
+                });
+            });
+            //Create phieu thanh toan va in phieu thu
+            $('#btn_create_in, #btn_createFooter_in').click(function () {
+
+                $("#txtCodeProduct").focus(); //để rời khoản ô tính tiền
+                var loainhapxuat = 2;
+                var objectid = $('#txtDT_ID').val();
+                var address = $('#txtDiaChi').val();
+                var nguoigiaonhan = " ";
+                var ghichu = " ";
+                var congty_id = "@Session["congty_id"]";
+                var userid = "@Session["user_id"]";
+                var sophieu_id = $('#txtSoPhieu').val();
+                var sophieu = "XB";
+                var ngayphieu = $('#txtNgayPhieu').text();
+                var giovao = new Date().toUTCString();
+                var giora = new Date().toUTCString();
+                var tienhang = $('#spTienHang').text().replace(/,/g, "");
+                var tongtien = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var tylegiamgia = $('#TyLeGiamGia option:selected').val();
+                var tiengiamgia = $('#txtTienGiamGia').val().replace(/,/g, "");
+                var tylephucvu = $('#TyLePhucVu option:selected').val();
+                var tienphucvu = $('#txtTienPhucVu').val().replace(/,/g, "");
+                var tylethue = $('#TyLeThue option:selected').val();
+                var tienthue = $('#txtTienThue').val().replace(/,/g, "");
+                var tienphatsinh = $('#txtTienPhatSinh').val().replace(/,/g, "");
+                var lydophatsinh = " ";
+                var ban_id = $('#txtBan_ID').val();
+                var thanhtoan = 1;
+                var status = 1;
+                var thutienngay = $('#radioThuTien').is(":checked");
+                var ghino = $('#radioGhiNo').is(":checked");
+                var tienmat = $('#radioTienMat').is(":checked");
+                var chuyenkhoan = $('#radioChuyenKhoan').is(":checked");
+                //phan hinh thuc thanh toan
+                var nganhang_id = 0;
+                if (tienmat == true) {
+                    nganhang_id = 0;
+                }
+                else {
+                    nganhang_id = $('#NganHang_ID option:selected').val();
+                }
+
+                if (objectid == "") {
+                    toastr.error('Chưa nhập khách hàng !', 'Bị lỗi', { timeOut: 3000 });
+                    $("#txtObjectName").focus();
+                    return;
+                }
+                if (Number($('#spSoLuong').text()) == 0) {
+                    toastr.error('Chưa có sản phẩm nào để lưu !', 'Bị lỗi', { timeOut: 3000 });
+                    $("#txtSoLuongNhap").focus();
+                    return;
+                }
+
+                //Save phieu xuat
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ThanhToanOrder", "QuanLyBan")',
+                    data: {
+                        LoaiNhapXuat_ID: loainhapxuat,
+                        DT_ID: objectid,
+                        DiaChi: address,
+                        DienGiai: ghichu,
+                        NguoiGiaoNhan: nguoigiaonhan,
+                        NguoiDung_ID: userid,
+                        SoPhieu: sophieu,
+                        SoPhieu_ID: sophieu_id,
+                        NgayPhieu: ngayphieu,
+                        GioVao: giovao,
+                        GioRa: giora,
+                        TienHang: tienhang,
+                        TongTien: tongtien,
+                        ThueSuat: tylethue,
+                        TienThue: tienthue,
+                        TyLeGiamGia: tylegiamgia,
+                        TienGiamGia: tiengiamgia,
+                        TylePPhucVu: tylephucvu,
+                        TienPPhucVu: tienphucvu,
+                        TienPhatSinh: tienphatsinh,
+                        LyDoPhatSinh: lydophatsinh,
+                        ThuTienNgay: thutienngay,
+                        Ban_ID: ban_id,
+                        Status: status,
+                        ThanhToan: thanhtoan,
+                        GhiNo: ghino,
+                        TienMat: tienmat,
+                        ChuyenKhoan: chuyenkhoan,
+                        TenCongTy_ID: congty_id
+                    },
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (output) {
+                        var last_id = output.PhNhapXuat_ID; // this is the id
+                        $('#txtPhieu_ID').val(last_id);
+                        GhiCongNoPhieuXuatIn();
+                        toastr.success('Bạn đã thanh toán thành công!', 'Thành công Alert', { timeOut: 3000 });
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    }
+                });
+
+            });
+            //Create tam tinh
+            $('#btn_order, #btn_orderFooter').click(function () {
+                $("#txtCodeProduct").focus(); //để rời khoản ô tính tiền
+                var loainhapxuat = 2;
+                var objectid = $('#txtDT_ID').val();
+                var address = $('#txtDiaChi').val();
+                var nguoigiaonhan = " ";
+                var ghichu = " ";
+                var congty_id = "@Session["congty_id"]";
+                var userid = "@Session["user_id"]";
+                var sophieu_id = $('#txtSoPhieu').val();
+                var sophieu = "XB";
+                var ngayphieu = $('#txtNgayPhieu').text();
+                var giovao = new Date().toUTCString();
+                var giora = new Date().toUTCString();
+                var tienhang = $('#spTienHang').text().replace(/,/g, "");
+                var tongtien = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var tylegiamgia = $('#TyLeGiamGia option:selected').val();
+                var tiengiamgia = $('#txtTienGiamGia').val().replace(/,/g, "");
+                var tylephucvu = $('#TyLePhucVu option:selected').val();
+                var tienphucvu = $('#txtTienPhucVu').val().replace(/,/g, "");
+                var tylethue = $('#TyLeThue option:selected').val();
+                var tienthue = $('#txtTienThue').val().replace(/,/g, "");
+                var tienphatsinh = $('#txtTienPhatSinh').val().replace(/,/g, "");
+                var lydophatsinh = " ";
+                var ban_id = $('#txtBan_ID').val();
+                var thanhtoan = 0;
+                var status = 1;
+                var thutienngay = $('#radioThuTien').is(":checked");
+                var ghino = $('#radioGhiNo').is(":checked");
+                var tienmat = $('#radioTienMat').is(":checked");
+                var chuyenkhoan = $('#radioChuyenKhoan').is(":checked");
+                //phan hinh thuc thanh toan
+                var nganhang_id = 0;
+                if (tienmat == true) {
+                    nganhang_id = 0;
+                }
+                else {
+                    nganhang_id = $('#NganHang_ID option:selected').val();
+                }
+
+                if (objectid == "") {
+                    toastr.error('Chưa nhập khách hàng !', 'Bị lỗi', { timeOut: 3000 });
+                    $("#txtObjectName").focus();
+                    return;
+                }
+                if (Number($('#spSoLuong').text()) == 0) {
+                    toastr.error('Chưa có sản phẩm nào để lưu !', 'Bị lỗi', { timeOut: 3000 });
+                    $("#txtSoLuongNhap").focus();
+                    return;
+                }
+
+                //Save phieu xuat
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateTamTinh", "QuanLyBan")',
+                    data: {
+                        LoaiNhapXuat_ID: loainhapxuat,
+                        DT_ID: objectid,
+                        DiaChi: address,
+                        DienGiai: ghichu,
+                        NguoiGiaoNhan: nguoigiaonhan,
+                        NguoiDung_ID: userid,
+                        SoPhieu: sophieu,
+                        SoPhieu_ID: sophieu_id,
+                        NgayPhieu: ngayphieu,
+                        GioVao: giovao,
+                        GioRa: giora,
+                        TienHang: tienhang,
+                        TongTien: tongtien,
+                        ThueSuat: tylethue,
+                        TienThue: tienthue,
+                        TyLeGiamGia: tylegiamgia,
+                        TienGiamGia: tiengiamgia,
+                        TylePPhucVu: tylephucvu,
+                        TienPPhucVu: tienphucvu,
+                        TienPhatSinh: tienphatsinh,
+                        LyDoPhatSinh: lydophatsinh,
+                        ThuTienNgay: thutienngay,
+                        Ban_ID: ban_id,
+                        Status: status,
+                        ThanhToan: thanhtoan,
+                        GhiNo: ghino,
+                        TienMat: tienmat,
+                        ChuyenKhoan: chuyenkhoan,
+                        TenCongTy_ID: congty_id
+                    },
+
+                    dataType: "json",
+                    success: function (output) {
+                        var last_id = output.PhNhapXuat_ID; // this is the id
+                        $('#txtPhieu_ID').val(last_id);
+                        insertDetailOrder();
+                        toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    }
+                });
+
+            });
+            //In order in pha che
+            $('#btn_in_order, #btn_in_orderFooter').click(function () {
+                $("#txtCodeProduct").focus(); //để rời khoản ô tính tiền
+                var loainhapxuat = 2;
+                var objectid = $('#txtDT_ID').val();
+                var address = $('#txtDiaChi').val();
+                var nguoigiaonhan = " ";
+                var ghichu = " ";
+                var congty_id = "@Session["congty_id"]";
+                var userid = "@Session["user_id"]";
+                var sophieu_id = $('#txtSoPhieu').val();
+                var sophieu = "XB";
+                var ngayphieu = $('#txtNgayPhieu').text();
+                var giovao = new Date().toUTCString();
+                var giora = new Date().toUTCString();
+                var tienhang = $('#spTienHang').text().replace(/,/g, "");
+                var tongtien = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var tylegiamgia = $('#TyLeGiamGia option:selected').val();
+                var tiengiamgia = $('#txtTienGiamGia').val().replace(/,/g, "");
+                var tylephucvu = $('#TyLePhucVu option:selected').val();
+                var tienphucvu = $('#txtTienPhucVu').val().replace(/,/g, "");
+                var tylethue = $('#TyLeThue option:selected').val();
+                var tienthue = $('#txtTienThue').val().replace(/,/g, "");
+                var tienphatsinh = $('#txtTienPhatSinh').val().replace(/,/g, "");
+                var lydophatsinh = " ";
+                var ban_id = $('#txtBan_ID').val();
+                var thanhtoan = 0;
+                var status = 1;
+                var thutienngay = $('#radioThuTien').is(":checked");
+                var ghino = $('#radioGhiNo').is(":checked");
+                var tienmat = $('#radioTienMat').is(":checked");
+                var chuyenkhoan = $('#radioChuyenKhoan').is(":checked");
+                //phan hinh thuc thanh toan
+                var nganhang_id = 0;
+                if (tienmat == true) {
+                    nganhang_id = 0;
+                }
+                else {
+                    nganhang_id = $('#NganHang_ID option:selected').val();
+                }
+
+                if (objectid == "") {
+                    toastr.error('Chưa nhập khách hàng !', 'Bị lỗi', { timeOut: 3000 });
+                    $("#txtObjectName").focus();
+                    return;
+                }
+                if (Number($('#spSoLuong').text()) == 0) {
+                    toastr.error('Chưa có sản phẩm nào để lưu và in pha chế !', 'Bị lỗi', { timeOut: 3000 });
+                    $("#txtSoLuongNhap").focus();
+                    return;
+                }
+                //Save phieu xuat
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateTamTinh", "QuanLyBan")',
+                    data: {
+                        LoaiNhapXuat_ID: loainhapxuat,
+                        DT_ID: objectid,
+                        DiaChi: address,
+                        DienGiai: ghichu,
+                        NguoiGiaoNhan: nguoigiaonhan,
+                        NguoiDung_ID: userid,
+                        SoPhieu: sophieu,
+                        SoPhieu_ID: sophieu_id,
+                        NgayPhieu: ngayphieu,
+                        GioVao: giovao,
+                        GioRa: giora,
+                        TienHang: tienhang,
+                        TongTien: tongtien,
+                        ThueSuat: tylethue,
+                        TienThue: tienthue,
+                        TyLeGiamGia: tylegiamgia,
+                        TienGiamGia: tiengiamgia,
+                        TylePPhucVu: tylephucvu,
+                        TienPPhucVu: tienphucvu,
+                        TienPhatSinh: tienphatsinh,
+                        LyDoPhatSinh: lydophatsinh,
+                        ThuTienNgay: thutienngay,
+                        Ban_ID: ban_id,
+                        Status: status,
+                        ThanhToan: thanhtoan,
+                        GhiNo: ghino,
+                        TienMat: tienmat,
+                        ChuyenKhoan: chuyenkhoan,
+                        TenCongTy_ID: congty_id
+                    },
+                    dataType: "json",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (output) {
+                        var last_id = output.PhNhapXuat_ID; // this is the id
+                        $('#txtPhieu_ID').val(last_id);
+                        insertDetailOrderInBep();
+                        toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    }
+                });
+            });
+            //Create detail product for order
+            function insertDetailOrder() {
+                var products = new Array();
+                $("#TableXuatHang TBODY TR").each(function () {
+                    var row = $(this);
+                    var product = {};
+                    //var data1 = oTable.row( $(this).parents('tr') ).data()["position"];
+                    product.PhNhapXuat_ID = $('#txtPhieu_ID').val();
+                    product.HH_ID = row.find('td:eq(0)').text();
+                    product.DnMH_ID = row.find('td:eq(1)').text();
+                    product.DVT_ID = row.find('td:eq(2)').text();
+                    product.SoLuong = tp_decode_currency_format(row.find("#txtSoLuong").val());
+                    product.DonGiaBan = tp_decode_currency_format(row.find("#txtDonGia").val());
+                    product.ThanhTienBan = tp_decode_currency_format(row.find("#txtTotal").val());
+                    product.DonGiaVon = tp_decode_currency_format(row.find("#txtGiaVon").val());
+                    product.ThanhTienVon = tp_decode_currency_format(row.find("#txtTienVon").val());
+                    product.TenCongTy_ID = "@Session["congty_id"]";
+                    product.LoaiNhapXuat_ID = 2;
+                    products.push(product);
+
+                });
+                //Send the JSON array to Controller using AJAX.
+                $.ajax({
+                    type: "POST",
+                    url: "/QuanLyBan/InsertProducts",
+                    data: JSON.stringify(products),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (r) {
+                        window.location.href = "/QuanLyBan/Index";
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    }
+                });
+            }
+            //Create detail product for order and in phieu thu
+            function insertDetailOrderIn() {
+                var products = new Array();
+                $("#TableXuatHang TBODY TR").each(function () {
+                    var row = $(this);
+                    var product = {};
+                    //var data1 = oTable.row( $(this).parents('tr') ).data()["position"];
+                    product.PhNhapXuat_ID = $('#txtPhieu_ID').val();
+                    product.HH_ID = row.find('td:eq(0)').text();
+                    product.DnMH_ID = row.find('td:eq(1)').text();
+                    product.DVT_ID = row.find('td:eq(2)').text();
+                    product.SoLuong = tp_decode_currency_format(row.find("#txtSoLuong").val());
+                    product.DonGiaBan = tp_decode_currency_format(row.find("#txtDonGia").val());
+                    product.ThanhTienBan = tp_decode_currency_format(row.find("#txtTotal").val());
+                    product.DonGiaVon = tp_decode_currency_format(row.find("#txtGiaVon").val());
+                    product.ThanhTienVon = tp_decode_currency_format(row.find("#txtTienVon").val());
+                    product.TenCongTy_ID = "@Session["congty_id"]";
+                    product.LoaiNhapXuat_ID = 2;
+                    products.push(product);
+
+                });
+                //Send the JSON array to Controller using AJAX.
+                $.ajax({
+                    type: "POST",
+                    url: "/QuanLyBan/InsertProducts",
+                    data: JSON.stringify(products),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (r) {
+                        InPhieu();
+                    },
+                    error: function (output) {
+                        console.log('Error:', output);
+                    }
+                });
+
+            }
+            //Create detail product for in bep
+            function insertDetailOrderInBep() {
+                var products = new Array();
+                $("#TableXuatHang TBODY TR").each(function () {
+                    var row = $(this);
+                    var product = {};
+                    //var data1 = oTable.row( $(this).parents('tr') ).data()["position"];
+                    product.PhNhapXuat_ID = $('#txtPhieu_ID').val();
+                    product.HH_ID = row.find('td:eq(0)').text();
+                    product.DnMH_ID = row.find('td:eq(1)').text();
+                    product.DVT_ID = row.find('td:eq(2)').text();
+                    product.SoLuong = tp_decode_currency_format(row.find("#txtSoLuong").val());
+                    product.DonGiaBan = tp_decode_currency_format(row.find("#txtDonGia").val());
+                    product.ThanhTienBan = tp_decode_currency_format(row.find("#txtTotal").val());
+                    product.DonGiaVon = tp_decode_currency_format(row.find("#txtGiaVon").val());
+                    product.ThanhTienVon = tp_decode_currency_format(row.find("#txtTienVon").val());
+                    product.TenCongTy_ID = "@Session["congty_id"]";
+                    product.LoaiNhapXuat_ID = 2;
+                    products.push(product);
+
+                });
+                //Send the JSON array to Controller using AJAX.
+                $.ajax({
+                    type: "POST",
+                    url: "/QuanLyBan/InsertProducts",
+                    data: JSON.stringify(products),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (r) {
+                        //load form in bep
+                        var id_in = $('#txtPhieu_ID').val();
+                        localStorage.setItem("myValueIn", id_in);
+                        window.location.href = "/QuanLyBan/InOrder";
+                    },
+                    error: function (result) {
+                        console.log('Error:', result);
+                    }
+                });
+            }
+            //Create Phieu thu hay cong no
+            function GhiCongNoPhieuXuat() {
+                if ($('#radioThuTien').is(":checked")) {
+                    ThuTienNgay();
+                }
+                else {
+                    toastr.error('Nợ !', 'Bị lỗi', { timeOut: 3000 });
+                    GhiCongNo();
+                }
+            }
+            function ThuTienNgay() {
+                var congty_id = "@Session["congty_id"]";
+                var loaithuchi_id = 2; //lay trong controller loai thu chi co ghi no
+                var phnhapxuat_id = $('#txtPhieu_ID').val();
+                var objectid = $('#txtDT_ID').val();
+                var address = $('#txtDiaChi').val();
+                var sophieu = "PT";
+                var sophieu_id = $('#txtSoPhieu').val();//lay trong controller +1
+                var ngayphieu = $('#txtNgayPhieu').text();
+                var congty_id = "@Session["congty_id"]";
+                var userid = "@Session["user_id"]";
+                var sotien = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var lydo = " ";
+                var status = 0;
+                var hinhthucthanhtoan = $('#radioTienMat').is(":checked");
+                if (hinhthucthanhtoan == true) {
+                    var nganhang_id = 0;
+                }
+                else {
+                    var nganhang_id = $('#NganHang_ID option:selected').val();
+                }
+                //Save phieu thu
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreatePhieuThu", "QuanLyBan")',
+                    data: {
+                        PhNhapXuat_ID: phnhapxuat_id,
+                        LoaiThuChi_ID: loaithuchi_id,
+                        DT_ID: objectid,
+                        DiaChi: address,
+                        SoPhieu: sophieu,
+                        SoPhieu_ID: sophieu_id,
+                        NgayPhieu: ngayphieu,
+                        LyDo: lydo,
+                        SoTien: sotien,
+                        NganHang_ID: nganhang_id,
+                        HinhThucThanhToan: hinhthucthanhtoan,
+                        TenCongTy_ID: congty_id,
+                        UserID: userid,
+                        Status: status
+                    },
+                    dataType: "json",
+                    success: function (result) {
+                        insertDetailOrder();
+                    },
+                    error: function (result) {
+                        console.log('Error:', result);
+                        //toastr.error('lỗi phiếu nợ có!', 'Thành công Alert', { timeOut: 3000 });
+                    }
+                });
+
+            }
+            function GhiCongNo() {
+
+                var thuchi_id = 0;
+                var loaicongno_id = 1; ///lay trong DmLoaiCongNo tam
+                var donvi_id = 1;
+                var phnhapxuat_id = $('#txtPhieu_ID').val();
+                var objectid = $('#txtDT_ID').val();
+                var ngayphatsinh = $('#txtNgayPhieu').text();
+                var giatri = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var congno = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var diengiai = "Ghi nợ";
+                var congty_id = "@Session["congty_id"]";
+                var userid = "@Session["user_id"]";
+                //Save phieu CongNoKH
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateCongNo", "QuanLyBan")',
+                    data: {
+                        PhNhapXuat_ID: phnhapxuat_id,
+                        ThuChi_ID: thuchi_id,
+                        DT_ID: objectid,
+                        LoaiCongNo_ID: loaicongno_id,
+                        DonVi_ID: donvi_id,
+                        NgayPhatSinh: ngayphatsinh,
+                        GiaTri: giatri,
+                        CongNo: congno,
+                        DienGiai: diengiai,
+                        TenCongTy_ID: congty_id,
+                        UserID: userid
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        insertDetailOrder();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+
+
+            }
+            //Create Phieu thu hay cong no va in phieu
+            function GhiCongNoPhieuXuatIn() {
+                if ($('#radioThuTien').is(":checked")) {
+
+                    ThuTienNgayIn();
+                }
+                else {
+                    toastr.error('Nợ !', 'Bị lỗi', { timeOut: 3000 });
+                    GhiCongNoIn();
+                }
+            }
+            function ThuTienNgayIn() {
+
+                var congty_id = "@Session["congty_id"]";
+                var loaithuchi_id = 2; //lay trong controller tu DmThuChi co ghi no
+                var phnhapxuat_id = $('#txtPhieu_ID').val();
+                var objectid = $('#txtDT_ID').val();
+                var address = $('#txtDiaChi').val();
+                var sophieu = "PT";
+                var sophieu_id = $('#txtSoPhieu').val();
+                var ngayphieu = $('#txtNgayPhieu').text();
+                var congty_id = "@Session["congty_id"]";
+                var userid = "@Session["user_id"]";
+                var sotien = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var lydo = " ";
+                var status = 0;
+                var hinhthucthanhtoan = $('#radioTienMat').is(":checked");
+                if (hinhthucthanhtoan == true) {
+                    var nganhang_id = 0;
+                }
+                else {
+                    var nganhang_id = $('#NganHang_ID option:selected').val();
+                }
+                //Save phieu thu
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreatePhieuThu", "QuanLyBan")',
+                    data: {
+                        PhNhapXuat_ID: phnhapxuat_id,
+                        LoaiThuChi_ID: loaithuchi_id,
+                        DT_ID: objectid,
+                        DiaChi: address,
+                        SoPhieu: sophieu,
+                        SoPhieu_ID: sophieu_id,
+                        NgayPhieu: ngayphieu,
+                        LyDo: lydo,
+                        SoTien: sotien,
+                        NganHang_ID: nganhang_id,
+                        HinhThucThanhToan: hinhthucthanhtoan,
+                        TenCongTy_ID: congty_id,
+                        UserID: userid,
+                        Status: status
+                    },
+                    dataType: "json",
+                    success: function (result) {
+                        insertDetailOrderIn();
+                    },
+                    error: function (result) {
+                        console.log('Error:', result);
+                        //toastr.error('lỗi phiếu nợ có!', 'Thành công Alert', { timeOut: 3000 });
+                    }
+                });
+            }
+            function GhiCongNoIn() {
+                var thuchi_id = 0;
+                var loaicongno_id = 1;
+                var donvi_id = 1;
+                var phnhapxuat_id = $('#txtPhieu_ID').val();
+                var objectid = $('#txtDT_ID').val();
+                var ngayphatsinh = $('#txtNgayPhieu').text();
+                var giatri = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var congno = $('#txtTienThanhToan').val().replace(/,/g, "");
+                var diengiai = "Ghi nợ";
+                var congty_id = "@Session["congty_id"]";
+                var userid = "@Session["user_id"]";
+                //Save phieu CongNoKH
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateCongNo", "QuanLyBan")',
+                    data: {
+                        PhNhapXuat_ID: phnhapxuat_id,
+                        ThuChi_ID: thuchi_id,
+                        DT_ID: objectid,
+                        LoaiCongNo_ID: loaicongno_id,
+                        DonVi_ID: donvi_id,
+                        NgayPhatSinh: ngayphatsinh,
+                        GiaTri: giatri,
+                        CongNo: congno,
+                        DienGiai: diengiai,
+                        TenCongTy_ID: congty_id,
+                        UserID: userid
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        insertDetailOrderIn();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+
+            }
+            //Load Popup Modal Object
+            $('#btn_createObject').click(function () {
+                var url = $('#myModalObject').data('url');
+                $.get(url, function (data) {
+                    //load Groupobject in dropdown
+                    $.ajax({
+                        url: "/DmDoiTuong/GetListNhomDT",
+                        type: "GET",
+                        dataType: "JSON",
+                        success: function (data) {
+                            $('#slNhomDoiTuong_add').empty();
+                            // $('#TenDVT').append("<option value=''>Chọn nhóm hàng</option>");
+                            $.each(data, function (key, value) {
+                                $("#slNhomDoiTuong_add").append($("<option></option>").val(value.LoaiDT_ID).html(value.TenLoaiDT));
+                            });
+                            //$("#CategoryObject_ID").prop('selectedIndex', 2);
+                        },
+                    });
+                    $('#myModalObject').html(data);
+                    $('#myModalObject').modal('show');
+
+                });
+            });
+            //save object from popup modal
+            $(document).on('click', '#btn_saveObject', function () {
+
+                var madt = $('#txtMaDT_add').val();
+                var tendt = $('#txtTenDT_add').val();
+                var loaidt_id = $('#slNhomDoiTuong_add option:selected').val();
+                var diachi = $('#txtDiaChi_add').val();
+                var dienthoai = $('#txtDienThoai_add').val();
+                var email = $('#txtEmail_add').val();
+                var mast = $('#txtMaST_add').val();
+                var sotk = $('#txtSoTK_add').val();
+                var nggiaodich = $('#txtNguoiGiaoDich_add').val();
+                var congty_id = "@Session["congty_id"]";
+                var status = 0;
+                if (madt === "") {
+                    toastr.error('Chưa nhập mã đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (madt.indexOf(' ') !== -1) {
+                    toastr.error('Không được có khoản trắng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                if (tendt === "") {
+                    toastr.error('Chưa nhập tên đối tượng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                var testEmail = /^[A-Z0-9._%+-]+ ([A-Z0-9-]+\.)+[A-Z]{2,4}$/i;
+                if (testEmail.test(email))
+                {
+                    toastr.error('Chưa nhập mail chưa đúng !', 'Bị lỗi', { timeOut: 3000 });
+                    return;
+                }
+                //Check object already
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckInputMaDT", "DmDoiTuong")',
+                    data: { MaDT: madt },
+                    success: function (data) {
+                        if (data == true) {
+                             //Create object
+                            $.ajax({
+                                type: "POST",
+                                url: '@Url.Action("CreateObject", "DmDoiTuong")',
+                                data: {
+                                    MaDT: madt,
+                                    TenDT: tendt,
+                                    LoaiDT_ID: loaidt_id,
+                                    DiaChi: diachi,
+                                    phone: dienthoai,
+                                    Email: email,
+                                    SoTK: sotk,
+                                    MaST: mast,
+                                    NgGiaoDich: nggiaodich,
+                                    TenCongTy_ID: congty_id,
+                                    Status: status
+                                },
+                                success: function (data) {
+                                    toastr.success('Bạn đã tạo thành công!', 'Thành công Alert', { timeOut: 3000 });
+                                    ChonDoiTuong();
+                                    $('#myModalObject').modal('hide');
+
+                                },
+                                error: function (data) {
+                                    console.log('Error:', data);
+                                }
+                            });
+                        }
+                        else {
+                            toastr.error('Mã đối tượng này đã có !', 'Bị lỗi', { timeOut: 3000 });
+                        }
+                    }
+                });
+            });
+            function ChonDoiTuong() {
+                var codeSearch = $('#txtMaDT_add').val();
+                $.ajax({
+                    type: "GET",
+                    url: "@Url.Action("GetObjectByBarcode", "DmDoiTuong")",
+                    data: { Barcode: codeSearch },
+                    success: function (data) {
+                        $('#txtDT_ID').val(data.DT_ID);
+                        $('#txtObjectCode').val(data.MaDT);
+                        $('#txtObjectName').val(data.TenDT);
+                        $('#Address_order').val(data.DiaChi);
+                    },
+                    error: function (data) {
+                        console.log('Error: ', data);
+                    }
+                });
+            }
+            //refesh form
+            $('#link_refresh').click(function () {
+                ClearFormProduct();
+                loadKML();
+            })
+            function ClearFormProduct() {
+                $('#txtPhieu_ID').val('');
+                $('#txtThuChi_id').val('');
+                $('#txtDT_ID').val('');
+                $('#txtObjectCode').val('');
+                $('#txtObjectName').val('');
+                $('#txtDiaChi').val('');
+                $('#order_people').val('');
+                $('#order_note').val('');
+                $('#txtCodeProduct').val('');
+                $('#txtSoLuongNhap').val(1);
+                $('#txtNameProduct').val('Tên hàng hóa');
+                $('#txtTienPhucVu').val('0');
+                $('#txtTienThue').val('0');
+                $('#txtTienPhatSinh').val('0');
+                $('#txtTienThanhToan').val('0');
+                $('#txtTienGiamGia').val('0');
+                $('#spCount').text('0');
+                $('#spSoLuong').text('0');
+                $('#TableXuatHang').DataTable().clear().draw();
+                $('#txtCodeProduct').focus();
+            }
+            //Load modal Config PageSize
+            $('#btn_ConfigSize').click(function () {
+                var url = $('#myModalConfigIn').data('url');
+                $.get(url, function (data) {
+                    $('#myModalConfigIn').html(data);
+                    $('#myModalConfigIn').modal('show');
+                });
+            });
+            //Save PageSize
+            $(document).on('click', '#btn_savePageSize', function () {
+                var sizeValue = $('#pageSize_id option:selected').val();
+                var sizeText = $('#pageSize_id option:selected').text();
+                $('#spPageSize').val(sizeValue)
+                $.cookie("ckPageSizeX", $('#spPageSize').val(), { expires: 360 });
+                $('#spPageSize').text(sizeText)
+                $.cookie("ckPageSizeText", $('#spPageSize').text(), { expires: 360 });
+                $('#myModalConfigIn').modal('hide');
+            });
+            $('#btn_minus').click(function () {
+                var minus = $("#txtSoLuongNhap").val();
+                var val = parseInt(minus) - 1;
+                $("#txtSoLuongNhap").val(val < 1 ? 1 : val);
+                //$val = parseInt($('#spinner-927 .spinner input').val(), 10) - 1;
+                //$(this).parents('#spinner-927 .spinner').find('input').val($val < 1 ? 1 : $val);
+            });
+            $('#btn_plus').click(function () {
+                var plus = $("#txtSoLuongNhap").val();
+                $("#txtSoLuongNhap").val(parseInt(plus) + 1);
+                //$(this).parents('#spinner-927 .spinner').find('input').val(parseInt($('#spinner-927 .spinner input').val(), 10) + 1);
+            });
+            //buton minus in datatable
+            $('#TableXuatHang tbody').on('click', '[id*=btn_minusTable]', function () {
+                var minus = $(this).parent().parent().find('#txtSoLuong').val();
+                var val = parseInt(minus) - 1;
+                $(this).parent().parent().find('#txtSoLuong').val(val < 1 ? 1 : val);
+
+                var sl = $(this).parent().parent().parent().find('#txtSoLuong').val();
+                var dg = tp_decode_currency_format($(this).parent().parent().parent().find('#txtDonGia').val());
+                var total = sl * dg;
+                $(this).parent().parent().parent().find('#txtTotal').val(tp_encode_currency_format(total));
+                updateFooterForm();
+            });
+            //buton plus in datatable
+            $('#TableXuatHang tbody').on('click', '[id*=btn_plusTable]', function () {
+                var plus = $(this).parent().parent().find('#txtSoLuong').val();
+                $(this).parent().parent().find('#txtSoLuong').val(parseInt(plus) + 1);
+
+                var sl = $(this).parent().parent().parent().find('#txtSoLuong').val();
+                var dg = tp_decode_currency_format($(this).parent().parent().parent().find('#txtDonGia').val());
+                var total = sl * dg;
+                $(this).parent().parent().parent().find('#txtTotal').val(tp_encode_currency_format(total));
+                updateFooterForm();
+
+
+            });
+            //Radio chuyen khoan
+            $(document).on('click', '#radioChuyenKhoan', function () {
+
+                $.ajax({
+                    url: "/DmNganHang/GetListNganHangChon",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $('#NganHang_ID').empty();
+                        $.each(data, function (key, value) {
+                            $('#NganHang_ID').append($("<option></option>").val(value.NganHang_ID).html(value.TenNganHang));
+                        });
+                        $('#NganHang_ID').prop('selectedIndex', 0);
+                    },
+                });
+            });
+            //radio Tien mat
+            $(document).on('click', '#radioTienMat', function () {
+                $('#NganHang_ID').empty();
+            });
+            //show form chon san pham and hide form chinh
+            $('#txtCodeProduct').keyup(function () {
+                $('#FormChonSP').show();
+                $('#FormMain').hide();
+                $('#ContentMain').hide();
+                var name = $('#txtCodeProduct').val();
+                $('#inputSearch').val(name);
+                $.ajax({
+                    url: "/DmHangHoa/ChonProductByName",
+                    type: "GET",
+                    data: { name: name },
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $("#trDiv").html('');
+                        var tdContent = '';
+                        for (var i = 0; i < data.length; i++) {
+                            tdContent += '<tr><td><a href="javascript:void(0);" style="color:black;display:block;" id="btn_AddProductChon" data-id=' + data[i].MaHH + '>' + data[i].TenHH + '<br><input type="hidden" id="txtSL" class="btn btn-outline-danger btn-sm" value="' + 0 + '"> <span class="font-weight-bold">' + CurrencyFormatted(data[i].GiaBan1) + '</span></a></td></tr>';
+                        }
+                        $("#trDiv").append(tdContent);
+                        LoadListNhomSP();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                });
+            });
+            //Load list danh muc nhom sp
+            function LoadListNhomSP() {
+                //nhom san pham..............
+                $.ajax({
+                    url: "/DmHangHoa/NhomHang",
+                    type: "GET",
+                    dataType: "JSON",
+                    success: function (data) {
+                        $("#colNhomProduct").html("");
+                        $.each(data, function (key, value) {
+                            $("#colNhomProduct").append("<a class='btn btn-app bg-info' href='javascript:void(0);' id='ChonNhomProduct' data-id='" + value.LoaiHH_ID + "'>" + value.TenLoaiHH + "</a>");
+
+                        });
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+            //input tim san pham
+            $(document).on('keyup', '#inputSearch', function () {
+                var name = $('#inputSearch').val();
+                $.ajax({
+                    url: "/DmHangHoa/ChonProductByName",
+                    type: "GET",
+                    data: { name: name },
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $("#trDiv").html('');
+                        var tdContent = '';
+                        for (var i = 0; i < data.length; i++) {
+                            tdContent += '<tr><td><a href="javascript:void(0);" style="color:black;display:block;" id="btn_AddProductChon" data-id=' + data[i].MaHH + '>' + data[i].TenHH + '<br><input type="hidden" id="txtSL" class="btn btn-outline-danger btn-sm" value="' + 0 + '"> <span class="font-weight-bold">' + CurrencyFormatted(data[i].GiaBan1) + '</span></a></td></tr>';
+                        }
+                        $("#trDiv").append(tdContent);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //add product in to Datatable
+            $(document).on('click', '[id*=btn_AddProductChon]', function () {
+                $(this).parent().parent().find('#txtSL').prop('type', 'button');
+                var productcode = $(this).data('id');
+                var plus = $(this).parent().parent().find('#txtSL').val();
+                $(this).parent().parent().find('#txtSL').val(parseInt(plus) + 1 + ' x ');
+
+                $.ajax({
+                    url: '@Url.Action("GetProductbyID", "DmHangHoa")',
+                    type: 'GET',
+                    dataType: 'JSON',
+                    data: { ProductCode: productcode },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+
+                        $("#txtProduct_id").val(data.val);
+                        $("#txtDnMH_id").val(data.valDn);
+                        $("#txtDVT_id").val(data.valDVT);
+                        $("#txtTenDVT").val(data.TenDVT);
+                        $("#txtGiaMua").val(data.giamua);
+                        $("#txtGiaBan1").val(data.giaban1);
+                        $("#txtGiaBan2").val(data.giaban2);
+                        $("#txtGiaBan3").val(data.giaban3);
+                        $("#txtCodeProduct").val(data.code);
+                        $("#txtNameProduct").val(data.label);
+                        $("#txtSoLuongNhap").val('1');
+
+                        autocomplete_enter_DmHangHoa();
+
+                        //$("#txtSoLuongNhap").focus();
+                        //$("#txtSoLuongNhap").focus().select();
+                        //$('#myModalChonProduct').modal('hide');
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //Tim theo nhom san pham
+            $(document).on('click', '[id*=ChonNhomProduct]', function () {
+                var id_nhomSP = $(this).data("id");
+                $(this).addClass('active').siblings().removeClass('active');
+
+                $.ajax({
+                    url: "/DmHangHoa/ChonProductByIdNhomSP",
+                    type: "GET",
+                    data: { id: id_nhomSP },
+                    dataType: "JSON",
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $("#trDiv").html('');
+                        var tdContent = '';
+                        for (var i = 0; i < data.length; i++) {
+                            tdContent += '<tr><td><a href="javascript:void(0);" style="color:black;display:block;" id="btn_AddProductChon" data-id=' + data[i].MaHH + '>' + data[i].TenHH + '<br><input type="hidden" id="txtSL" class="btn btn-outline-danger btn-sm" value="' + 0 + '"> <span class="font-weight-bold">' + CurrencyFormatted(data[i].GiaBan1) + '</span></a></td></tr>';
+                        }
+                        $("#trDiv").append(tdContent);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            });
+            //search Dm Doi Tuong by autocomplete
+            $(function () {
+                $("#txtNhapObject").autocomplete({
+                    minLength: 0,
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '/DmDoiTuong/GetObjectAutoComplete/',
+                            data: "{ 'Prefix': '" + request.term + "'}",
+                            dataType: "json",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return item;
+                                }))
+                            },
+                            error: function (response) {
+                                alert(response.responseText);
+                            },
+                            failure: function (response) {
+                                alert(response.responseText);
+                            }
+                        });
+                    },
+                    focus: function (event, ui) {
+                        $("#txtObjectCode").val(ui.item.madt);
+                        $("#txtObjectName").val(ui.item.tendt);
+                        return false;
+                    },
+                    select: function (event, ui) {
+                        $("#txtDT_ID").val(ui.item.dt_id);
+                        $("#txtDiaChi").val(ui.item.diachi);
+                        var myMa = ui.item.madt;
+                        myMa = jQuery.trim(myMa);
+                        $("#txtObjectCode").val(myMa);
+                        $("#txtObjectName").val(ui.item.tendt);
+                        $("#txtCodeProduct").focus();
+                        SetFocusMobile();
+                        return false;
+                    }
+
+                }).keyup(function (e) { //dung cho ma vach
+                    if (e.which === 13) {
+                        autocomplete_enter_object();
+                        $(".ui-menu").hide();
+                    }
+                }).autocomplete("instance")._renderItem = function (ul, item) {
+                    return $("<li style='border-bottom: 1px solid #CBD3DD';>")
+                        .append("<div>" + item.madt + "<br>" + item.tendt + "</div>")
+                        .appendTo(ul);
+                };
+            });
+            //enter cho ma vach cho doi tuong khach hang
+            function autocomplete_enter_object() {
+                var code = $("#txtNhapObject").val();
+                $.ajax({
+                    url: "/DmDoiTuong/GetObjectByBarcode",
+                    method: "GET",
+                    dataType: "json",
+                    data: { Barcode: code },
+                    success: function (data) {
+                        $("#txtDT_ID").val(ui.item.DT_ID);
+                        $("#txtDiaChi").val(ui.item.DiaChi);
+                        var myMa = ui.item.MaDT;
+                        myMa = jQuery.trim(myMa);
+                        $("#txtObjectCode").val(myMa);
+                        $("#txtObjectName").val(ui.item.TenDT);
+                        //$("#txtCodeProduct").focus();
+                        $("#txtCodeProduct").focus().select();
+                        $("#txtNhapObject").val('');
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                        toastr.error('Mã đối tượng này không có !', 'Bị lỗi', { timeOut: 3000 });
+                    }
+                });
+
+            }
+            //Set focus for mobile
+            function SetFocusMobile() {
+                var dt_id = $('#txtDT_ID').val();
+                $.ajax({
+                    url: "/DmDoiTuong/SetFocusMobile",
+                    method: "GET",
+                    dataType: "json",
+                    data: { id: dt_id },
+                    beforeSend: function () {
+                        $('.overlay').show();
+                    },
+                    success: function (data) {
+                        $("#txtNhapObject").val('');
+                        $('#txtObjectCode').val(data.MaDT);
+                        $("#txtCodeProduct").focus();
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+                });
+            }
+            //In phieu thanh toan
+            function InPhieu() {
+                var phieu_id = $('#txtPhieu_ID').val();
+                var pagesize = $('#spPageSize').val();
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("InPhieuXuat", "QuanLyBan")',
+                    data: { id: phieu_id, pagesize: pagesize },
+                    success: function (data) {
+                        window.location.href = "/QuanLyBan/FormInRDLCPhieu";
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    },
+                    complete: function () {
+                        $('.overlay').hide();
+                    }
+
+                });
+            }
+        });
+    </script>
+}
+
+
+
+
+
